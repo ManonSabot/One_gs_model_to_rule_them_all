@@ -1,0 +1,104 @@
+
+[[Fit Statistics]]
+    # fitting method   = differential_evolution
+    # function evals   = 423
+    # data points      = 145
+    # variables        = 2
+    chi-square         = 29748.0709
+    reduced chi-square = 208.028468
+    Akaike info crit   = 775.948944
+    Bayesian info crit = 781.902412
+[[Variables]]
+    kmaxS2:    0.38449146 +/- 0.01094147 (2.85%) (init = 0.8)
+    factor:    0.92789397 +/- 0.26191962 (28.23%) (init = 0.7)
+    ksc_prev:  0.35676730 +/- 0.10051843 (28.17%) == 'factor * kmaxS2'
+
+[[Fit Statistics]]
+    # fitting method   = basinhopping
+    # function evals   = 404
+    # data points      = 145
+    # variables        = 2
+    chi-square         = 31217.9179
+    reduced chi-square = 218.307118
+    Akaike info crit   = 782.941995
+    Bayesian info crit = 788.895463
+[[Variables]]
+    kmaxS2:    0.40794189 +/- 0.01151075 (2.82%) (init = 0.8)
+    factor:    0.48970967 +/- 0.20537346 (41.94%) (init = 0.7)
+    ksc_prev:  0.19977309 +/- 0.08370854 (41.90%) == 'factor * kmaxS2'
+
+[[Fit Statistics]]
+    # fitting method   = Nelder-Mead
+    # function evals   = 76
+    # data points      = 145
+    # variables        = 2
+    chi-square         = 29966.7176
+    reduced chi-square = 209.557466
+    Akaike info crit   = 777.010789
+    Bayesian info crit = 782.964257
+[[Variables]]
+    kmaxS2:    0.38521831 +/- 0.01102308 (2.86%) (init = 0.8)
+    factor:    0.67823729 +/- 0.23750867 (35.02%) (init = 0.7)
+    ksc_prev:  0.26126942 +/- 0.09135149 (34.96%) == 'factor * kmaxS2'
+
+[[Fit Statistics]]
+    # fitting method   = Powell
+    # function evals   = 181
+    # data points      = 145
+    # variables        = 2
+    chi-square         = 29745.1276
+    reduced chi-square = 208.007885
+    Akaike info crit   = 775.934597
+    Bayesian info crit = 781.888065
+[[Variables]]
+    kmaxS2:    0.38450973 +/- 0.01099498 (2.86%) (init = 0.8)
+    factor:    0.97140048 +/- 0.36875279 (37.96%) (init = 0.7)
+    ksc_prev:  0.37351293 +/- 0.14076181 (37.69%) == 'factor * kmaxS2'
+[[Correlations]] (unreported correlations are < 0.100)
+    C(kmaxS2, factor) = -0.133
+
+[[Fit Statistics]]
+    # fitting method   = COBYLA
+    # function evals   = 34
+    # data points      = 145
+    # variables        = 2
+    chi-square         = 30042.0143
+    reduced chi-square = 210.084016
+    Akaike info crit   = 777.374670
+    Bayesian info crit = 783.328138
+[[Variables]]
+    kmaxS2:    0.38646662 +/- 0.01106994 (2.86%) (init = 0.8)
+    factor:    0.64948853 +/- 0.21141541 (32.55%) (init = 0.7)
+    ksc_prev:  0.25100564 +/- 0.08160993 (32.51%) == 'factor * kmaxS2'
+
+[[Fit Statistics]]
+    # fitting method   = dual_annealing
+    # function evals   = 4043
+    # data points      = 145
+    # variables        = 2
+    chi-square         = 29745.1276
+    reduced chi-square = 208.007885
+    Akaike info crit   = 775.934597
+    Bayesian info crit = 781.888065
+[[Variables]]
+    kmaxS2:    0.38447815 +/- 0.01099702 (2.86%) (init = 0.8)
+    factor:    0.96377611 +/- 0.39679259 (41.17%) (init = 0.7)
+    ksc_prev:  0.37055086 +/- 0.15178354 (40.96%) == 'factor * kmaxS2'
+[[Correlations]] (unreported correlations are < 0.100)
+    C(kmaxS2, factor) = -0.108
+
+[[Fit Statistics]]
+    # fitting method   = ampgo, with L-BFGS-B as local solver
+    # function evals   = 4989
+    # data points      = 145
+    # variables        = 2
+    chi-square         = 89836.4953
+    reduced chi-square = 628.227240
+    Akaike info crit   = 936.206861
+    Bayesian info crit = 942.160329
+[[Variables]]
+    kmaxS2:    0.59053132 +/- 0.02303601 (3.90%) (init = 0.8)
+    factor:    0.95374469 +/- 0.46647881 (48.91%) (init = 0.7)
+    ksc_prev:  0.56321611 +/- 0.27352280 (48.56%) == 'factor * kmaxS2'
+[[Correlations]] (unreported correlations are < 0.100)
+    C(kmaxS2, factor) = -0.128

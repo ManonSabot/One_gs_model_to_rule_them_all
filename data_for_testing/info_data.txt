@@ -1,0 +1,30 @@
+Choat_ManyPeaksRange.csv: 415 data points
+4 species (Alphitonia excelsa, Austromyrtus bidwillii, Brachychiton australe, Cochlospermum gillivraei)
+LWPmin: -2.2 MPa, LWPmax: -0.175 MPa
+
+
+Heroult_Richmond.csv: 332 data points
+4 species (Eucalyptus cladocalyx, Eucalyptus dunnii, Eucalyptus melliodora, Eucalyptus saligna)
+LWPmin: -1.4 MPa, LWPmax: -0.05 MPa
+
+
+Limousin_Sevilleta.csv: 1448 data points
+2 species (Juniperus monosperma, Pinus edulis)
+LWPmin: -7.0 MPa, LWPmax: -0.67 MPa
+SWC available
+
+
+MartinStPaul_SouthFrance.csv: 102 data points
+1 species (Quercus ilex)
+LWPmin: -3.4 MPa, LWPmax: -0.35 MPa
+LAI available
+height available
+
+
+Mitchell_Corrigin.csv: 132 data points
+2 species (Eucalyptus capillosa, Eucalyptus salmonophloiia)
+LWPmin: -4.4 MPa, LWPmax: -3.2 MPa
+LAI available
+height available
+
+

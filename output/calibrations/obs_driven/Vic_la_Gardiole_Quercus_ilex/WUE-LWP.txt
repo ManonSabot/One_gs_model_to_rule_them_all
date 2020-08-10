@@ -1,0 +1,36 @@
+
+[[Fit Statistics]]
+    # fitting method   = differential_evolution
+    # function evals   = 122
+    # data points      = 45
+    # variables        = 1
+    chi-square         = 107504.568
+    reduced chi-square = 2443.28563
+    Akaike info crit   = 352.038176
+    Bayesian info crit = 353.844838
+[[Variables]]
+    Lambda:  12.4241775 +/- 0.52841600 (4.25%) (init = 5)
+
+[[Fit Statistics]]
+    # fitting method   = Powell
+    # function evals   = 94
+    # data points      = 45
+    # variables        = 1
+    chi-square         = 106964.286
+    reduced chi-square = 2431.00651
+    Akaike info crit   = 351.811451
+    Bayesian info crit = 353.618113
+[[Variables]]
+    Lambda:  12.2254413 +/- 0.47448918 (3.88%) (init = 5)
+
+[[Fit Statistics]]
+    # fitting method   = dual_annealing
+    # function evals   = 2009
+    # data points      = 45
+    # variables        = 1
+    chi-square         = 107390.787
+    reduced chi-square = 2440.69970
+    Akaike info crit   = 351.990523
+    Bayesian info crit = 353.797186
+[[Variables]]
+    Lambda:  12.5698129 +/- 0.53111851 (4.23%) (init = 5)

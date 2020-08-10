@@ -1,0 +1,23 @@
+Panama.csv
+======================
+9 species (size=N) at 2 site.s:
+Calycophyllum candidissimum (34), Carapa guianensis (37), Guatteria dumetorum (33), Luehea seemannii (35), Pittoniotis trichantha (30), Tachigali versicolor (30), Terminalia amazonia (34), Tocoyena pittieri (33), Vochysia ferruginea (37)
+
+Hydraulic traits available for Calycophyllum candidissimum
+
+Hydraulic traits available for Carapa guianensis
+
+Hydraulic traits available for Luehea seemannii
+
+Hydraulic traits available for Tachigali versicolor
+
+Hydraulic traits available for Vochysia ferruginea
+
+Missing hydraulic traits for 4 species
+
+LWPpdmax: -0.325 MPa and LWPpdmin: -2.175 MPa across all remaining data
+
+The dataset is missing:
+opt, fitgroup, PFT2v, VPD_A, VPD_L, Rdark, SWC, SWP, Totalheight, LAI, sampleheight, nperc, SLA, leafage, leaflen, Season, Treatment, TreeNum, Comments
+
+

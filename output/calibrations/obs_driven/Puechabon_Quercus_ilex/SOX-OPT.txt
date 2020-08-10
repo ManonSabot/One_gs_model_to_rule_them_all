@@ -1,0 +1,48 @@
+
+[[Fit Statistics]]
+    # fitting method   = differential_evolution
+    # function evals   = 333
+    # data points      = 32
+    # variables        = 2
+    chi-square         = 27482.7974
+    reduced chi-square = 916.093247
+    Akaike info crit   = 220.178548
+    Bayesian info crit = 223.110020
+[[Variables]]
+    kmaxS2:    0.37284669 +/- 0.02742882 (7.36%) (init = 0.8)
+    factor:    0.74818530 +/- 0.24595265 (32.87%) (init = 0.7)
+    ksc_prev:  0.27895841 +/- 0.08996709 (32.25%) == 'factor * kmaxS2'
+[[Correlations]] (unreported correlations are < 0.100)
+    C(kmaxS2, factor) = -0.196
+
+[[Fit Statistics]]
+    # fitting method   = Powell
+    # function evals   = 186
+    # data points      = 32
+    # variables        = 2
+    chi-square         = 27453.2793
+    reduced chi-square = 915.109310
+    Akaike info crit   = 220.144160
+    Bayesian info crit = 223.075632
+[[Variables]]
+    kmaxS2:    0.38190264 +/- 0.02767297 (7.25%) (init = 0.8)
+    factor:    0.74132487 +/- 0.25656304 (34.61%) (init = 0.7)
+    ksc_prev:  0.28311392 +/- 0.09667838 (34.15%) == 'factor * kmaxS2'
+[[Correlations]] (unreported correlations are < 0.100)
+    C(kmaxS2, factor) = -0.168
+
+[[Fit Statistics]]
+    # fitting method   = dual_annealing
+    # function evals   = 4082
+    # data points      = 32
+    # variables        = 2
+    chi-square         = 27450.5366
+    reduced chi-square = 915.017887
+    Akaike info crit   = 220.140963
+    Bayesian info crit = 223.072435
+[[Variables]]
+    kmaxS2:    0.37873602 +/- 0.02786956 (7.36%) (init = 0.8)
+    factor:    0.77621634 +/- 0.21779108 (28.06%) (init = 0.7)
+    ksc_prev:  0.29398109 +/- 0.08073774 (27.46%) == 'factor * kmaxS2'
+[[Correlations]] (unreported correlations are < 0.100)
+    C(kmaxS2, factor) = -0.211
