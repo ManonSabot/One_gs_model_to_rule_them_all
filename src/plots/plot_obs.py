@@ -6,6 +6,7 @@ import pandas as pd  # read/write dataframes, csv files
 import matplotlib.pyplot as plt
 from cycler import cycler
 from scipy.spatial import ConvexHull
+from shapely.geometry import MultiPoint
 from pygam import ExpectileGAM  # fit the functional shapes
 
 
@@ -53,7 +54,7 @@ def which_model(short):
     return lab
 
 
-def chaikins_corner_cutting(coords, refinements=5000):
+def chaikins_corner_cutting(coords, refinements=1000):
 
     for _ in range(refinements):
 
@@ -70,12 +71,14 @@ def chaikins_corner_cutting(coords, refinements=5000):
 def encircle(ax, x, y, smooth=False, **kw):
 
     p = np.c_[x, y]  # concatenate along second axis
-    hull = ConvexHull(p)
-    p = p[hull.vertices, :]
+    hull = MultiPoint(p).convex_hull
 
     if smooth:
-        p = chaikins_corner_cutting(p)
+        hull = hull.buffer(5.).buffer(-5.)
 
+    x, y = hull.exterior.xy
+    p = np.array([x, y]).T
+    p = chaikins_corner_cutting(p)
     poly = plt.Polygon(p, **kw)
     ax.add_patch(poly)
 
@@ -339,12 +342,12 @@ def E_A_relationships(df, colours):
 
 def gs_Ci_clusters(df, colours):
 
-    keep = ['Richmond_Eucalyptus_dunnii', 'Richmond_Eucalyptus_saligna',
+    keep = ['Richmond_Eucalyptus_saligna', 'Richmond_Eucalyptus_dunnii',
             'Puechabon_Quercus_ilex', 'Vic_la_Gardiole_Quercus_ilex',
-            'Richmond_Eucalyptus_cladocalyx', 'Sevilleta_Juniperus_monosperma',
-            'Sevilleta_Pinus_edulis', 'Corrigin_Eucalyptus_capillosa']
+            'Sevilleta_Pinus_edulis', 'Sevilleta_Juniperus_monosperma',
+            'Richmond_Eucalyptus_cladocalyx', 'Corrigin_Eucalyptus_capillosa']
 
-    fig, axes = plt.subplots(round(len(keep) / 3), 3, figsize=(15, 15))
+    fig, axes = plt.subplots(2, 4, figsize=(20, 10), sharex='col', sharey='row')
 
     i = 0  # loop over the axes
     iter = 0  # first column
@@ -391,8 +394,8 @@ def gs_Ci_clusters(df, colours):
                              transform=axes[i][iter].get_xaxis_transform())
 
         # tighten the subplots
-        __, right = axes[i][iter].get_xlim()
-        axes[i][iter].set_xlim(0., right)
+        __, top = axes[i][iter].get_ylim()
+        axes[i][iter].set_ylim(0., top)
 
         site = what.split('_')[0]
 
@@ -417,10 +420,10 @@ def gs_Ci_clusters(df, colours):
             iter = 0
             i += 1
 
-    axes[-1][-1].axis('off')
-    axes[0][-1].legend(bbox_to_anchor=(1., -2.4), loc=4, frameon=False)
+    #axes[-1][-1].axis('off')
+    #axes[0][-1].legend(bbox_to_anchor=(1., -2.4), loc=4, frameon=False)
 
-    fig.savefig('Ci_gs_clustered_test2.png', dpi=300, bbox_inches='tight')
+    fig.savefig('gs_Ci_clustered.png', dpi=300, bbox_inches='tight')
 
 
 def LWP_box_plots(df, colours):
@@ -503,5 +506,5 @@ plt.rcParams['text.latex.preamble'] = [r'\usepackage{avant}',
                                        r'\usepackage{amsmath}']
 
 #E_A_relationships(df, colours)
-Ci_gs_clusters(df, colours)
+gs_Ci_clusters(df, colours)
 #LWP_box_plots(df, colours)
