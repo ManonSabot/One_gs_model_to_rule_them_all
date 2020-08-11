@@ -1,39 +1,39 @@
 
 [[Fit Statistics]]
     # fitting method   = differential_evolution
-    # function evals   = 393
+    # function evals   = 351
     # data points      = 104
     # variables        = 2
-    chi-square         = 8065549.20
-    reduced chi-square = 79074.0117
-    Akaike info crit   = 1174.90703
-    Bayesian info crit = 1180.19581
+    chi-square         = 7756762.68
+    reduced chi-square = 76046.6929
+    Akaike info crit   = 1170.84721
+    Bayesian info crit = 1176.13599
 [[Variables]]
-    krlM:    45.8337277 +/- 76.7120394 (167.37%) (init = 1)
-    PcritM: -5.14212513 +/- 0.21052426 (4.09%) (init = -3.17)
+    krlM:    44.9534199 +/- 31.9786279 (71.14%) (init = 1)
+    PcritM: -15.4499428 +/- 0.08290862 (0.54%) (init = -3.17)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 96
+    # function evals   = 63
     # data points      = 104
     # variables        = 2
-    chi-square         = 8063163.32
-    reduced chi-square = 79050.6207
-    Akaike info crit   = 1174.87626
-    Bayesian info crit = 1180.16505
+    chi-square         = 7756442.17
+    reduced chi-square = 76043.5507
+    Akaike info crit   = 1170.84291
+    Bayesian info crit = 1176.13170
 [[Variables]]
-    krlM:    80.0000000 +/- 3.4056e-05 (0.00%) (init = 1)
-    PcritM: -5.14459821 +/- 0.12193075 (2.37%) (init = -3.17)
+    krlM:    79.2401087 +/- 20.0339785 (25.28%) (init = 1)
+    PcritM: -15.1494814 +/- 2.52436813 (16.66%) (init = -3.17)
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing
-    # function evals   = 5117
+    # function evals   = 4775
     # data points      = 104
     # variables        = 2
-    chi-square         = 8062948.98
-    reduced chi-square = 79048.5194
-    Akaike info crit   = 1174.87350
-    Bayesian info crit = 1180.16228
+    chi-square         = 7756038.70
+    reduced chi-square = 76039.5951
+    Akaike info crit   = 1170.83750
+    Bayesian info crit = 1176.12629
 [[Variables]]
-    krlM:    77.4915347 +/- 123.787946 (159.74%) (init = 1)
-    PcritM: -5.15000000 +/- 1.59906461 (31.05%) (init = -3.17)
+    krlM:    80.0000000 +/- 132.397910 (165.50%) (init = 1)
+    PcritM: -15.3668185 +/- 4.30679332 (28.03%) (init = -3.17)
