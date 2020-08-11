@@ -10,6 +10,8 @@ SOX,wet,dual_annealing,2321.89807,1199470.0,kmaxS1,0.31223678,,,,
 Tuzet,wet,Powell,1894.23088,158710.0,g1T,3.10999503,PrefT,-2.97364499,kmaxT,0.89742068
 WUE-LWP,wet,dual_annealing,3624.18818,1193570.0,Lambda,8.29679581,kmaxWUE,0.89959183,,
 CAP,inter,dual_annealing,3816.4197,3516400.0,krlC,1.32647538,PcritC,-4.8784201,,
+CGainNet,inter,differential_evolution,3115.29253,63130.0,beta,7.43656589,kmaxCN,0.66087639,,
+CMax,inter,dual_annealing,3428.66557,2383600.0,Alpha,10.0573838,Beta,7.95571102,kmaxCM,0.66480842
 LeastCost,inter,dual_annealing,3162.62165,3601360.0,kmaxLC,0.33338976,BoA,61.7642843,,
 Medlyn-LWP,inter,Powell,2952.76216,26550.0,sref,1.30109216,,,,
 MES,inter,dual_annealing,3727.69775,3387190.0,krlM,0.8877729,PcritM,-4.9,,
@@ -17,3 +19,4 @@ ProfitMax,inter,dual_annealing,3144.07986,1427210.0,kmax,0.66480842,,,,
 SOX-OPT,inter,dual_annealing,3152.81405,2392450.0,kmaxS2,0.40608143,ksc_prev,0.40312186,,
 SOX,inter,dual_annealing,3237.87453,1194750.0,kmaxS1,0.20123972,,,,
 Tuzet,inter,dual_annealing,3113.36793,3666850.0,g1T,2.78328662,PrefT,-2.40280339,kmaxT,0.66480842
+WUE-LWP,inter,Powell,3705.05062,37170.0,Lambda,9.67947184,kmaxWUE,0.66093917,,

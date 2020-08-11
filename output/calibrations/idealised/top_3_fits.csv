@@ -32,6 +32,12 @@ WUE-LWP,wet,dual_annealing,1,3624.18818,1193570.0,Lambda,8.29679581,,
 CAP,inter,differential_evolution,2,3820.13395,392940.0,krlC,1.25793089,PcritC,-4.89999897
 CAP,inter,Powell,3,3826.02941,142190.0,krlC,1.47372632,PcritC,-4.76730555
 CAP,inter,dual_annealing,1,3816.4197,3516400.0,krlC,1.32647538,PcritC,-4.8784201
+CGainNet,inter,differential_evolution,1,3115.29253,63130.0,beta,7.43656589,,
+CGainNet,inter,Powell,2,3118.1768,30090.0,beta,7.44193639,,
+CGainNet,inter,dual_annealing,3,3125.3757,1190030.0,beta,8.02057364,,
+CMax,inter,differential_evolution,2,3429.85935,231870.0,Alpha,9.95981702,Beta,7.93704376
+CMax,inter,Powell,3,3436.35445,72570.0,Alpha,7.53381009,Beta,4.62965579
+CMax,inter,dual_annealing,1,3428.66557,2383600.0,Alpha,10.0573838,Beta,7.95571102
 LeastCost,inter,differential_evolution,3,3163.7737,334530.0,kmaxLC,0.33337927,BoA,60.2141135
 LeastCost,inter,Powell,2,3162.8656,115050.0,kmaxLC,0.33096127,BoA,62.8435049
 LeastCost,inter,dual_annealing,1,3162.62165,3601360.0,kmaxLC,0.33338976,BoA,61.7642843
@@ -53,3 +59,6 @@ SOX,inter,dual_annealing,2,3237.87453,1194750.0,kmaxS1,0.20123972,,
 Tuzet,inter,differential_evolution,3,3113.81463,568170.0,g1T,2.78672919,PrefT,-2.41725827
 Tuzet,inter,Powell,2,3113.5393,175820.0,g1T,2.78381136,PrefT,-2.41132011
 Tuzet,inter,dual_annealing,1,3113.36793,3666850.0,g1T,2.78328662,PrefT,-2.40280339
+WUE-LWP,inter,differential_evolution,3,3706.92232,71980.0,Lambda,9.66425175,,
+WUE-LWP,inter,Powell,1,3705.05062,37170.0,Lambda,9.67947184,,
+WUE-LWP,inter,dual_annealing,2,3705.48633,1192390.0,Lambda,9.77774561,,

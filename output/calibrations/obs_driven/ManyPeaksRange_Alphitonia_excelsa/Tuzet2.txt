@@ -1,42 +1,45 @@
 
 [[Fit Statistics]]
     # fitting method   = differential_evolution
-    # function evals   = 309
+    # function evals   = 153
     # data points      = 161
     # variables        = 2
-    chi-square         = 5535931.67
-    reduced chi-square = 34817.1803
-    Akaike info crit   = 1685.70394
-    Bayesian info crit = 1691.86675
+    chi-square         = 3805519.69
+    reduced chi-square = 23934.0861
+    Akaike info crit   = 1625.35996
+    Bayesian info crit = 1631.52277
+##  Warning: uncertainties could not be estimated:
 [[Variables]]
-    g1T:    1.949086 (fixed)
-    PrefT: -8.81478788 +/- 0.47683282 (5.41%) (init = -5.56)
-    srefT:  7.99993876 +/- 2.9238e-15 (0.00%) (init = 2)
+    g1T:    3.747279 (fixed)
+    PrefT: -17.4700104 (init = -5.56)
+    srefT:  7.97157459 (init = 2)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 45
+    # function evals   = 105
     # data points      = 161
     # variables        = 2
-    chi-square         = 5506117.44
-    reduced chi-square = 34629.6694
-    Akaike info crit   = 1684.83451
-    Bayesian info crit = 1690.99732
+    chi-square         = 3805519.69
+    reduced chi-square = 23934.0861
+    Akaike info crit   = 1625.35996
+    Bayesian info crit = 1631.52277
+##  Warning: uncertainties could not be estimated:
 [[Variables]]
-    g1T:    1.966599 (fixed)
-    PrefT: -9.05000000 +/- 5.1818e-06 (0.00%) (init = -5.56)
-    srefT:  7.99993876 +/- 2.2003e-06 (0.00%) (init = 2)
+    g1T:    3.747284 (fixed)
+    PrefT: -27.1478122 (init = -5.56)
+    srefT:  4.33775641 (init = 2)
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing
-    # function evals   = 4007
+    # function evals   = 4010
     # data points      = 161
     # variables        = 2
-    chi-square         = 5505750.35
-    reduced chi-square = 34627.3607
-    Akaike info crit   = 1684.82378
-    Bayesian info crit = 1690.98659
+    chi-square         = 3805519.69
+    reduced chi-square = 23934.0861
+    Akaike info crit   = 1625.35996
+    Bayesian info crit = 1631.52277
+##  Warning: uncertainties could not be estimated:
 [[Variables]]
-    g1T:    1.966833 (fixed)
-    PrefT: -9.05000000 +/- 0.76923839 (8.50%) (init = -5.56)
-    srefT:  7.98780295 +/- 11.4833973 (143.76%) (init = 2)
+    g1T:    3.747276 (fixed)
+    PrefT: -17.5422465 (init = -5.56)
+    srefT:  5.13969892 (init = 2)
