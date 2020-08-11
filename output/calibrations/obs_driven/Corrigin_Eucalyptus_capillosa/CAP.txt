@@ -1,39 +1,39 @@
 
 [[Fit Statistics]]
     # fitting method   = differential_evolution
-    # function evals   = 93
+    # function evals   = 96
     # data points      = 114
     # variables        = 2
-    chi-square         = 950137.036
-    reduced chi-square = 8483.36639
-    Akaike info crit   = 1033.21059
-    Bayesian info crit = 1038.68298
+    chi-square         = 949976.272
+    reduced chi-square = 8481.93100
+    Akaike info crit   = 1033.19130
+    Bayesian info crit = 1038.66369
 [[Variables]]
-    krlC:    59.1702226 +/- 120029.931 (202855.30%) (init = 1)
-    PcritC: -8.54992565 +/- 0.30238064 (3.54%) (init = -5.7)
+    krlC:    17.9934270 +/- 22158.1158 (123145.61%) (init = 1)
+    PcritC: -17.0994378 +/- 1.99753876 (11.68%) (init = -5.7)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 105
+    # function evals   = 106
     # data points      = 114
     # variables        = 2
-    chi-square         = 950137.035
-    reduced chi-square = 8483.36639
-    Akaike info crit   = 1033.21059
-    Bayesian info crit = 1038.68298
+    chi-square         = 949976.235
+    reduced chi-square = 8481.93067
+    Akaike info crit   = 1033.19129
+    Bayesian info crit = 1038.66369
 [[Variables]]
-    krlC:    79.9999999 +/- 15.2804049 (19.10%) (init = 1)
-    PcritC: -8.54999661 +/- 0.15670673 (1.83%) (init = -5.7)
+    krlC:    79.9999999 +/- 11.0323342 (13.79%) (init = 1)
+    PcritC: -17.0995006 +/- 1.89178672 (11.06%) (init = -5.7)
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing
-    # function evals   = 4079
+    # function evals   = 4139
     # data points      = 114
     # variables        = 2
-    chi-square         = 950137.035
-    reduced chi-square = 8483.36639
-    Akaike info crit   = 1033.21059
-    Bayesian info crit = 1038.68298
+    chi-square         = 949976.235
+    reduced chi-square = 8481.93067
+    Akaike info crit   = 1033.19129
+    Bayesian info crit = 1038.66369
 [[Variables]]
-    krlC:    79.9997628 +/- 304319.387 (380400.36%) (init = 1)
-    PcritC: -8.55000000 +/- 7.83505815 (91.64%) (init = -5.7)
+    krlC:    79.9999468 +/- 251266.381 (314083.19%) (init = 1)
+    PcritC: -17.1000000 +/- 70.2880020 (411.04%) (init = -5.7)
