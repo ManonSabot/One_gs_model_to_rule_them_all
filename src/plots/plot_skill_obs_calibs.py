@@ -4,10 +4,11 @@ import pandas as pd  # read/write dataframes, csv files
 from scipy import stats
 
 # plotting
+import matplotlib as mpl
 import matplotlib.pyplot as plt
-from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 import colorcet as cc
 from matplotlib.colors import LinearSegmentedColormap, PowerNorm
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 
 def shift_cmap(cmap, start=0., locpoint=0.5, stop=1.0, name='centered'):
@@ -96,10 +97,6 @@ def model_perf(df, variable, what):
         order = (df[df['variable'] == variable].drop('variable', axis=1)
                    .median(axis=1).sort_values())
 
-    elif what == 'log':
-        order = (df[df['variable'] == variable].drop('variable', axis=1)
-                   .mean(axis=1).sort_values())
-
     else:
         order = (df[df['variable'] == variable].drop('variable', axis=1)
                    .mean(axis=1).sort_values())
@@ -107,18 +104,23 @@ def model_perf(df, variable, what):
     return order
 
 
-def cmap_specs(data):
+def cmap_specs(df):
 
     cmap = plt.cm.OrRd
     cmap2 = cc.cm.CET_D1A
     cmap3 = cc.cm.CET_D1A_r
     norm = None
 
-    # what is the data distribution
-    loc_zero = np.abs(np.nanmin(data)) / (np.nanmax(data) +
-                                          np.abs(np.nanmin(data)))
+    # extra info
+    min = np.nanmin(df.drop('variable', axis=1))
+    max = np.nanmax(df.drop('variable', axis=1))
+    mean = np.nanmean(df.drop('variable', axis=1))
+    med = np.nanmedian(df.drop('variable', axis=1))
 
-    if any(data.flatten() < 0.):
+    # what is the data distribution
+    loc_zero = np.abs(min) / (max + np.abs(min))
+
+    if min < 0.:
 
         if loc_zero > 0.5:
             cmap = cmap3
@@ -139,19 +141,19 @@ def cmap_specs(data):
                 cmap = shift_cmap(cmap, locpoint=loc_zero)
 
     else:
-        thresh = np.nanmean(data) / np.nanmedian(data)
+        thresh = mean / med
 
         if (thresh < 0.8) or (thresh > 1.2):
-            norm = PowerNorm(gamma=0.5)
+            norm = PowerNorm(gamma=0.4)
 
-    return cmap, norm
+    return cmap, norm, min, max
 
 
 def format_grid(ax, xmax, ymax):
 
     # grid
     #ax.grid(False, 'major')
-    #ax.grid(True, 'minor', c='w')
+    #ax.grid(True, 'minor', c='w', lw=0.1)
 
     # remove the ticks
     ax.set_xticks([t + 0.5 for t in ax.get_xticks()], minor=True)
@@ -170,89 +172,206 @@ def format_grid(ax, xmax, ymax):
     return
 
 
+def cbar_specs(what, df):
+
+    # extra info
+    min = np.nanmin(df.drop('variable', axis=1))
+    max = np.nanmax(df.drop('variable', axis=1))
+    start = 0.  # start for smooth
+
+    if what == 'NSE':
+        N1 = 50
+        N2 = 150
+        cticks = np.array([min, -2.5, -1., 0., 0.1, 0.25, 0.5, 0.75, max])
+
+    elif what == 'log':
+        N1 = 100
+        N2 = 100
+        cticks = np.sort(np.append([min, max],
+                         np.log(np.array([0.1, 0.2, 0.5, 1., 2., 5.]))))
+
+    elif what == 'MASE':
+        N2 = 20
+        start = 0.5
+        cticks = np.array([min, start, 0.75, 1., 1.4, 2., max])
+
+    elif what == 'MAPE':
+        N2 = 200
+        start = 0.25
+        cticks = np.array([min, start, 0.5, 0.75, 1., 2., 4., max])
+
+    elif what == 'SMAPE':
+        N2 = 200
+        start = 0.1
+        cticks = np.array([min, start, 0.25, 0.5, 1., 1.5, max])
+
+    if what == 'RMSE':
+        N2 = 200
+        start = 0.1
+        cticks = np.array([min, start, 0.25, 0.5, 1., 2., 4., 6., max])
+
+    smooth = list(np.linspace(start, cticks[-2], N2))
+
+    if min < 0.:
+        smooth = list(np.linspace(cticks[1], 0., N1)) + smooth
+
+    bounds = [cticks[0]] + smooth + [cticks[-1]]
+
+    return cticks[1:], bounds
+
+
+def MAP_arrow(ax, direction='horizontal'):
+
+    ax.get_yaxis().set_visible(False)
+    ax.get_xaxis().set_visible(False)
+    ax.patch.set_visible(False)
+
+    for s in ax.spines.values():  # remove spines
+
+        s.set_visible(False)
+
+    if direction == 'horizontal':
+        x1 = 0.
+        x2 = x1 + 0.075
+        x3 = 1.
+        y1 = 0.
+        y2 = y1
+        y3 = y1
+        head = '->'
+
+    if direction == 'vertical':
+        x1 = 0.
+        x2 = x1
+        x3 = x1
+        y1 = 0.
+        y2 = y1 + 0.05
+        y3 = 1.
+        head = '<-'
+
+    # plot arrow
+    ax.text(x1, y1, 'Mesic', va='center', ha='center',
+            transform=ax.transAxes)
+    ax.annotate('Xeric', xy=(x2, y2), xytext=(x3, y3),
+                xycoords='axes fraction', va='center', ha='center',
+                arrowprops=dict(arrowstyle='<-', lw=1.))
+
+    return
+
+
 def heatmap(df, gs=True, E=True, A=True, what='NSE'):
 
-    # default plot characteristics
-    size_scale = 500.
     to_plot = np.array(['gs', 'E', 'A'])[np.array([gs, E, A])]
-    labels = np.array(['g$_s$', 'E', 'A$_n$'])[np.array([gs, E, A])]
+    variables = np.array(['$g_s$', '$E$', '$A_n$'])[np.array([gs, E, A])]
 
     # setup the plotss
     fig, axes = plt.subplots(1, len(to_plot), figsize=(4.5 * len(to_plot), 5.),
                              sharey=True)
-    plt.subplots_adjust(wspace=0.05)
+
+    if len(to_plot) < 2:
+        axes = [axes]
+        df = df[df['variable'] == to_plot[0]]
+
+    else:
+        plt.subplots_adjust(wspace=0.025)
+
+    # info needed for shared colorbar
+    cmap, norm, vmin, vmax = cmap_specs(df)
 
     for i in range(len(to_plot)):
 
         axes[i].set_facecolor('#737373')  # set background colour
 
         # reorder the df based on model perf, only keep relevant var
-        sub = df.copy()[df['variable'] == to_plot[i]]
+        if len(to_plot) > 1:
+            sub = df.copy()[df['variable'] == to_plot[i]]
+
+        else:
+            sub = df.copy()
+
         order = model_perf(sub, to_plot[i], what)
         sub = sub.drop('variable', axis=1)
         sub = sub.reindex(index=order.index.to_list())
 
-        # into the right format
-        x_labels = sub.index.to_list()
-        y_labels = sub.columns.to_list()
+        # into the right formats
+        models = [which_model(e) for e in sub.index.to_list()]
+        spps = [e.split('_') for e in sub.columns.to_list()]
+        spps = ['$%s$. $%s$ (%s)' % (e[-2][0], e[-1], ' '.join(e[:-2])[0])
+                if 'Quercus' in e else '$%s$. $%s$' % (e[-2][0], e[-1])
+                for e in spps]
         data = sub.to_numpy()
 
-        # from column names to integer coordinates
-        x_num = (np.repeat(np.arange(len(x_labels)), len(y_labels))
-                          .reshape(len(x_labels), -1))
-        y_num = np.tile(np.arange(len(y_labels)), (len(x_labels), 1))
+        if len(to_plot) > 1:
+            data = data.T
 
         # plot the data
-        cmap, norm = cmap_specs(data)
-        #hm = ax.scatter(x_num, y_num, s=np.abs(data) * size_scale, c=data,
-        #                marker='s', cmap=cmap, alpha=0.8)
-        hm = axes[i].scatter(x_num, y_num, s=size_scale, c=data, ec='none',
-                             marker='s', cmap=cmap, norm=norm, alpha=0.8)
+        hm = axes[i].imshow(data, alpha=0.8, cmap=cmap, norm=norm, vmin=vmin,
+                            vmax=vmax)
 
-        # models labels
-        axes[i].set_xticks(np.arange(len(x_labels)))
-        axes[i].set_xticklabels([which_model(e) for e in x_labels], rotation=90,
-                                ha='center')
+        # x and y axes labels
+        xlabs = spps
+        ylabs = models
 
-        # species labels
-        y_labels = [e.split('_') for e in y_labels]
-        spp = ['$%s$. $%s$ (%s)' % (e[-2][0], e[-1], ' '.join(e[:-2])[0])
-               if 'Quercus' in e else '$%s$. $%s$' % (e[-2][0], e[-1])
-               for e in y_labels]
-        axes[i].set_yticks(np.arange(len(y_labels)))
-        axes[i].set_yticklabels(spp, ha='right')
+        if len(to_plot) > 1:
+            xlabs = models
+            ylabs = spps
 
-        # setup the axes
-        format_grid(axes[i], np.amax(x_num), np.amax(y_num))
-
-        # add the colorbar
-        cax = make_axes_locatable(axes[i]).append_axes('top', size='4%',
-                                  pad='3%')
-
-        if (norm is not None) and ((np.nanmin(data) < 0.) or
-                                   (np.nanmax(data) > 1.)):
-            cticks =[round(np.nanpercentile(data, 5), 1),
-                     round(np.nanpercentile(data, 25), 1),
-                     round(np.nanpercentile(data, 50), 1),
-                     round(np.nanpercentile(data, 75), 1),
-                     round(np.nanpercentile(data, 95), 1)]
-
-            if any(data.flatten() < 0.):
-                cticks.insert(2, 0)
-
-            else:
-                cticks.insert(0, 0)
-
-            cbar = plt.colorbar(hm, cax=cax, ticks=cticks,
-                                orientation='horizontal')
+        if len(to_plot) > 1:
+            axes[i].set_xticks(np.arange(len(xlabs)))
+            axes[i].set_xticklabels(xlabs, rotation=90, ha='center')
+            axes[i].xaxis.tick_top()
 
         else:
-            cbar = plt.colorbar(hm, cax=cax, extend='both',
+            axes[i].set_xticks(np.arange(len(xlabs)) + 0.4)
+            axes[i].set_xticklabels(xlabs, rotation=45, ha='right')
+
+        axes[i].set_yticks(np.arange(len(ylabs)))
+        axes[i].set_yticklabels(ylabs, ha='right')
+
+        # format the axes
+        format_grid(axes[i], len(xlabs) - 1, len(ylabs) - 1)
+
+        if len(axes) > 1:  # add title below axis
+            axes[i].set_title(r'%s for %s' % (what, variables[i]), y=-0.1,
+                              fontsize=10.)
+
+    # add colorbar and arrow
+    cticks, bounds = cbar_specs(what, df)
+
+    if len(axes) > 1:
+        cax = fig.add_axes([1. / len(axes), -0.025,
+                            int(len(axes) / 2) / len(axes) + 0.025, 0.04])
+        #cbar = plt.colorbar(hm, cax=cax, orientation='horizontal')
+
+        if vmin < 0.:
+            cbar = plt.colorbar(hm, cax=cax, ticks=cticks, boundaries=bounds,
+                                extend='both', orientation='horizontal')
+
+        else:
+            cbar = plt.colorbar(hm, cax=cax, ticks=cticks, boundaries=bounds,
+                                spacing='proportional', extend='both',
                                 orientation='horizontal')
 
-        cbar.set_label(r'%s of %s' % (what, labels[i]))
-        cax.xaxis.set_ticks_position('top')
-        cax.xaxis.set_label_position('top')
+        if (what == 'NSE') or (what == 'MAPE') or (what == 'MASE'):
+            cbar.ax.set_xticklabels([round(e, 2) for e in cticks])
+
+        else:
+            cbar.ax.set_xticklabels([round(e, 1) for e in cticks])
+
+        # add mesic - xeric arrow
+        ax = fig.add_axes([0.03, 0.148, 0.05, 0.688])
+        MAP_arrow(ax, direction='vertical')
+
+    else:
+        cax = make_axes_locatable(axes[0]).append_axes('right', size='5%',
+                                                        pad=0.2)
+        cbar = plt.colorbar(hm, cax=cax, ticks=cticks, boundaries=bounds,
+                            extend='both')
+        cbar.ax.set_yticklabels([round(e, 2) for e in cticks])
+        cbar.set_label(r'%s for %s' % (what, variables[0]))
+
+        # add mesic - xeric arrow
+        ax = fig.add_axes([0.175, 0.825, 0.6, 0.05])
+        MAP_arrow(ax)
 
     fig.savefig(r'%s_skill_for_%s.png' % (what, '_'.join(to_plot)), dpi=300,
                 bbox_inches='tight')
@@ -261,7 +380,7 @@ def heatmap(df, gs=True, E=True, A=True, what='NSE'):
 
 
 # Import Data
-what = 'log'
+what = 'SMAPE'
 df = pd.read_csv('/mnt/c/Users/le_le/Work/One_gs_model_to_rule_them_all/output/simulations/obs_driven/all_%ss.csv' % (what))
 
 plt.rcParams['text.usetex'] = True  # use LaTeX
@@ -269,16 +388,16 @@ plt.rcParams['text.latex.preamble'] = [r'\usepackage{avant}',
                                        r'\usepackage{mathpazo}',
                                        r'\usepackage{amsmath}']
 
-# order by MAP
+# order by MAP: wet to dry
 df.set_index('model', inplace=True)
-order = ['Richmond_Eucalyptus_dunnii', 'ManyPeaksRange_Alphitonia_excelsa',
+order = ['ManyPeaksRange_Alphitonia_excelsa',
          'ManyPeaksRange_Austromyrtus_bidwillii',
          'ManyPeaksRange_Brachychiton_australis',
          'ManyPeaksRange_Cochlospermum_gillivraei',
-         'Richmond_Eucalyptus_saligna', 'Puechabon_Quercus_ilex',
-         'Vic_la_Gardiole_Quercus_ilex', 'Richmond_Eucalyptus_cladocalyx',
-         'Sevilleta_Juniperus_monosperma', 'Sevilleta_Pinus_edulis',
-         'Corrigin_Eucalyptus_capillosa']
+         'Richmond_Eucalyptus_dunnii', 'Richmond_Eucalyptus_saligna',
+         'Richmond_Eucalyptus_cladocalyx', 'Puechabon_Quercus_ilex',
+         'Vic_la_Gardiole_Quercus_ilex','Corrigin_Eucalyptus_capillosa',
+         'Sevilleta_Juniperus_monosperma', 'Sevilleta_Pinus_edulis']
 
 # make the figure
-heatmap(df[['variable'] + order], what=what)
+heatmap(df[['variable'] + order], what=what) #, E=False, A=False)

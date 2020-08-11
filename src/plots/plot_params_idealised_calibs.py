@@ -20,6 +20,7 @@ warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 # general modules
 import os  # check for files, paths
+import sys  # check for files, paths
 import numpy as np  # array manipulations, math operators
 import pandas as pd  # read/write dataframes, csv files
 
@@ -35,6 +36,10 @@ import functools
 from matplotlib.patches import Patch
 from matplotlib.lines import Line2D
 
+# change the system path to load modules from TractLSM
+script_dir = os.path.dirname(os.path.realpath(sys.argv[0]))
+sys.path.append(os.path.abspath(os.path.join(script_dir, '..')))
+
 # own modules
 from TractLSM.Utils import get_main_dir  # get the project's directory
 
@@ -44,7 +49,8 @@ def main(fname1, fname2, fname3, models, calibs='both', orientation='both',
          colours=None):
 
     base_dir = get_main_dir()
-    dirname = os.path.join(os.path.join(base_dir, 'output'), 'Calibs')
+    dirname = os.path.join(os.path.join(os.path.join(base_dir, 'output'),
+                           'calibrations'), 'idealised')
 
     # load in the data
     df1 = (pd.read_csv(os.path.join(dirname, fname1), header=[0])
@@ -158,19 +164,6 @@ def update_model_names(df, models):
 
     # replace the model names
     df.replace({'Model': {'SOX': 'Eller'}}, inplace=True)
-
-    # create a wet Medlyn-LWP filled with nans to align the box plots
-    for solver in pd.unique(df['solver']):
-
-        if 'sub-sample' in df.columns:
-            dic = {'Model': 'Medlyn-LWP', 'training': 'wet', 'sub-sample': 0,
-                   'solver': solver}
-
-        else:
-            dic = {'Model': 'Medlyn-LWP', 'training': 'wet', 'solver': solver}
-
-        df = df.append(dic, ignore_index=True)
-
     df.Model = df.Model.astype('category')
     df.Model.cat.set_categories(models, inplace=True)
 
@@ -233,13 +226,6 @@ def calib_info(data):
 
     # sorted data in model order
     ordered = [e for __, e in data.groupby('Model')]
-
-    if len(ordered[0]) < 1:  # wet calibrations only, landscape
-        ordered = ordered[1:]  # rm Medlyn empty model params
-
-    if len(ordered[-1]) < 1:  # wet calibrations only, portrait
-        ordered = ordered[:-1]  # rm Medlyn empty model params
-
     datas = [[e['norm_v1'].values, e['norm_v2'].values] for e in ordered]
     datas = [-(0.6 ** e) for ee in datas for e in ee]
 
@@ -419,7 +405,7 @@ def solver_info_plot(df, ax):
 
     # plot the N best data
     ax.scatter(df[df['sv'] < 3]['sv'], df[df['sv'] < 3]['Rank'], marker='o',
-               c=c[1], s=df['counts'] * size / 2.)
+               c=c[1], s=df[df['sv'] < 3]['counts'] * size / 2.)
 
     # plot the average ranks
     ax.plot(pd.unique(df['sv']), df.groupby('sv')['waRank'].mean(), c='k',
@@ -474,6 +460,7 @@ def calib_info_plot(df1, df2, df3, models, calibs='wet',
 
     # user-defined plot attributes
     wbox = 0.85
+    Npoints = 500  # smooth violins
     vert = True
     s1 = 'left'
     s2 = 'right'
@@ -496,12 +483,6 @@ def calib_info_plot(df1, df2, df3, models, calibs='wet',
 
     # model performance info across all solvers
     df1, w, i = model_performance(df1)
-
-    if calibs == 'wet':
-        df1 = df1[df1['Model'] != 'Medlyn-LWP']
-        df1.reset_index(drop=True, inplace=True)
-        w = w[w['Model'] != 'Medlyn-LWP']
-        w.reset_index(drop=True, inplace=True)
 
     # wet and inter data across all solvers
     wet1, best_w1 = calib_info(w)
@@ -528,22 +509,22 @@ def calib_info_plot(df1, df2, df3, models, calibs='wet',
 
     # all solver data
     if calibs != 'inter':
-        vp1 = ax.violinplot(wet1, showextrema=False,
-                            points=len(pd.unique(df1['solver'])) *
-                                   len(pd.unique(df1['sub-sample'])),
+        vp1 = ax.violinplot(wet1, showextrema=False, points=Npoints,
                             positions=pos, vert=vert, widths=wbox)
 
         for vp in vp1['bodies']:
             vp.set_alpha(0.7)
 
+        #ax.plot(np.repeat(pos, len(wet1[0])), [item for sublist in wet1 for item in sublist], 'ro', alpha=0.5)
+
     if calibs != 'wet':
-        vp2 = ax.violinplot(inter1, showextrema=False,
-                            points=len(pd.unique(df1['solver'])) *
-                                   len(pd.unique(df1['sub-sample'])),
+        vp2 = ax.violinplot(inter1, showextrema=False, points=Npoints,
                             positions=pos + pspace, vert=vert, widths=wbox)
 
         for vp in vp2['bodies']:
             vp.set_alpha(0.7)
+
+        #ax.plot(np.repeat(pos + pspace, len(inter1[0])), [item for sublist in inter1 for item in sublist], 'ro', alpha=0.5)
 
     if calibs == 'both':
         slice_vplot(vp1, s1, ec=c[0])
@@ -551,9 +532,7 @@ def calib_info_plot(df1, df2, df3, models, calibs='wet',
 
     # top 3 solver data
     if calibs != 'inter':
-        vp1 = ax.violinplot(wet2, showextrema=False,
-                            points=len(pd.unique(df2['solver'])) *
-                                   len(pd.unique(df1['sub-sample'])),
+        vp1 = ax.violinplot(wet2, showextrema=False, points=Npoints,
                             positions=pos, vert=vert, widths=wbox)
 
         for vp in vp1['bodies']:
@@ -561,9 +540,7 @@ def calib_info_plot(df1, df2, df3, models, calibs='wet',
 
 
     if calibs != 'wet':
-        vp2 = ax.violinplot(inter2, showextrema=False,
-                            points=len(pd.unique(df2['solver'])) *
-                                   len(pd.unique(df1['sub-sample'])),
+        vp2 = ax.violinplot(inter2, showextrema=False, points=Npoints,
                             positions=pos + pspace, vert=vert, widths=wbox)
 
         for vp in vp2['bodies']:
@@ -628,7 +605,7 @@ def calib_info_plot(df1, df2, df3, models, calibs='wet',
                       bbox_to_anchor=(1.03, 1.02))
 
     # add grid and format the axes
-    ppos = np.asarray([0.1, 0.5, 0.9, 1., 1.1, 2., 10.])
+    ppos = np.asarray([0.25, 0.5, 0.9, 1., 1.1, 2., 4.])
     mpos = pos[::2] + (pos[1::2] - pos[::2]) / 2.
     mlines = mpos[:-1] + 0.5 * np.diff(mpos)
     custom_grid(mlines, -(0.6 ** ppos), ax, orientation)
@@ -653,7 +630,7 @@ def calib_info_plot(df1, df2, df3, models, calibs='wet',
         ax.set_xlim(right=-(0.6 ** 70))  # crops the data but looks nicer
 
         if calibs == 'both':
-            ax.set_ylim([np.amin(pos) - 0.5, np.amax(pos) + 0.15])
+            ax.set_ylim([np.amin(pos) - 0.5, np.amax(pos) + 0.5])
 
         else:
             ax.set_xlim(right=-(0.6 ** 55))  # crops the data but looks nicer
@@ -662,19 +639,16 @@ def calib_info_plot(df1, df2, df3, models, calibs='wet',
         ax.set_yticks(mpos)
 
     # nicer display of the model names and normalised param values
-    pvals = ['0.1', '0.5', '', '1', '', '2', '10']
+    pvals = ['0.25', '0.5', '0.9', '', '1.1', '2', '4']
     mnames = models[:]  # creates a copy of slice
     idx = [i for i, e in enumerate(mnames) if '-' in e]
 
     if orientation == 'landscape':
-        change_to = [r'Medlyn-$f_{\varPsi_{l,pd}}$',
-                     r'WUE-$f_{\varPsi_l}$',
-                     'SOX$_\mathrm{\mathsf{opt}}$']
+        change_to = [r'WUE-$f_{\varPsi_l}$', 'SOX$_\mathrm{\mathsf{opt}}$']
 
     else:
         change_to = ['SOX$_\mathrm{\mathsf{opt}}$',
-                     'WUE-\n%s' % (r'$f_{\varPsi_l}$'),
-                     'Medlyn-\n%s' % (r'$f_{\varPsi_{l,pd}}$')]
+                     'WUE-\n%s' % (r'$f_{\varPsi_l}$')]
 
     for i, e in enumerate(idx):
 
@@ -689,23 +663,22 @@ def calib_info_plot(df1, df2, df3, models, calibs='wet',
 
     if orientation == 'landscape':
         ax.set_yticklabels(pvals)
-        ax.xaxis.set_tick_params(length=0., pad=2.5)
         ax.set_xticklabels(mnames, rotation=20., size=7.)
 
         # move the y labels to the right side
         ax.yaxis.set_label_position('right')
         ax.yaxis.tick_right()
-        ax.tick_params(bottom='off', left='off', right='off', labelright='on',
-                       labelbottom='on')
         ax.set_ylabel('Normalised parameter values')
 
     else:
         ax.set_xticklabels(pvals)
         ax.set_yticklabels(mnames, size=7.)
         ax.tick_params(axis='y',direction='in', pad=-7)
-        ax.tick_params(bottom='off', left='off', right='off', labelleft='on',
-                       labelbottom='on')
         ax.set_xlabel('Normalised parameter values')
+
+    # remove the ticks themselves
+    ax.xaxis.set_tick_params(length=0., pad=2.5)
+    ax.yaxis.set_tick_params(length=0., pad=2.5)
 
     # finally, add the inset plot of solver performance
     if calibs == 'both':
@@ -715,8 +688,7 @@ def calib_info_plot(df1, df2, df3, models, calibs='wet',
         solver_info_plot(df0[df0['training'] == calibs], iax)
 
     base_dir = get_main_dir()
-    opath = os.path.join(os.path.join(os.path.join(base_dir, 'output'),
-                         'figures'), 'Calibs')
+    opath = os.path.join(os.path.join(base_dir, 'output'), 'plots')
 
     fig.tight_layout()
     plt.savefig(os.path.join(opath,
@@ -733,8 +705,8 @@ if __name__ == "__main__":
     fname1 = 'overview_of_fits.csv'  # all the solvers' info
     fname2 = 'top_3_fits.csv'  # 3 best solvers
     fname3 = 'best_fit.csv'  # best solvers
-    models = ['Medlyn-LWP', 'Tuzet', 'Eller', 'WUE-LWP', 'CGainNet',
-              'ProfitMax', 'CMax', 'LeastCost', 'SOX-OPT', 'CAP', 'MES']
+    models = ['Tuzet', 'Eller', 'ProfitMax', 'CGainNet', 'WUE-LWP', 'CMax',
+              'LeastCost', 'SOX-OPT', 'CAP', 'MES']
     calibs = 'both'
     orientation = 'both'
 

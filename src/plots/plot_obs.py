@@ -184,21 +184,21 @@ def E_A_relationships_backup(df, colours):
     fig.savefig('E_A_functional.png', dpi=300, bbox_inches='tight')
 
 
-def set_box_color(bp, colour):
+def set_box_color(bp, colour, alpha=1., lc='gray'):
 
-    plt.setp(bp['boxes'], color='grey', linewidth=1.)
-    plt.setp(bp['boxes'], facecolor=colour)
+    plt.setp(bp['boxes'], color=lc, linewidth=1.)
+    plt.setp(bp['boxes'], facecolor=colour, alpha=alpha)
 
     if colour == 'w':
-        plt.setp(bp['whiskers'], color='grey')
-        plt.setp(bp['caps'], color='grey')
+        plt.setp(bp['whiskers'], color=lc)
+        plt.setp(bp['caps'], color=lc)
 
     else:
-        plt.setp(bp['whiskers'], color=colour)
-        plt.setp(bp['caps'], color=colour)
+        plt.setp(bp['whiskers'], color=lc)
+        plt.setp(bp['caps'], color=lc)
 
-    plt.setp(bp['medians'], color='grey', linewidth=1.)
-    plt.setp(bp['fliers'], color='grey', markersize=1.5)
+    plt.setp(bp['medians'], color=lc, linewidth=1.)
+    plt.setp(bp['fliers'], color=lc, markersize=1.5)
 
 
 def E_A_relationships(df, colours):
@@ -236,11 +236,10 @@ def E_A_relationships(df, colours):
 
             for axis in [ax_y, ax_x]:
 
-                # removing the spines
-                axis.spines['right'].set_visible(False)
-                axis.spines['top'].set_visible(False)
-                axis.spines['bottom'].set_visible(False)
-                axis.spines['left'].set_visible(False)
+                for s in axis.spines.values():  # remove spines
+
+                    s.set_visible(False)
+
                 axis.patch.set_visible(False)
 
                 # removing the double tick marks
@@ -253,11 +252,14 @@ def E_A_relationships(df, colours):
             # plot the obs functional relationship
             x = sub['E']
             y = sub['A']
+
+            print(keep[iter])
             xmin = np.nanmin(x) / 2.5
             xmax = 2.5 * np.nanmax(x)
             ymin = np.nanmin(y) / 2.5
             ymax = 2.5 * np.nanmax(y)
 
+            # full range
             encircle(ax, x, y, ec='none', fc='gray', alpha=0.15)
             gam = (ExpectileGAM(expectile=0.5, n_splines=5, spline_order=4)
                                .gridsearch(x.values.reshape(-1, 1), y.values))
@@ -266,11 +268,11 @@ def E_A_relationships(df, colours):
             ax.plot(px, py, color='k', ls='--', linewidth=4.)
 
             bp = ax_y.boxplot(y, widths=0.35, patch_artist=True)
-            set_box_color(bp, 'w')
+            set_box_color(bp, 'w', lc='k')
             ax_y.invert_xaxis()
 
             bp = ax_x.boxplot(x, vert=False, widths=0.35, patch_artist=True)
-            set_box_color(bp, 'w')
+            set_box_color(bp, 'w', lc='k')
             ax_x.invert_yaxis()
 
             j = 0
@@ -340,6 +342,128 @@ def E_A_relationships(df, colours):
     fig.savefig('E_A_functional.png', dpi=300, bbox_inches='tight')
 
 
+def iWUE_VPD_relationships(df, colours):
+
+    keep = ['Richmond_Eucalyptus_dunnii', 'ManyPeaksRange_Alphitonia_excelsa',
+            'ManyPeaksRange_Austromyrtus_bidwillii',
+            'ManyPeaksRange_Brachychiton_australis',
+            'ManyPeaksRange_Cochlospermum_gillivraei',
+            'Richmond_Eucalyptus_saligna', 'Puechabon_Quercus_ilex',
+            'Vic_la_Gardiole_Quercus_ilex', 'Richmond_Eucalyptus_cladocalyx',
+            'Sevilleta_Juniperus_monosperma', 'Sevilleta_Pinus_edulis',
+            'Corrigin_Eucalyptus_capillosa']
+
+    fig = plt.figure(figsize=(16, 20))
+
+    iter = 0  # keep track of the sites
+
+    for row in range(3, -1, -1):  # adding suplots from the top
+
+        b = row / 4.
+        t = (row + 1) / 4.
+        t = t - (t - b) / 15.
+
+        for col in range(3):  # adding from the left
+
+            l = col / 3.
+            r = (col + 1) / 3.
+            r = r - (r - l) / 15.
+
+            gs = fig.add_gridspec(nrows=6, ncols=6, left=l, right=r, top=t,
+                                  bottom=b, wspace=0., hspace=0.)
+            ax = fig.add_subplot(gs)
+
+            for axis in [ax_y, ax_x]:
+
+                for s in axis.spines.values():  # remove spines
+
+                    s.set_visible(False)
+
+                axis.patch.set_visible(False)
+
+                # removing the double tick marks
+                axis.tick_params(left=False, labelleft=False, bottom=False,
+                                 labelbottom=False)
+
+            # plot the obs functional relationship
+            sub = df.copy()[df['site_spp'] == keep[iter]]
+            x = sub['VPD']
+            y = sub['A'] / sub['gs']
+            xmin = np.nanmin(x)
+            xmax = np.nanmax(x)
+            ymin = np.nanmin(y) / 2.5
+            ymax = 2.5 * np.nanmax(y)
+
+            # full range
+            encircle(ax, x, y, ec='none', fc='gray', alpha=0.15)
+            gam = (ExpectileGAM(expectile=0.5, n_splines=5, spline_order=4)
+                               .gridsearch(x.values.reshape(-1, 1), y.values))
+            px = np.linspace(x.min(), x.max(), num=500)
+            py = gam.predict(px)
+            ax.plot(px, py, color='k', ls='--', linewidth=4.)
+
+            j = 0
+
+            for mod in ['std2', 'tuz', 'sox1', 'wue', 'cmax', 'pmax', 'cgn',
+                        'lcst', 'sox2', 'cap', 'mes']:
+
+                subsub = sub[['VPD', 'A(%s)' % (mod), 'gs(%s)' % (mod)]].dropna()
+
+                xx = subsub['VPD']
+                yy = subsub['A(%s)' % (mod)] / subsub['gs(%s)' % (mod)]
+
+                # deal with the nans + non-physical values
+                valid = np.logical_and(yy >= ymin, yy < ymax)
+                xx = xx[valid]
+                yy = yy[valid]
+
+                try:
+                    ax.scatter(xx, yy, marker='+', c=colours[j], s=40.,
+                               label=which_model(mod))
+
+                except Exception:
+                    pass
+
+                j += 1
+
+            # tighten the subplots
+            ax.set_xlim(xmin, xmax)
+
+            __, high = ax.get_ylim()
+            ax.set_ylim(np.maximum(-0.25, ymin), np.minimum(3. * ymax, high))
+
+            pad = 40.
+
+            if row == 0:
+                ax.set_xlabel('E (mmol m$^{-2}$ s$^{-1}$)',
+                              labelpad=4. / 5. * pad)
+
+            if col == 0:
+                ax.set_ylabel('A$_n$ ($\mu$mol m$^{-2}$ s$^{-1}$)',
+                              labelpad=pad)
+
+            site = keep[iter].split('_')[0]
+
+            if site == 'Vic':
+                site = '%s %s %s' % (site, keep[iter].split('_')[1],
+                                     keep[iter].split('_')[2])
+
+            species = '$%s$ $%s$' % (keep[iter].split('_')[-2],
+                                     keep[iter].split('_')[-1])
+
+            if 'Quercus' in species:
+                title = '%s (%s)' % (species, site)
+
+            else:
+                title = species
+
+            ax.set_title(title)
+
+            iter += 1  # second or third column
+
+    fig.savefig('iWUE_functional.png', dpi=300, bbox_inches='tight')
+
+
 def gs_Ci_clusters(df, colours):
 
     keep = ['Richmond_Eucalyptus_saligna', 'Richmond_Eucalyptus_dunnii',
@@ -395,7 +519,7 @@ def gs_Ci_clusters(df, colours):
 
         # tighten the subplots
         __, top = axes[i][iter].get_ylim()
-        axes[i][iter].set_ylim(0., top)
+        #axes[i][iter].set_ylim(0., top)
 
         site = what.split('_')[0]
 
@@ -443,23 +567,23 @@ def LWP_box_plots(df, colours):
 
         for c in select:
 
-            sub[c] -= sub['Ps_pd']  # we're looking at deltaPleaf
+            #sub[c] -= sub['Ps_pd']  # daily deltaPleaf
             sub[c][sub[c] >= 0.] =  np.nan  # mask nonsense
             sub[c][sub[c] < -100.] = np.nan  # mask nonsense
 
         pos = 0.
         bp = axes[i][iter].boxplot([sub['Pleaf'].dropna()], positions=[pos],
                                    widths=0.8, patch_artist=True)
-        set_box_color(bp, 'w')
+        set_box_color(bp, 'gray', lc=colours[0])
         interquartiles = [sub['Pleaf'].dropna().quantile(0.25),
                           sub['Pleaf'].dropna().quantile(0.75)]
         axes[i][iter].fill_between(np.arange(-0.5, 12.), interquartiles[0],
-                                   interquartiles[1], color='#f0f0f0',
+                                   interquartiles[1], color='gray', alpha=0.15,
                                    zorder=-1)
 
-        j = 0
+        j = 1
 
-        for mod in ['std2', 'tuz', 'sox1', 'wue', 'cmax', 'pmax', 'cgn', 'lcst',
+        for mod in ['tuz', 'sox1', 'wue', 'cmax', 'pmax', 'cgn', 'lcst',
                     'sox2', 'cap', 'mes']:
 
             pos += 1.
@@ -476,8 +600,8 @@ def LWP_box_plots(df, colours):
 
             j += 1
 
-        if axes[i][iter].get_ylim()[0] < -16.:
-            axes[i][iter].set_ylim(-16., 0.1)
+        if axes[i][iter].get_ylim()[0] < -14.:
+            axes[i][iter].set_ylim(-14., 0.1)
 
         else:
             axes[i][iter].set_ylim(axes[i][iter].get_ylim()[0], 0.1)
@@ -491,7 +615,7 @@ def LWP_box_plots(df, colours):
             i = 0
             iter += 1  # second or third column
 
-    fig.savefig('LWP_boxes.png', dpi=1200, bbox_inches='tight')
+    fig.savefig('LWP_boxes.png', dpi=300, bbox_inches='tight')
 
 # Import Data
 df = pd.read_csv('/mnt/c/Users/le_le/Work/One_gs_model_to_rule_them_all/output/simulations/obs_driven/all_site_spp_simulations.csv')
@@ -505,6 +629,7 @@ plt.rcParams['text.latex.preamble'] = [r'\usepackage{avant}',
                                        r'\usepackage{mathpazo}',
                                        r'\usepackage{amsmath}']
 
-#E_A_relationships(df, colours)
+E_A_relationships(df, colours)
+iWUE_VPD_relationships(df, colours)
 gs_Ci_clusters(df, colours)
-#LWP_box_plots(df, colours)
+LWP_box_plots(df, colours)
