@@ -1,40 +1,40 @@
 
 [[Fit Statistics]]
     # fitting method   = differential_evolution
-    # function evals   = 306
+    # function evals   = 777
     # data points      = 32
     # variables        = 2
-    chi-square         = 182533.335
-    reduced chi-square = 6084.44449
-    Akaike info crit   = 280.766470
-    Bayesian info crit = 283.697942
+    chi-square         = 177411.618
+    reduced chi-square = 5913.72059
+    Akaike info crit   = 279.855742
+    Bayesian info crit = 282.787214
 [[Variables]]
-    krlC:    80.0000000 +/- 6.5893e-14 (0.00%) (init = 1)
-    PcritC: -5.95155730 +/- 0.04987350 (0.84%) (init = -4.7)
+    krlC:    11.0986025 +/- 32.9126769 (296.55%) (init = 1)
+    PcritC: -8.30889730 +/- 0.54377816 (6.54%) (init = -4.7)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 203
+    # function evals   = 214
     # data points      = 32
     # variables        = 2
-    chi-square         = 186427.925
-    reduced chi-square = 6214.26416
-    Akaike info crit   = 281.442051
-    Bayesian info crit = 284.373522
+    chi-square         = 178563.188
+    reduced chi-square = 5952.10628
+    Akaike info crit   = 280.062781
+    Bayesian info crit = 282.994253
+##  Warning: uncertainties could not be estimated:
 [[Variables]]
-    krlC:    1.25486360 +/- 2.52511532 (201.23%) (init = 1)
-    PcritC: -5.19664048 +/- 0.14044234 (2.70%) (init = -4.7)
+    krlC:    0.98085747 +/-        nan (nan%) (init = 1)
+    PcritC: -10.1725079 +/- 0.20818665 (2.05%) (init = -4.7)
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing
-    # function evals   = 6041
+    # function evals   = 6161
     # data points      = 32
     # variables        = 2
-    chi-square         = 181300.190
-    reduced chi-square = 6043.33967
-    Akaike info crit   = 280.549553
-    Bayesian info crit = 283.481025
-##  Warning: uncertainties could not be estimated:
+    chi-square         = 172060.717
+    reduced chi-square = 5735.35724
+    Akaike info crit   = 278.875738
+    Bayesian info crit = 281.807209
 [[Variables]]
-    krlC:    8.28930095 +/- 3.19253020 (38.51%) (init = 1)
-    PcritC: -5.57009706 +/-        nan (nan%) (init = -4.7)
+    krlC:    52.0765167 +/- 10.6442961 (20.44%) (init = 1)
+    PcritC: -8.26670879 +/- 0.70470192 (8.52%) (init = -4.7)
