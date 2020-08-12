@@ -380,7 +380,7 @@ def heatmap(df, gs=True, E=True, A=True, what='NSE'):
 
 
 # Import Data
-what = 'SMAPE'
+what = 'RMSE'
 df = pd.read_csv('/mnt/c/Users/le_le/Work/One_gs_model_to_rule_them_all/output/simulations/obs_driven/all_%ss.csv' % (what))
 
 plt.rcParams['text.usetex'] = True  # use LaTeX
@@ -390,7 +390,9 @@ plt.rcParams['text.latex.preamble'] = [r'\usepackage{avant}',
 
 # order by MAP: wet to dry
 df.set_index('model', inplace=True)
-order = ['ManyPeaksRange_Alphitonia_excelsa',
+order = ['San_Lorenzo_Carapa_guianensis',
+         'Parque_Natural_Metropolitano_Calycophyllum_candidissimum',
+         'ManyPeaksRange_Alphitonia_excelsa',
          'ManyPeaksRange_Austromyrtus_bidwillii',
          'ManyPeaksRange_Brachychiton_australis',
          'ManyPeaksRange_Cochlospermum_gillivraei',

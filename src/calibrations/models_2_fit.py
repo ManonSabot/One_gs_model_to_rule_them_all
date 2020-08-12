@@ -101,7 +101,7 @@ def floop(p, model, photo='Farquhar', inf_gb=True):
             dkcost = cost_pd - cost_mid
 
             # dP is needed to calculate gs
-            dP = 0.5 * (Pleaf_pd + p.P50)  # MPa
+            dP = 0.5 * (Pleaf_pd + p.P50)  # MPa,  /!\ sign of P50
 
             # xi, the loss of xylem cost of stomatal opening, mmol m-2 s-1
             dq = Dleaf * conv.FROM_kPa  # mol mol-1, equivalent to D / Patm

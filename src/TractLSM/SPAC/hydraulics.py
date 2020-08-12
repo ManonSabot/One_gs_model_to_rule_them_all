@@ -40,67 +40,6 @@ from TractLSM import conv, cst  # unit converter & general constants
 
 # ======================================================================
 
-def f(P, b, c):
-
-    """
-    Calculates soil and xylem vulnerability curves based on a
-    two-parameter Weibull function (Neufeld et al., 1992). In turn, this
-    is used to calculate hydraulic conductance and transpiration at
-    steady-state.
-
-    Arguments:
-    ----------
-    P: array
-        leaf or soil (upstream) water potential [MPa], an array of
-        values from the soil water potential Ps to the critical water
-        potential Pcrit for which cavitation of the xylem occurs
-
-    b: float
-        one of two Weibull parameters [MPa], it is P at k / kmax = 0.37
-
-    c: float
-        one of two Weibull parameters [unitless], it controls whether
-        the curve has a threshold sigmoidal form or non-threshold
-        sigmoidal form
-
-    Returns:
-    --------
-    The vulnerability curves of the the plant [unitless] describing the
-    response of stomatal conductance to various leaf water potential
-    drop and thus, how likely the plant is to cavitate for a specific
-    value of P.
-
-    """
-
-    return np.maximum(cst.zero, np.exp(- (- P / b) ** c))
-
-
-def k_regulate(kP0, fP0):
-
-    """
-    Maximum xylem hydraulic conductance can be defined as the logically
-    equivalent to the conductance corresponding to the maximum water
-    potential.
-
-    Arguments:
-    ----------
-    K0: float
-        hydraulic conductance [mmol.s-1.m-2.MPa-1] at the upper
-        potential bound of the water potential range, i.e. f(Ps=0, b, c)
-
-    fP0: float
-        current upper bound of the water potential range [MPa]
-
-    Returns:
-    --------
-    The maximum hydraulic conductance [mmol.s-1.m-2.MPa-1] of the plant,
-    given the current upper bound of the water potential range.
-
-    """
-
-    return kP0 * fP0
-
-
 def Weibull_params(p):
 
     """
@@ -171,6 +110,74 @@ def Weibull_params(p):
     b = Px1 / ((- np.log(1 - x1)) ** (1. / c))
 
     return b, c
+
+
+def f(P, b, c):
+
+    """
+    Calculates soil and xylem vulnerability curves based on a
+    two-parameter Weibull function (Neufeld et al., 1992). In turn, this
+    is used to calculate hydraulic conductance and transpiration at
+    steady-state.
+
+    Arguments:
+    ----------
+    P: array
+        leaf or soil (upstream) water potential [MPa], an array of
+        values from the soil water potential Ps to the critical water
+        potential Pcrit for which cavitation of the xylem occurs
+
+    b: float
+        one of two Weibull parameters [MPa], it is P at k / kmax = 0.37
+
+    c: float
+        one of two Weibull parameters [unitless], it controls whether
+        the curve has a threshold sigmoidal form or non-threshold
+        sigmoidal form
+
+    Returns:
+    --------
+    The vulnerability curves of the the plant [unitless] describing the
+    response of stomatal conductance to various leaf water potential
+    drop and thus, how likely the plant is to cavitate for a specific
+    value of P.
+
+    """
+
+    return np.maximum(cst.zero, np.exp(-(-P / b) ** c))
+
+
+def k_regulate(p, kx, Px):
+
+    """
+    Maximum xylem hydraulic conductance can be defined as the logically
+    equivalent to the conductance corresponding to the maximum water
+    potential.
+
+    Arguments:
+    ----------
+    p: recarray object or pandas series or class containing the data
+        time step's met data & params
+
+    kx: float
+        hydraulic conductance [mmol.s-1.m-2.MPa-1] given the current upper
+        bound of the water potential range
+
+    Px: float
+        current upper bound of the water potential range [MPa]
+
+    Returns:
+    --------
+    The maximum hydraulic conductance [mmol.s-1.m-2.MPa-1] of the plant,
+    assuming saturation at P = -0.05 MPa.
+
+    """
+
+    # two Weibull parameters setting the shape of the vuln curves
+    b, c = Weibull_params(p)  # MPa, unitless
+    fPx = f(Px, b, c)
+
+    return kx / fPx
 
 
 def transpiration(P, kmax, b, c):

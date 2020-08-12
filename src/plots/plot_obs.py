@@ -203,7 +203,9 @@ def set_box_color(bp, colour, alpha=1., lc='gray'):
 
 def E_A_relationships(df, colours):
 
-    keep = ['Richmond_Eucalyptus_dunnii', 'ManyPeaksRange_Alphitonia_excelsa',
+    keep = ['San_Lorenzo_Carapa_guianensis',
+            'Parque_Natural_Metropolitano_Calycophyllum_candidissimum',
+            'Richmond_Eucalyptus_dunnii', 'ManyPeaksRange_Alphitonia_excelsa',
             'ManyPeaksRange_Austromyrtus_bidwillii',
             'ManyPeaksRange_Brachychiton_australis',
             'ManyPeaksRange_Cochlospermum_gillivraei',
@@ -222,7 +224,7 @@ def E_A_relationships(df, colours):
         t = (row + 1) / 4.
         t = t - (t - b) / 15.
 
-        for col in range(3):  # adding from the left
+        for col in range(4):  # adding from the left
 
             l = col / 3.
             r = (col + 1) / 3.
@@ -252,20 +254,20 @@ def E_A_relationships(df, colours):
             # plot the obs functional relationship
             x = sub['E']
             y = sub['A']
-
-            print(keep[iter])
             xmin = np.nanmin(x) / 2.5
             xmax = 2.5 * np.nanmax(x)
             ymin = np.nanmin(y) / 2.5
             ymax = 2.5 * np.nanmax(y)
 
             # full range
-            encircle(ax, x, y, ec='none', fc='gray', alpha=0.15)
+            encircle(ax, x, y, ec='none', fc='gray', alpha=0.15,
+                     label='Range of Obs.')
             gam = (ExpectileGAM(expectile=0.5, n_splines=5, spline_order=4)
                                .gridsearch(x.values.reshape(-1, 1), y.values))
             px = np.linspace(x.min(), x.max(), num=500)
             py = gam.predict(px)
-            ax.plot(px, py, color='k', ls='--', linewidth=4.)
+            ax.plot(px, py, color='k', ls='--', linewidth=4.,
+                    label='50$^{th}$ expectile of Obs.')
 
             bp = ax_y.boxplot(y, widths=0.35, patch_artist=True)
             set_box_color(bp, 'w', lc='k')
@@ -339,6 +341,10 @@ def E_A_relationships(df, colours):
 
             iter += 1  # second or third column
 
+            if iter == len(keep):
+                ax.legend(bbox_to_anchor=(1.9, 0.2), loc=4, frameon=False)
+                break
+
     fig.savefig('E_A_functional.png', dpi=300, bbox_inches='tight')
 
 
@@ -371,19 +377,7 @@ def iWUE_VPD_relationships(df, colours):
 
             gs = fig.add_gridspec(nrows=6, ncols=6, left=l, right=r, top=t,
                                   bottom=b, wspace=0., hspace=0.)
-            ax = fig.add_subplot(gs)
-
-            for axis in [ax_y, ax_x]:
-
-                for s in axis.spines.values():  # remove spines
-
-                    s.set_visible(False)
-
-                axis.patch.set_visible(False)
-
-                # removing the double tick marks
-                axis.tick_params(left=False, labelleft=False, bottom=False,
-                                 labelbottom=False)
+            ax = fig.add_subplot(gs[:])
 
             # plot the obs functional relationship
             sub = df.copy()[df['site_spp'] == keep[iter]]
@@ -395,7 +389,7 @@ def iWUE_VPD_relationships(df, colours):
             ymax = 2.5 * np.nanmax(y)
 
             # full range
-            encircle(ax, x, y, ec='none', fc='gray', alpha=0.15)
+            #encircle(ax, x, y, ec='none', fc='gray', alpha=0.15)
             gam = (ExpectileGAM(expectile=0.5, n_splines=5, spline_order=4)
                                .gridsearch(x.values.reshape(-1, 1), y.values))
             px = np.linspace(x.min(), x.max(), num=500)
@@ -466,12 +460,14 @@ def iWUE_VPD_relationships(df, colours):
 
 def gs_Ci_clusters(df, colours):
 
-    keep = ['Richmond_Eucalyptus_saligna', 'Richmond_Eucalyptus_dunnii',
+    keep = ['San_Lorenzo_Carapa_guianensis',
+            'Parque_Natural_Metropolitano_Calycophyllum_candidissimum',
             'Puechabon_Quercus_ilex', 'Vic_la_Gardiole_Quercus_ilex',
-            'Sevilleta_Pinus_edulis', 'Sevilleta_Juniperus_monosperma',
-            'Richmond_Eucalyptus_cladocalyx', 'Corrigin_Eucalyptus_capillosa']
+            'Corrigin_Eucalyptus_capillosa', 'Richmond_Eucalyptus_dunnii',
+            'Sevilleta_Juniperus_monosperma', 'Sevilleta_Pinus_edulis',
+            'Richmond_Eucalyptus_saligna', 'Richmond_Eucalyptus_cladocalyx']
 
-    fig, axes = plt.subplots(2, 4, figsize=(20, 10), sharex='col', sharey='row')
+    fig, axes = plt.subplots(4, 3, figsize=(12, 16), sharex='col', sharey='row')
 
     i = 0  # loop over the axes
     iter = 0  # first column
@@ -521,31 +517,23 @@ def gs_Ci_clusters(df, colours):
         __, top = axes[i][iter].get_ylim()
         #axes[i][iter].set_ylim(0., top)
 
-        site = what.split('_')[0]
+        what = what.split('_')
+        species = '$%s$ $%s$' % (what[-2], what[-1])
 
-        if site == 'Vic':
-            site = '%s %s %s' % (site, what.split('_')[1], what.split('_')[2])
-            species = '%s %s' % (what.split('_')[3], what.split('_')[4])
+        if 'Quercus' in what:
+            species += ' (%s)' % (what[0][0])
 
-        else:
-            species = '%s %s' % (what.split('_')[1], what.split('_')[2])
+        axes[i][iter].set_title(species)
 
-        if 'Quercus' in species:
-            title = '%s (%s)' % (species, site)
+        i += 1  # second or third column
 
-        else:
-            title = species
+        if i == len(axes):
+            iter += 1
+            i = 0
 
-        axes[i][iter].set_title(title)
-
-        iter += 1  # second or third column
-
-        if iter == len(axes[0]):
-            iter = 0
-            i += 1
-
-    #axes[-1][-1].axis('off')
-    #axes[0][-1].legend(bbox_to_anchor=(1., -2.4), loc=4, frameon=False)
+    axes[-2][-1].axis('off')
+    axes[-1][-1].axis('off')
+    axes[-1][-2].legend(bbox_to_anchor=(1.9, 0.2), loc=4, frameon=False)
 
     fig.savefig('gs_Ci_clustered.png', dpi=300, bbox_inches='tight')
 
@@ -553,8 +541,8 @@ def gs_Ci_clusters(df, colours):
 def LWP_box_plots(df, colours):
 
     # histograms
-    groups = ['ManyPeaksRange', 'Richmond', 'Sevilleta', 'Quercus']
-    fig, axes = plt.subplots(2, 2, figsize=(20, 15))
+    groups = ['Panama', 'ManyPeaksRange', 'Richmond', 'Quercus', 'Sevilleta']
+    fig, axes = plt.subplots(3, 2, figsize=(15, 15), sharex=True)
 
     select = df.filter(like='Pleaf').columns.to_list()
 
@@ -563,7 +551,13 @@ def LWP_box_plots(df, colours):
 
     for what in groups:
 
-        sub = df.copy()[df['site_spp'].str.contains(what)]
+        if what == 'Panama':
+            s1 = 'San_Lorenzo'
+            s2 = 'Parque_Natural_Metropolitano'
+            sub = df.copy()[df['site_spp'].str.contains('|'.join([s1, s2]))]
+
+        else:
+            sub = df.copy()[df['site_spp'].str.contains(what)]
 
         for c in select:
 
@@ -609,11 +603,19 @@ def LWP_box_plots(df, colours):
         axes[i][iter].set_xlim(-0.5, 11.5)
         axes[i][iter].set_title(what)
 
-        i += 1
+        iter += 1  # second or third column
 
-        if i == len(axes):
-            i = 0
-            iter += 1  # second or third column
+        if iter == len(axes[0]):
+            iter = 0
+            i += 1
+
+    axes[1][1].set_xticklabels(['Obs.'] + [which_model(mod) for mod in
+                               ['tuz', 'sox1', 'wue', 'cmax', 'pmax', 'cgn',
+                                'lcst', 'sox2', 'cap', 'mes']], rotation=90)
+    axes[0][0].set_xticklabels(['Obs.'] + [which_model(mod) for mod in
+                                ['tuz', 'sox1', 'wue', 'cmax', 'pmax', 'cgn',
+                                 'lcst', 'sox2', 'cap', 'mes']], rotation=90)
+    axes[-1][-1].axis('off')
 
     fig.savefig('LWP_boxes.png', dpi=300, bbox_inches='tight')
 
@@ -630,6 +632,6 @@ plt.rcParams['text.latex.preamble'] = [r'\usepackage{avant}',
                                        r'\usepackage{amsmath}']
 
 E_A_relationships(df, colours)
-iWUE_VPD_relationships(df, colours)
-gs_Ci_clusters(df, colours)
-LWP_box_plots(df, colours)
+#iWUE_VPD_relationships(df, colours)
+#gs_Ci_clusters(df, colours)
+#LWP_box_plots(df, colours)

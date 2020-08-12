@@ -139,7 +139,7 @@ def conductances(p, Tleaf=None, gs=None, inf_gb=False):
             gb = p.gb
 
         except (IndexError, AttributeError, ValueError):  # calc. gb
-            gb = np.maximum(cst.zero, gHa * conv.GbvGbh)  # mol m-2 s-1
+            gb = np.maximum(cst.zero, 2. * gHa * conv.GbvGbh)  # mol m-2 s-1
 
             if np.isclose(gHa, cst.zero, rtol=cst.zero, atol=cst.zero):
                 gb = cst.zero  # mol m-2 s-1

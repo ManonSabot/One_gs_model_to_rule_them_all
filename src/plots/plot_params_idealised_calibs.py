@@ -461,6 +461,7 @@ def calib_info_plot(df1, df2, df3, models, calibs='wet',
     # user-defined plot attributes
     wbox = 0.85
     Npoints = 500  # smooth violins
+    bw = 0.3
     vert = True
     s1 = 'left'
     s2 = 'right'
@@ -510,7 +511,7 @@ def calib_info_plot(df1, df2, df3, models, calibs='wet',
     # all solver data
     if calibs != 'inter':
         vp1 = ax.violinplot(wet1, showextrema=False, points=Npoints,
-                            positions=pos, vert=vert, widths=wbox)
+                            positions=pos, vert=vert, widths=wbox, bw_method=bw)
 
         for vp in vp1['bodies']:
             vp.set_alpha(0.7)
@@ -519,7 +520,8 @@ def calib_info_plot(df1, df2, df3, models, calibs='wet',
 
     if calibs != 'wet':
         vp2 = ax.violinplot(inter1, showextrema=False, points=Npoints,
-                            positions=pos + pspace, vert=vert, widths=wbox)
+                            positions=pos + pspace, vert=vert, widths=wbox,
+                            bw_method=bw)
 
         for vp in vp2['bodies']:
             vp.set_alpha(0.7)
@@ -531,9 +533,11 @@ def calib_info_plot(df1, df2, df3, models, calibs='wet',
         slice_vplot(vp2, s2, ec=c[0])
 
     # top 3 solver data
+    bw *= len(df1['solver'].unique()) / len(df2['solver'].unique())
+
     if calibs != 'inter':
         vp1 = ax.violinplot(wet2, showextrema=False, points=Npoints,
-                            positions=pos, vert=vert, widths=wbox)
+                            positions=pos, vert=vert, widths=wbox, bw_method=bw)
 
         for vp in vp1['bodies']:
             vp.set_alpha(0.7)
@@ -541,7 +545,7 @@ def calib_info_plot(df1, df2, df3, models, calibs='wet',
 
     if calibs != 'wet':
         vp2 = ax.violinplot(inter2, showextrema=False, points=Npoints,
-                            positions=pos + pspace, vert=vert, widths=wbox)
+                            positions=pos + pspace, vert=vert, widths=wbox, bw_method=bw)
 
         for vp in vp2['bodies']:
             vp.set_alpha(0.7)

@@ -156,7 +156,7 @@ def supply_max(p, photo='Farquhar', case=1, res='low', threshold_conv=0.1,
             dkcost = cost_pd - cost_mid
 
             # dkcostdP is needed to calculate gs
-            dP = 0.5 * (Pleaf_pd + p.P50)  # MPa
+            dP = 0.5 * (Pleaf_pd + p.P50)  # MPa, /!\ sign of P50
             dkcostdP = dkcost / dP * 1. / cost_pd  # MPa-1
 
             # xi, the loss of xylem cost of stomatal opening, mmol m-2 s-1
@@ -204,7 +204,7 @@ def supply_max(p, photo='Farquhar', case=1, res='low', threshold_conv=0.1,
         # new associated transpiration (Penman-Monteith), Tleaf
         trans, real_zero, gw, gb = calc_trans(p, Tleaf, gs, inf_gb=inf_gb)
         new_Tleaf, __ = leaf_temperature(p, trans, Tleaf=Tleaf, inf_gb=inf_gb)
-
+        
         if case == 1:  # calculate gc, An, Ci
             gc = np.maximum(cst.zero, conv.GcvGw * (gb * gs) / (gb + gs))
             An, Aj, Ac = calc_photosynthesis(p, 0., Cs, photo, Tleaf=p.Tair,

@@ -53,7 +53,7 @@ from scipy.integrate import quad  # integrate on a range
 
 # own modules
 from TractLSM import cst  # general constants
-from TractLSM.SPAC import f, Weibull_params, k_regulate
+from TractLSM.SPAC import f, Weibull_params
 
 
 # ======================================================================
@@ -216,7 +216,7 @@ def hydraulic_cost(p, P):
     k = p.kmax * f(P, b, c)  # mmol s-1 m-2 MPa-1
 
     # current maximum hydraulic conductance of the plant
-    kmax = k_regulate(p.kmax, f(p.Ps, b, c))  # mmol s-1 m-2 MPa-1
+    kmax = p.kmax * f(p.Ps, b, c)  # mmol s-1 m-2 MPa-1
 
     # cost, from kmax @ Ps to kcrit @ Pcrit
     cost = (kmax - k) / (kmax - kcrit)  # normalized, unitless
