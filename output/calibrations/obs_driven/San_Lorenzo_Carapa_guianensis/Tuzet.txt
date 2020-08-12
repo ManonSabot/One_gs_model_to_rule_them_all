@@ -1,0 +1,44 @@
+
+[[Fit Statistics]]
+    # fitting method   = differential_evolution
+    # function evals   = 399
+    # data points      = 37
+    # variables        = 2
+    chi-square         = 54558.7116
+    reduced chi-square = 1558.82033
+    Akaike info crit   = 273.956246
+    Bayesian info crit = 277.178082
+[[Variables]]
+    g1T:    9.28637067 +/- 2.23939457 (24.11%) (init = 3.5)
+    PrefT: -2.88467691 +/- 0.20092539 (6.97%) (init = -1.28)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(g1T, PrefT) =  0.946
+
+[[Fit Statistics]]
+    # fitting method   = Powell
+    # function evals   = 196
+    # data points      = 37
+    # variables        = 2
+    chi-square         = 133248.882
+    reduced chi-square = 3807.11092
+    Akaike info crit   = 306.995074
+    Bayesian info crit = 310.216909
+##  Warning: uncertainties could not be estimated:
+[[Variables]]
+    g1T:    7.48241190 +/-        nan (nan%) (init = 3.5)
+    PrefT: -0.29524441 +/-        nan (nan%) (init = -1.28)
+
+[[Fit Statistics]]
+    # fitting method   = dual_annealing
+    # function evals   = 4052
+    # data points      = 37
+    # variables        = 2
+    chi-square         = 54558.7116
+    reduced chi-square = 1558.82033
+    Akaike info crit   = 273.956246
+    Bayesian info crit = 277.178082
+[[Variables]]
+    g1T:    9.28638018 +/- 2.28925484 (24.65%) (init = 3.5)
+    PrefT: -2.87379814 +/- 0.20577408 (7.16%) (init = -1.28)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(g1T, PrefT) =  0.948
