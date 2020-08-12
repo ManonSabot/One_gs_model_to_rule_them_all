@@ -1,41 +1,39 @@
 
 [[Fit Statistics]]
     # fitting method   = differential_evolution
-    # function evals   = 126
+    # function evals   = 270
     # data points      = 100
     # variables        = 2
-    chi-square         = 8873292.44
-    reduced chi-square = 90543.8004
-    Akaike info crit   = 1143.33863
-    Bayesian info crit = 1148.54897
+    chi-square         = 8777825.02
+    reduced chi-square = 89569.6431
+    Akaike info crit   = 1142.25690
+    Bayesian info crit = 1147.46724
 [[Variables]]
-    krlM:    80.0000000 +/- 1.4493e-13 (0.00%) (init = 1)
-    PcritM: -2.04998683 +/- 4.0200e-04 (0.02%) (init = -1.44)
+    krlM:    67.6385284 +/- 317.580720 (469.53%) (init = 1)
+    PcritM: -6.14999794 +/- 0.06249995 (1.02%) (init = -1.44)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 51
+    # function evals   = 94
     # data points      = 100
     # variables        = 2
-    chi-square         = 8873292.44
-    reduced chi-square = 90543.8004
-    Akaike info crit   = 1143.33863
-    Bayesian info crit = 1148.54897
+    chi-square         = 8777529.93
+    reduced chi-square = 89566.6320
+    Akaike info crit   = 1142.25354
+    Bayesian info crit = 1147.46388
 [[Variables]]
-    krlM:    79.9999783 +/- 2.46790966 (3.08%) (init = 1)
-    PcritM: -2.04999583 +/- 0.00707275 (0.35%) (init = -1.44)
+    krlM:    26.1747491 +/- 152.232541 (581.60%) (init = 1)
+    PcritM: -6.13936722 +/- 0.46036571 (7.50%) (init = -1.44)
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing
-    # function evals   = 5399
+    # function evals   = 4607
     # data points      = 100
     # variables        = 2
-    chi-square         = 8872931.83
-    reduced chi-square = 90540.1208
-    Akaike info crit   = 1143.33456
-    Bayesian info crit = 1148.54491
-##  Warning: uncertainties could not be estimated:
-    PcritM:  at boundary
+    chi-square         = 8777093.67
+    reduced chi-square = 89562.1803
+    Akaike info crit   = 1142.24857
+    Bayesian info crit = 1147.45891
 [[Variables]]
-    krlM:    12.5915741 +/-        nan (nan%) (init = 1)
-    PcritM: -2.05000000 +/- 0.56265628 (27.45%) (init = -1.44)
+    krlM:    80.0000000 +/- 158.856184 (198.57%) (init = 1)
+    PcritM: -6.00433147 +/- 9.77680958 (162.83%) (init = -1.44)

@@ -1,40 +1,40 @@
 
 [[Fit Statistics]]
     # fitting method   = differential_evolution
-    # function evals   = 126
+    # function evals   = 156
     # data points      = 100
     # variables        = 2
-    chi-square         = 8890673.22
-    reduced chi-square = 90721.1553
-    Akaike info crit   = 1143.53431
-    Bayesian info crit = 1148.74466
+    chi-square         = 8862031.45
+    reduced chi-square = 90428.8923
+    Akaike info crit   = 1143.21164
+    Bayesian info crit = 1148.42198
+##  Warning: uncertainties could not be estimated:
 [[Variables]]
-    krlC:    80.0000000 +/- 1.5689e-13 (0.00%) (init = 1)
-    PcritC: -1.96769725 +/- 0.28755750 (14.61%) (init = -1.44)
+    krlC:    79.9024546 +/- 104.290229 (130.52%) (init = 1)
+    PcritC: -3.27289263 +/-        nan (nan%) (init = -1.44)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 73
+    # function evals   = 118
     # data points      = 100
     # variables        = 2
-    chi-square         = 8889993.79
-    reduced chi-square = 90714.2223
-    Akaike info crit   = 1143.52667
-    Bayesian info crit = 1148.73701
-##  Warning: uncertainties could not be estimated:
+    chi-square         = 8860792.68
+    reduced chi-square = 90416.2518
+    Akaike info crit   = 1143.19766
+    Bayesian info crit = 1148.40800
 [[Variables]]
-    krlC:    47.5532065 +/- 331.795653 (697.74%) (init = 1)
-    PcritC: -2.03806404 +/-        nan (nan%) (init = -1.44)
+    krlC:    80.0000000 +/- 3.8935e-04 (0.00%) (init = 1)
+    PcritC: -2.87278321 +/- 1.00515364 (34.99%) (init = -1.44)
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing
-    # function evals   = 5861
+    # function evals   = 5192
     # data points      = 100
     # variables        = 2
-    chi-square         = 8884608.33
-    reduced chi-square = 90659.2686
-    Akaike info crit   = 1143.46608
-    Bayesian info crit = 1148.67642
+    chi-square         = 8854452.87
+    reduced chi-square = 90351.5599
+    Akaike info crit   = 1143.12609
+    Bayesian info crit = 1148.33643
 [[Variables]]
-    krlC:    74.5876360 +/- 75.5443456 (101.28%) (init = 1)
-    PcritC: -2.02443128 +/- 0.54839042 (27.09%) (init = -1.44)
+    krlC:    36.1589388 +/- 55.3777531 (153.15%) (init = 1)
+    PcritC: -2.86407224 +/- 0.43086267 (15.04%) (init = -1.44)
