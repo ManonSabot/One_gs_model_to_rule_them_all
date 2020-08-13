@@ -128,18 +128,20 @@ def conductances(p, Tleaf=None, gs=None, inf_gb=False):
 
     # boundary layer cond to free convect. (Campbell & Norman, 1998)
     gHf = (p.LAI * (0.54 * cmolar * cst.DH * ((grashof * prandtl) ** 0.25)) / d)
-    gHa = np.maximum(cst.zero, gHa + gHf)  # mol m-2 s-1
+    gHa = np.maximum(cst.zero, 2. * (gHa + gHf))  # mol m-2 s-1
 
     # boundary layer conductance to water vapour
     if inf_gb:
         gb = conv.MILI  # 1.e3 mol m-2 s-1 prescribed
+        gHa = conv.MILI  # 1.e3 mol m-2 s-1 prescribed
 
     else:
         try:  # is gb one of the input fields?
             gb = p.gb
+            gHa = gb * conv.GbhGbv  # corresponding gHa
 
         except (IndexError, AttributeError, ValueError):  # calc. gb
-            gb = np.maximum(cst.zero, 2. * gHa * conv.GbvGbh)  # mol m-2 s-1
+            gb = np.maximum(cst.zero, gHa * conv.GbvGbh)  # mol m-2 s-1
 
             if np.isclose(gHa, cst.zero, rtol=cst.zero, atol=cst.zero):
                 gb = cst.zero  # mol m-2 s-1
@@ -148,7 +150,7 @@ def conductances(p, Tleaf=None, gs=None, inf_gb=False):
     gr = np.maximum(cst.zero, 4. * p.eps_l * cst.sigma * TairK ** 3. / cst.Cp)
 
     # total two-sided leaf conductance to heat (Medlyn et al., 2007)
-    gH = 2. * (gHa + gr)  # hypostomatous leaf (2-sided)
+    gH = gHa + 2. * gr  # hypostomatous leaf (2-sided)
 
     if (np.isclose(gHa, cst.zero, rtol=cst.zero, atol=cst.zero) and
        np.isclose(gr, cst.zero, rtol=cst.zero, atol=cst.zero)):

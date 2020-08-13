@@ -183,6 +183,7 @@ def net_radiation(p):
     # incoming short and long wave radiation
     Rsw = (1. - p.albedo_l) * p.PPFD * conv.PAR_2_SW  # W m-2
     Rlw = emissivity(p) * cst.sigma * TairK ** 4.  # W m-2
-    Rabs = Rsw + Rlw  # absorbed radiation, W m-2
+    Rlw -= p.eps_l * cst.sigma * TairK ** 4.
+    Rnet = Rsw - Rlw  # absorbed radiation, W m-2
 
-    return Rabs - p.eps_l * cst.sigma * TairK ** 4.
+    return Rnet
