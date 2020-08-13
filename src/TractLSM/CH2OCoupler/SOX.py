@@ -35,9 +35,9 @@ import bottleneck as bn  # faster C-compiled np for all nan operations
 
 # own modules
 from TractLSM import conv, cst  # unit converter & general constants
-from TractLSM.SPAC.leaf import arrhen
-from TractLSM.SPAC import kcost, leaf_temperature, vpsat
+from TractLSM.SPAC import kcost, leaf_temperature
 from TractLSM.SPAC import calc_colim_Ci, calc_photosynthesis, rubisco_limit
+from TractLSM.SPAC.leaf import arrhen
 from TractLSM.CH2OCoupler import calc_trans
 
 
@@ -125,9 +125,6 @@ def supply_max(p, photo='Farquhar', case=1, res='low', threshold_conv=0.1,
     Tleaf = p.Tair  # deg C
     Dleaf = p.VPD  # kPa
 
-    # saturation vapour pressure of water at Tair, kPa
-    esat_a = vpsat(p.Tair)
-
     # hydraulics
     Pleaf_pd = p.Ps_pd - p.height * cst.rho * cst.g0 * conv.MEGA
 
@@ -201,12 +198,12 @@ def supply_max(p, photo='Farquhar', case=1, res='low', threshold_conv=0.1,
             gs = np.maximum(cst.zero,
                             gb * conv.GwvGc * gc / (gb - conv.GwvGc * gc))
 
-        # new associated transpiration (Penman-Monteith), Tleaf
-        trans, real_zero, gw, gb = calc_trans(p, Tleaf, gs, inf_gb=inf_gb)
+        # calculate new trans, gw, gb, mol.m-2.s-1
+        trans, real_zero, gw, gb, Dleaf = calc_trans(p, Tleaf, gs,
+                                                     inf_gb=inf_gb)
         new_Tleaf, __ = leaf_temperature(p, trans, Tleaf=Tleaf, inf_gb=inf_gb)
-        
+
         if case == 1:  # calculate gc, An, Ci
-            gc = np.maximum(cst.zero, conv.GcvGw * (gb * gs) / (gb + gs))
             An, Aj, Ac = calc_photosynthesis(p, 0., Cs, photo, Tleaf=p.Tair,
                                              gsc=conv.U * conv.GcvGw * gs)
             Ci = Cs - p.Patm * conv.FROM_MILI * An / (conv.GcvGw * gs)  # Pa
@@ -217,13 +214,9 @@ def supply_max(p, photo='Farquhar', case=1, res='low', threshold_conv=0.1,
         Cs = np.maximum(cst.zero, np.minimum(p.CO2, p.CO2 - boundary_CO2))
 
         if (np.isclose(trans, cst.zero, rtol=cst.zero, atol=cst.zero) or
-            np.isclose(gc, cst.zero, rtol=cst.zero, atol=cst.zero) or
-           np.isclose(gs, cst.zero, rtol=cst.zero, atol=cst.zero)):
+            np.isclose(gw, cst.zero, rtol=cst.zero, atol=cst.zero) or
+            np.isclose(gs, cst.zero, rtol=cst.zero, atol=cst.zero)):
             Dleaf = p.VPD  # kPa
-
-        else:
-            esat_l = vpsat(new_Tleaf)  # vpsat at new Tleaf, kPa
-            Dleaf = (esat_l - (esat_a - p.VPD))  # leaf-air vpd, kPa
 
         # force stop when atm. conditions yield E < 0. (non-physical)
         if (iter < 1) and (not real_zero):
@@ -232,7 +225,7 @@ def supply_max(p, photo='Farquhar', case=1, res='low', threshold_conv=0.1,
         # check for convergence
         if ((real_zero is None) or (iter >= iter_max) or ((iter > 1) and
             real_zero and (abs(Tleaf - new_Tleaf) <= threshold_conv) and not
-           np.isclose(gs, cst.zero, rtol=cst.zero, atol=cst.zero))):
+            np.isclose(gs, cst.zero, rtol=cst.zero, atol=cst.zero))):
             break
 
         # no convergence, iterate on leaf temperature

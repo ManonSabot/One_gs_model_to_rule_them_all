@@ -23,10 +23,9 @@ import bottleneck as bn  # faster C-compiled np for all nan operations
 
 # own modules
 from TractLSM import conv, cst  # unit converter
-from TractLSM.SPAC import LH_water_vapour, slope_vpsat, psychometric
+from TractLSM.SPAC import vpsat, conductances, leaf_energy_balance
+from TractLSM.SPAC import leaf_temperature, calc_photosynthesis
 from TractLSM.SPAC.leaf import arrhen
-from TractLSM.SPAC import conductances, leaf_energy_balance, leaf_temperature
-from TractLSM.SPAC import calc_photosynthesis
 
 
 #==============================================================================
@@ -34,9 +33,9 @@ from TractLSM.SPAC import calc_photosynthesis
 def calc_trans(p, Tleaf, gs, inf_gb=False):
 
     """
-    Calculates transpiration following Penman-Monteith at the leaf level
-    accounting for effects of leaf temperature and feedback on
-    evaporation.
+    Calculates transpiration at the leaf level, accounting for effects
+    of leaf temperature but not for e.g. radiative feedback on
+    evaporation (as in PM).
 
     Arguments:
     ----------
@@ -73,28 +72,25 @@ def calc_trans(p, Tleaf, gs, inf_gb=False):
     real_zero = True
 
     # get conductances, mol m-2 s-1
-    gw, gH, gb, __ = conductances(p, Tleaf=Tleaf, gs=gs, inf_gb=inf_gb)
+    gw, __, gb, __ = conductances(p, Tleaf=Tleaf, gs=gs, inf_gb=inf_gb)
 
-    # latent heat of water vapor
-    Lambda = LH_water_vapour(p)  # J mol-1
-
-    # slope of saturation vapour pressure of water vs Tair
-    slp = slope_vpsat(p)  # kPa degK-1
+    # saturation vapour pressure of water at Tair
+    esat_a = vpsat(p.Tair)  # kPa
+    esat_l = vpsat(Tleaf)  # vpsat at new Tleaf, kPa
+    Dleaf = np.maximum(0.05, (esat_l - (esat_a - p.VPD)))
 
     if np.isclose(gs, 0., rtol=cst.zero, atol=cst.zero):
         trans = cst.zero
 
     else:
-        gamm = psychometric(p)  # psychrometric constant, kPa degK-1
-        trans = (slp * p.Rnet + p.VPD * gH * cst.Cp) / (Lambda *
-                                                        (slp + gamm * gH / gw))
+        trans = gw * Dleaf / p.Patm
 
-        if trans < 0.:  # Penman-Monteith failed, non-physical trans
+        if trans < 0.:  # non-physical trans
             real_zero = False
 
         trans = max(cst.zero, trans)  # mol m-2 s-1
 
-    return trans, real_zero, gw, gb
+    return trans, real_zero, gw, gb, Dleaf
 
 
 def dAdgs(p, gs, gb, Ci):

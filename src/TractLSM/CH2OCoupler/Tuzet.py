@@ -122,7 +122,7 @@ def Tuzet(p, photo='Farquhar', res='low', threshold_conv=0.1, iter_max=40,
         gs = np.maximum(cst.zero, conv.GwvGc * gsoA * An)
 
         # calculate new trans, gw, gb, mol.m-2.s-1
-        trans, real_zero, gw, gb = calc_trans(p, Tleaf, gs, inf_gb=inf_gb)
+        trans, real_zero, gw, gb, __ = calc_trans(p, Tleaf, gs, inf_gb=inf_gb)
         new_Tleaf, __ = leaf_temperature(p, trans, Tleaf=Tleaf, inf_gb=inf_gb)
 
         # new Cs (in Pa)
@@ -137,7 +137,7 @@ def Tuzet(p, photo='Farquhar', res='low', threshold_conv=0.1, iter_max=40,
         # check for convergence
         if ((real_zero is None) or (iter > iter_max) or ((iter > 1) and
             real_zero and (abs(Tleaf - new_Tleaf) <= threshold_conv) and not
-           np.isclose(gs, cst.zero, rtol=cst.zero, atol=cst.zero))):
+            np.isclose(gs, cst.zero, rtol=cst.zero, atol=cst.zero))):
             break
 
         # no convergence, iterate on leaf temperature

@@ -44,7 +44,6 @@ import bottleneck as bn  # faster C-compiled np for all nan operations
 
 # own modules
 from TractLSM import conv, cst  # unit converter & general constants
-from TractLSM.SPAC import vpsat
 from TractLSM.SPAC import hydraulics, fwsoil, fwLWPpd
 from TractLSM.SPAC import leaf_temperature, calc_photosynthesis, rubisco_limit
 from TractLSM.CH2OCoupler import calc_trans
@@ -110,9 +109,6 @@ def solve_std(p, sw, photo='Farquhar', res='low', case=1, threshold_conv=0.1,
     Tleaf = p.Tair  # deg C
     Dleaf = np.maximum(0.05, p.VPD)  # gs model not valid < 0.05
 
-    # saturation vapour pressure of water at Tair
-    esat_a = vpsat(p.Tair)  # kPa
-
     # hydraulics
     P, E = hydraulics(p, res=res)
 
@@ -142,7 +138,8 @@ def solve_std(p, sw, photo='Farquhar', res='low', case=1, threshold_conv=0.1,
         gs = np.maximum(cst.zero, conv.GwvGc * gsoA * An)
 
         # calculate new trans, gw, gb, mol.m-2.s-1
-        trans, real_zero, gw, gb = calc_trans(p, Tleaf, gs, inf_gb=inf_gb)
+        trans, real_zero, gw, gb, Dleaf = calc_trans(p, Tleaf, gs,
+                                                     inf_gb=inf_gb)
         new_Tleaf, __ = leaf_temperature(p, trans, Tleaf=Tleaf, inf_gb=inf_gb)
 
         # new Cs (in Pa)
@@ -153,12 +150,8 @@ def solve_std(p, sw, photo='Farquhar', res='low', case=1, threshold_conv=0.1,
         # new leaf-air vpd, kPa
         if (np.isclose(trans, cst.zero, rtol=cst.zero, atol=cst.zero) or
             np.isclose(gw, cst.zero, rtol=cst.zero, atol=cst.zero) or
-           np.isclose(gs, cst.zero, rtol=cst.zero, atol=cst.zero)):
+            np.isclose(gs, cst.zero, rtol=cst.zero, atol=cst.zero)):
             Dleaf = np.maximum(0.05, p.VPD)  # kPa
-
-        else:
-            esat_l = vpsat(new_Tleaf)  # vpsat at new Tleaf, kPa
-            Dleaf = np.maximum(0.05, (esat_l - (esat_a - p.VPD)))
 
         # force stop when atm. conditions yield E < 0. (non-physical)
         if (iter < 1) and (not real_zero):
@@ -167,7 +160,7 @@ def solve_std(p, sw, photo='Farquhar', res='low', case=1, threshold_conv=0.1,
         # check for convergence
         if ((real_zero is None) or (iter > iter_max) or ((iter > 1) and
             real_zero and (abs(Tleaf - new_Tleaf) <= threshold_conv) and not
-           np.isclose(gs, cst.zero, rtol=cst.zero, atol=cst.zero))):
+            np.isclose(gs, cst.zero, rtol=cst.zero, atol=cst.zero))):
             break
 
         # no convergence, iterate on leaf temperature
