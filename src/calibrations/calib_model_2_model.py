@@ -264,7 +264,7 @@ def prep_training_N_target(profile, sub=None):
 
 #==============================================================================
 
-to_fit = False
+to_fit = True
 sample = None # None, 1, 2, or 3
 
 swaters = ['wet', 'inter']  # two different soil moisture profiles
@@ -283,7 +283,6 @@ if to_fit:
     for swater in swaters:  # loop over the training soil moisture profiles
 
         X, Y = prep_training_N_target(swater, sub=sample)
-
         opath = os.path.join(os.path.join(os.path.join(base_dir, 'output'),
                              'calibrations'), 'idealised')
 
@@ -303,12 +302,10 @@ if to_fit:
             XX = X.copy()
             nlmfit = NLMFIT(method=test, store=opath)
 
-            #if swater == 'inter':  # no point in calibrating this when wet
-            #    __ = nlmfit.run(XX, Y, 'Medlyn-LWP')
+            if swater == 'inter':  # no point in calibrating this when wet
+                __ = nlmfit.run(XX, Y, 'Medlyn-LWP')
 
             __ = nlmfit.run(XX, Y, 'SOX')
-
-            """
             __ = nlmfit.run(XX, Y, 'SOX-OPT')
             __ = nlmfit.run(XX, Y, 'CAP')
             __ = nlmfit.run(XX, Y, 'MES')
@@ -321,7 +318,6 @@ if to_fit:
             __ = nlmfit.run(XX, Y, 'WUE-LWP')
             __ = nlmfit.run(XX, Y, 'CGainNet')
             __ = nlmfit.run(XX, Y, 'CMax')
-            """
 
         exit(1)
 

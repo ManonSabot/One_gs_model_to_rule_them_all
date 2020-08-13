@@ -23,8 +23,7 @@ import numpy as np # array manipulations, math operators
 
 # own modules
 from TractLSM import conv, cst  # unit converter & general constants
-from TractLSM.SPAC import vpsat, f, Weibull_params
-from TractLSM.SPAC import hydraulics, leaf_energy_balance
+from TractLSM.SPAC import f, Weibull_params, hydraulics, leaf_energy_balance
 from TractLSM.SPAC import leaf_temperature, calc_colim_Ci, calc_photosynthesis
 from TractLSM.SPAC import fwLWPpd, fLWP, phiLWP, fPLC, hydraulic_cost, kcost
 from TractLSM.SPAC import dcost_dpsi
@@ -50,7 +49,6 @@ def floop(p, model, photo='Farquhar', inf_gb=True):
     Tleaf = p.Tair  # deg C
 
     if model != 'Tuzet':  # energy balance requirements
-        esat_a = vpsat(p.Tair)  # vpsat of water at Tair, kPa
         Dleaf = p.VPD
         Pleaf_pd = p.Ps_pd - p.height * cst.rho * cst.g0 * conv.MEGA
 
@@ -161,7 +159,7 @@ def floop(p, model, photo='Farquhar', inf_gb=True):
             gs = np.maximum(cst.zero, conv.GwvGc * gsoA * An)
 
         # calculate new trans, gw, gb, Tleaf
-        E, real_zero, gw, gb = calc_trans(p, Tleaf, gs, inf_gb=inf_gb)
+        E, real_zero, gw, gb, Dleaf = calc_trans(p, Tleaf, gs, inf_gb=inf_gb)
         new_Tleaf, __ = leaf_temperature(p, E, Tleaf=Tleaf, inf_gb=inf_gb)
 
         if model == 'SOX':  # calculate An
@@ -176,12 +174,8 @@ def floop(p, model, photo='Farquhar', inf_gb=True):
         if model != 'Tuzet':  # update the leaf-to-air VPD
             if (np.isclose(E, cst.zero, rtol=cst.zero, atol=cst.zero) or
                 np.isclose(gw, cst.zero, rtol=cst.zero, atol=cst.zero) or
-               np.isclose(gs, cst.zero, rtol=cst.zero, atol=cst.zero)):
+                np.isclose(gs, cst.zero, rtol=cst.zero, atol=cst.zero)):
                 Dleaf = p.VPD  # kPa
-
-            else:
-                esat_l = vpsat(new_Tleaf)  # vpsat at new Tleaf, kPa
-                Dleaf = (esat_l - (esat_a - p.VPD))  # leaf-air vpd, kPa
 
             if model == 'Medlyn-LWP':
                 Dleaf = np.maximum(0.05, Dleaf)  # gs model not valid < 0.05

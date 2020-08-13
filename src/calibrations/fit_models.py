@@ -60,20 +60,20 @@ class NLMFIT(object):
         params = lmfit.Parameters()  # empty parameter class
 
         if model == 'Medlyn-LWP':
-            params.add('sref', p0.sref, min=0.05, max=8.)
+            params.add('sref', p0.sref, min=0.01, max=10.)
 
             if g1:
-                params.add('g1', p0.g1, min=0.25, max=15.)
+                params.add('g1', p0.g1, min=0.05, max=20.)
 
         if model == 'SOX':
-            params.add('kmaxS1', p0.kmaxS1, min=0.01, max=15.)
+            params.add('kmaxS1', p0.kmaxS1, min=0.01, max=30.)
 
         if model == 'ProfitMax':
-            params.add('kmax', p0.kmax, min=0.05, max=15.)
+            params.add('kmax', p0.kmax, min=0.05, max=30.)
 
         # the following models all require the Sperry kmax as an input!
         if model == 'Tuzet':  # only vary g1 and Pref at first, sref fixed
-            params.add('g1T', p0.g1T, min=0.25, max=15.)
+            params.add('g1T', p0.g1T, min=0.05, max=20.)
 
             if p0.PrefT < p0.Ps_pd:
                 params.add('PrefT', p0.PrefT, min=-3. * p0.P88, max=-0.15)
@@ -82,27 +82,27 @@ class NLMFIT(object):
                 params.add('PrefT', -p0.P88, min=-3. * p0.P88, max=-0.15)
 
         if model == 'WUE-LWP':
-            params.add('Lambda', p0.Lambda, min=0.1, max=80.)
+            params.add('Lambda', p0.Lambda, min=0.1, max=100.)
 
         if model == 'CGainNet':
-            params.add('beta', p0.beta, min=0.1, max=80.)
+            params.add('beta', p0.beta, min=0.1, max=100.)
 
         if model == 'CMax':
             params.add('Alpha', p0.Alpha, min=0.5, max=80.)
             params.add('Beta', p0.Beta, min=0.1, max=8.)
 
         if model == 'SOX-OPT':
-            params.add('kmaxS2', p0.kmaxS2, min=0.01, max=15.)
-            params.add('factor', 0.7, min=0.1, max=1.)  # ancillary term
-            params.add('ksc_prev', 0.7 * p0.kmaxS2, min=0.007, max=10.5,
+            params.add('kmaxS2', p0.kmaxS2, min=0.01, max=30.)
+            params.add('factor', 0.7, min=0.05, max=0.95)  # ancillary term
+            params.add('ksc_prev', 0.7 * p0.kmaxS2, min=0.0005, max=28.5,
                        expr='factor * kmaxS2')
 
         if model == 'LeastCost':
-            params.add('kmaxLC', p0.kmaxLC, min=0.05, max=15.)
+            params.add('kmaxLC', p0.kmaxLC, min=0.05, max=30.)
             params.add('BoA', p0.BoA, min=0.1, max=250.)
 
         if model == 'CAP':
-            params.add('krlC', p0.krlC, min=0.05, max=80.)
+            params.add('krlC', p0.krlC, min=0.05, max=100.)
 
             if p0.PcritC < p0.Ps_pd:
                 params.add('PcritC', p0.PcritC, min=-3. * p0.P88, max=-0.15)
@@ -111,7 +111,7 @@ class NLMFIT(object):
                 params.add('PcritC', -p0.P88, min=-3. * p0.P88, max=-0.15)
 
         if model == 'MES':
-            params.add('krlM', p0.krlM, min=0.05, max=80.)
+            params.add('krlM', p0.krlM, min=0.05, max=100.)
 
             if p0.PcritC < p0.Ps_pd:
                 params.add('PcritM', p0.PcritM, min=-3. * p0.P88, max=-0.15)
@@ -146,7 +146,7 @@ class NLMFIT(object):
         txt.close()  # close text file
 
         if model == 'Tuzet':  # test two-step fitting
-        
+
             # retrieve the first (now solved for) parameter name and value
             p1name = str(out.params.valuesdict().popitem(last=False)[0])
             p1val = out.params.valuesdict().popitem(last=False)[1]
@@ -156,7 +156,7 @@ class NLMFIT(object):
                                              vary=False)
 
             # now vary sref alongside Pref
-            params.add('srefT', p0.srefT, min=0.05, max=8.)
+            params.add('srefT', p0.srefT, min=0.01, max=10.)
 
             # re-run the minimizer
             if self.method == 'emcee':
