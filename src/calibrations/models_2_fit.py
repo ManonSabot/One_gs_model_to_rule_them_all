@@ -62,7 +62,7 @@ def floop(p, model, photo='Farquhar', inf_gb=True):
 
     if 'SOX' not in model: # initialise gs over A
         g0 = 1.e-9  # g0 ~ 0, removing it entirely introduces errors
-        Cs_umol_mol = Cs * conv.MILI * conv.FROM_kPa  # umol mol-1
+        Cs_umol_mol = Cs * conv.MILI / p.Patm  # umol mol-1
 
         if model == 'Medlyn-LWP':
             gsoA = g0 + (1. + p.g1 * fw / (Dleaf ** 0.5)) / Cs_umol_mol
@@ -91,7 +91,7 @@ def floop(p, model, photo='Farquhar', inf_gb=True):
             dA = As - Acol  # ambient - colimitation
 
             # dAdCi (in mol H2O) is needed to calculate gs, mmol m-2 s-1
-            dAdCi = dA * conv.GwvGc / (dCi * conv.FROM_kPa)
+            dAdCi = dA * conv.GwvGc * p.Patm / dCi
 
             # kcost, unitless
             cost_pd, __ = kcost(p, Pleaf_pd, Pleaf_pd)
@@ -102,7 +102,7 @@ def floop(p, model, photo='Farquhar', inf_gb=True):
             dP = 0.5 * (Pleaf_pd + p.P50)  # MPa,  /!\ sign of P50
 
             # xi, the loss of xylem cost of stomatal opening, mmol m-2 s-1
-            dq = Dleaf * conv.FROM_kPa  # mol mol-1, equivalent to D / Patm
+            dq = Dleaf / p.Patm  # mol mol-1, equivalent to D / Patm
             Xi = 2. * p.kmaxS1 * (cost_pd ** 2.) * dP / (dq * dkcost)
 
             # calculate gs at the co-limitation point, mmol m-2 s-1
@@ -148,7 +148,7 @@ def floop(p, model, photo='Farquhar', inf_gb=True):
                                                  gs_over_A=gsoA)
 
             # update gs over A
-            Cs_umol_mol = Cs * conv.MILI * conv.FROM_kPa
+            Cs_umol_mol = Cs * conv.MILI / p.Patm
 
             if model == 'Medlyn-LWP':
                 gsoA = g0 + (1. + p.g1 * fw / (Dleaf ** 0.5)) / Cs_umol_mol
@@ -167,8 +167,8 @@ def floop(p, model, photo='Farquhar', inf_gb=True):
                                              gsc=conv.U * conv.GcvGw * gs)
 
         # new Cs (in Pa)
-        boundary_CO2 = (conv.ref_kPa * conv.FROM_MILI * An / (gb * conv.GbcvGb
-                        + gs * conv.GcvGw))
+        boundary_CO2 = p.Patm * conv.FROM_MILI * An / (gb * conv.GbcvGb +
+                                                       gs * conv.GcvGw)
         Cs = np.maximum(cst.zero, np.minimum(p.CO2, p.CO2 - boundary_CO2))
 
         if model != 'Tuzet':  # update the leaf-to-air VPD

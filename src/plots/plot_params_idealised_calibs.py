@@ -438,14 +438,14 @@ def calib_info_plot(df1, df2, df3, models, calibs='wet',
                     orientation='landscape'):
 
     # landscape characteristics
-    fs = (6., 4.25)
+    fs = (6., 4.5)
     iax = [0.2375, 0.685, 0.2, 0.2 * fs[0] / fs[1]]
 
     if calibs != 'both':
         iax = [0.2325, 0.678, 0.205, 0.205 * fs[0] / fs[1]]
 
     if orientation == 'portrait':
-        fs = (4.25, 6.)
+        fs = (5., 6.)
         iax = [0.665, 0.5685, 0.3025, 0.3025 * fs[0] / fs[1]]
 
         if calibs != 'both':
@@ -453,7 +453,7 @@ def calib_info_plot(df1, df2, df3, models, calibs='wet',
 
     # declare the figure and the axes
     fig, ax = plt.subplots(nrows=1, figsize=fs)
-    iax = fig.add_axes(iax)
+    #iax = fig.add_axes(iax)
 
     if orientation == 'portrait':  # model order for plots
         models.reverse()
@@ -485,6 +485,9 @@ def calib_info_plot(df1, df2, df3, models, calibs='wet',
     # model performance info across all solvers
     df1, w, i = model_performance(df1)
 
+    w1 = w.copy()
+    i1 = i.copy()
+
     # wet and inter data across all solvers
     wet1, best_w1 = calib_info(w)
     inter1, best_i1 = calib_info(i)
@@ -500,13 +503,27 @@ def calib_info_plot(df1, df2, df3, models, calibs='wet',
     inter2, best_i2 = calib_info(i)
 
     # assign positions to each model's parameters
+    pscale = 1.1
     pspace = 0.01
 
     if calibs != 'both':
         pspace = 0.025
 
-    pos = np.arange(float(len(wet1))) * 1.1
-    pos[1::2] -= 8. * pspace # second parameter position
+    # where are there 2nd params?
+    all = np.array([i for i in range(len(wet1)) if np.nansum(wet1[i]) != 0.])
+    isec = np.array([i for i in range(len(all)) if (all[i] % 2) != 0])
+    pos = np.arange(float(len(all))) * pscale
+    pos[isec] -= 8. * pspace # second parameter position
+
+    # now that we've reworked the positions, correct the data
+    wet1 = [wet1[i] for i in all]
+    wet2 = [wet2[i] for i in all]
+    inter1 = [inter1[i] for i in all]
+    inter2 = [inter2[i] for i in all]
+    best_w1 = [best_w1[i] for i in all]
+    best_w2 = [best_w2[i] for i in all]
+    best_i1 = [best_i1[i] for i in all]
+    best_i2 = [best_i2[i] for i in all]
 
     # all solver data
     if calibs != 'inter':
@@ -514,9 +531,15 @@ def calib_info_plot(df1, df2, df3, models, calibs='wet',
                             positions=pos, vert=vert, widths=wbox, bw_method=bw)
 
         for vp in vp1['bodies']:
+
             vp.set_alpha(0.7)
 
-        #ax.plot(np.repeat(pos, len(wet1[0])), [item for sublist in wet1 for item in sublist], 'ro', alpha=0.5)
+        for j in range(1):
+            for s in ['Powell', 'basinhopping', 'dual_annealing']:
+                mask = np.logical_and(w1['solver'] == s, w1['sub-sample'] == j)
+                data = w1[mask][['norm_v1', 'norm_v2']].values.flatten()
+                data = [-(0.6 ** e) for e in data if str(e) != 'nan']
+                ax.plot(pos - 0.2, data, lw=0, marker='*', mec='k', zorder=9)
 
     if calibs != 'wet':
         vp2 = ax.violinplot(inter1, showextrema=False, points=Npoints,
@@ -524,40 +547,52 @@ def calib_info_plot(df1, df2, df3, models, calibs='wet',
                             bw_method=bw)
 
         for vp in vp2['bodies']:
+
             vp.set_alpha(0.7)
 
-        #ax.plot(np.repeat(pos + pspace, len(inter1[0])), [item for sublist in inter1 for item in sublist], 'ro', alpha=0.5)
+        for j in range(1):
+            for s in ['Powell', 'basinhopping', 'dual_annealing']:
+                mask = np.logical_and(i1['solver'] == s, i1['sub-sample'] == j)
+                data = i1[mask][['norm_v1', 'norm_v2']].values.flatten()
+                data = [-(0.6 ** e) for e in data if str(e) != 'nan']
+                ax.plot(pos + 0.2, data, lw=0, marker='*', mec='k', zorder=9)
 
     if calibs == 'both':
         slice_vplot(vp1, s1, ec=c[0])
         slice_vplot(vp2, s2, ec=c[0])
 
+    """
     # top 3 solver data
-    bw *= len(df1['solver'].unique()) / len(df2['solver'].unique())
+    bw *= 2.
 
     if calibs != 'inter':
-        vp1 = ax.violinplot(wet2, showextrema=False, points=Npoints,
+        vp3 = ax.violinplot(wet2, showextrema=False, points=Npoints,
                             positions=pos, vert=vert, widths=wbox, bw_method=bw)
 
-        for vp in vp1['bodies']:
+        for vp in vp3['bodies']:
+
             vp.set_alpha(0.7)
 
 
     if calibs != 'wet':
-        vp2 = ax.violinplot(inter2, showextrema=False, points=Npoints,
-                            positions=pos + pspace, vert=vert, widths=wbox, bw_method=bw)
+        vp4 = ax.violinplot(inter2, showextrema=False, points=Npoints,
+                            positions=pos + pspace, vert=vert, widths=wbox,
+                            bw_method=bw)
 
-        for vp in vp2['bodies']:
+        for vp in vp4['bodies']:
+
             vp.set_alpha(0.7)
 
     if calibs == 'both':
-        slice_vplot(vp1, s1, ec=c[1])
-        slice_vplot(vp2, s2, ec=c[1])
+        slice_vplot(vp3, s1, ec=c[1])
+        slice_vplot(vp4, s2, ec=c[1])
 
     # best all solvers, best top 3 solvers
     best_wet = [best_w1, best_w2]
     best_inter = [best_i1, best_i2]
+    """
 
+    """
     for j in range(len(best_wet)):
 
         wmask = np.ma.masked_invalid(best_wet[j]).mask
@@ -589,7 +624,8 @@ def calib_info_plot(df1, df2, df3, models, calibs='wet',
                 x = best_inter[j][~imask]
 
         ax.plot(x, y, lw=0, marker='*', mec='k', zorder=9)
-
+    """
+    """
     # add custom legend
     if orientation == 'landscape':
         ax.legend(handles=custom_legend(calibs, orientation), loc=2,
@@ -607,37 +643,42 @@ def calib_info_plot(df1, df2, df3, models, calibs='wet',
         else:
             ax.legend(handles=custom_legend(calibs, orientation), loc=1,
                       bbox_to_anchor=(1.03, 1.02))
+    """
 
     # add grid and format the axes
     ppos = np.asarray([0.25, 0.5, 0.9, 1., 1.1, 2., 4.])
-    mpos = pos[::2] + (pos[1::2] - pos[::2]) / 2.
-    mlines = mpos[:-1] + 0.5 * np.diff(mpos)
+    mpos = np.copy(pos)
+    mpos[isec - 1] += (mpos[isec] - mpos[isec - 1] ) / 2.
+    mpos = np.delete(mpos, isec)
+    mlines = np.copy(pos) + pscale / 2.
+    mlines[isec] += pspace * 2. / 3.
+    mlines = np.delete(mlines, isec - 1)
     custom_grid(mlines, -(0.6 ** ppos), ax, orientation)
 
     if orientation == 'landscape':
         ax.set_yticks(-(0.6 ** ppos))
-        ax.set_ylim(bottom=-(0.6 ** 0.02))  # crops the data but looks nicer
-        ax.set_ylim(top=-(0.6 ** 70.))  # crops the data but looks nicer
+        ax.set_ylim(bottom=-(0.6 ** 0.15))  # crops the data but looks nicer
+        ax.set_ylim(top=-(0.6 ** 4.5))  # crops the data but looks nicer
 
         if calibs == 'both':
             ax.set_xlim([np.amin(pos) - 0.3, np.amax(pos) + 0.5])
 
         else:
-            ax.set_ylim(top=-(0.6 ** 55.))  # crops the data but looks nicer
+            ax.set_ylim(top=-(0.6 ** 4.5))  # crops the data but looks nicer
             ax.set_xlim([np.amin(pos) - 0.55, np.amax(pos) + 0.6])
 
         ax.set_xticks(mpos)
 
     else:
         ax.set_xticks(-(0.6 ** ppos))
-        ax.set_xlim(left=-(0.6 ** 0.02))  # crops the data but looks nicer
-        ax.set_xlim(right=-(0.6 ** 70))  # crops the data but looks nicer
+        ax.set_xlim(left=-(0.6 ** 0.15))  # crops the data but looks nicer
+        ax.set_xlim(right=-(0.6 ** 4.5))  # crops the data but looks nicer
 
         if calibs == 'both':
             ax.set_ylim([np.amin(pos) - 0.5, np.amax(pos) + 0.5])
 
         else:
-            ax.set_xlim(right=-(0.6 ** 55))  # crops the data but looks nicer
+            ax.set_xlim(right=-(0.6 ** 4.5))  # crops the data but looks nicer
             ax.set_ylim([np.amin(pos) - 0.6, np.amax(pos) + 0.55])
 
         ax.set_yticks(mpos)
@@ -685,11 +726,11 @@ def calib_info_plot(df1, df2, df3, models, calibs='wet',
     ax.yaxis.set_tick_params(length=0., pad=2.5)
 
     # finally, add the inset plot of solver performance
-    if calibs == 'both':
-        solver_info_plot(df0, iax)
+    #if calibs == 'both':
+    #    solver_info_plot(df0, iax)
 
-    else:
-        solver_info_plot(df0[df0['training'] == calibs], iax)
+    #else:
+    #    solver_info_plot(df0[df0['training'] == calibs], iax)
 
     base_dir = get_main_dir()
     opath = os.path.join(os.path.join(base_dir, 'output'), 'plots')
@@ -712,7 +753,7 @@ if __name__ == "__main__":
     models = ['Tuzet', 'Eller', 'ProfitMax', 'CGainNet', 'WUE-LWP', 'CMax',
               'LeastCost', 'SOX-OPT', 'CAP', 'MES']
     calibs = 'both'
-    orientation = 'both'
+    orientation = 'landscape'
 
     main(fname1, fname2, fname3, models, calibs=calibs,
          orientation=orientation)

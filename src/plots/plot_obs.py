@@ -260,8 +260,9 @@ def E_A_relationships(df, colours):
             ymax = 2.5 * np.nanmax(y)
 
             # full range
-            encircle(ax, x, y, ec='none', fc='gray', alpha=0.15,
-                     label='Range of Obs.')
+            #encircle(ax, x, y, ec='none', fc='gray', alpha=0.15,
+            #         label='Range of Obs.')
+            ax.fill(x, y, ec='none', fc='gray', alpha=0.15, label='Range of Obs.')
             gam = (ExpectileGAM(expectile=0.5, n_splines=5, spline_order=4)
                                .gridsearch(x.values.reshape(-1, 1), y.values))
             px = np.linspace(x.min(), x.max(), num=500)
@@ -345,7 +346,7 @@ def E_A_relationships(df, colours):
                 ax.legend(bbox_to_anchor=(1.9, 0.2), loc=4, frameon=False)
                 break
 
-    fig.savefig('E_A_functional.png', dpi=300, bbox_inches='tight')
+    fig.savefig('E_A_functional_2.png', dpi=300, bbox_inches='tight')
 
 
 def iWUE_VPD_relationships(df, colours):
@@ -541,10 +542,12 @@ def gs_Ci_clusters(df, colours):
 def LWP_box_plots(df, colours):
 
     # histograms
-    groups = ['Panama', 'ManyPeaksRange', 'Richmond', 'Quercus', 'Sevilleta']
-    fig, axes = plt.subplots(3, 2, figsize=(15, 15), sharex=True)
+    groups = ['Panama', 'ManyPeaksRange', 'Quercus', 'Sevilleta']
+    fig, axes = plt.subplots(2, 2, figsize=(12, 10), sharex=True)
 
     select = df.filter(like='Pleaf').columns.to_list()
+    switches = ['std2', 'tuz', 'sox1', 'wue', 'cmax', 'pmax', 'cgn', 'lcst',
+                'sox2', 'cap', 'mes']
 
     i = 0  # loop over the axes
     iter = 0  # first column
@@ -577,8 +580,7 @@ def LWP_box_plots(df, colours):
 
         j = 1
 
-        for mod in ['tuz', 'sox1', 'wue', 'cmax', 'pmax', 'cgn', 'lcst',
-                    'sox2', 'cap', 'mes']:
+        for mod in switches:
 
             pos += 1.
 
@@ -594,13 +596,19 @@ def LWP_box_plots(df, colours):
 
             j += 1
 
-        if axes[i][iter].get_ylim()[0] < -14.:
-            axes[i][iter].set_ylim(-14., 0.1)
+        if axes[i][iter].get_ylim()[0] < -12.:
+            print(axes[i][iter].get_ylim()[0])
+            axes[i][iter].set_ylim(-12., 0.1)
 
         else:
             axes[i][iter].set_ylim(axes[i][iter].get_ylim()[0], 0.1)
 
-        axes[i][iter].set_xlim(-0.5, 11.5)
+        axes[i][iter].set_xlim(-0.5, len(switches) + 0.5)
+
+        axes[i][iter].set_xticklabels(['Obs.'] + [which_model(mod) for mod in
+                                      switches], rotation=90)
+        axes[i][iter].set_ylabel('LWP (-MPa)')
+
         axes[i][iter].set_title(what)
 
         iter += 1  # second or third column
@@ -609,21 +617,13 @@ def LWP_box_plots(df, colours):
             iter = 0
             i += 1
 
-    axes[1][1].set_xticklabels(['Obs.'] + [which_model(mod) for mod in
-                               ['tuz', 'sox1', 'wue', 'cmax', 'pmax', 'cgn',
-                                'lcst', 'sox2', 'cap', 'mes']], rotation=90)
-    axes[0][0].set_xticklabels(['Obs.'] + [which_model(mod) for mod in
-                                ['tuz', 'sox1', 'wue', 'cmax', 'pmax', 'cgn',
-                                 'lcst', 'sox2', 'cap', 'mes']], rotation=90)
-    axes[-1][-1].axis('off')
-
     fig.savefig('LWP_boxes.png', dpi=300, bbox_inches='tight')
 
 # Import Data
 df = pd.read_csv('/mnt/c/Users/le_le/Work/One_gs_model_to_rule_them_all/output/simulations/obs_driven/all_site_spp_simulations.csv')
 
 # Draw Plot
-colours = ['#1a1a1a', '#984ea3', '#decbe4', '#0571b0', '#92c5de', '#1a9641',
+colours = ['#1a1a1a', 'k', '#984ea3', '#decbe4', '#0571b0', '#92c5de', '#1a9641',
            '#a6d96a', '#ca0020', '#f4a582', '#a6611a', '#dfc27d']
 #plt.rcParams['axes.prop_cycle'] = cycler(color=colours)
 plt.rcParams['text.usetex'] = True  # use LaTeX
@@ -631,7 +631,7 @@ plt.rcParams['text.latex.preamble'] = [r'\usepackage{avant}',
                                        r'\usepackage{mathpazo}',
                                        r'\usepackage{amsmath}']
 
-E_A_relationships(df, colours)
+#E_A_relationships(df, colours)
 #iWUE_VPD_relationships(df, colours)
 #gs_Ci_clusters(df, colours)
-#LWP_box_plots(df, colours)
+LWP_box_plots(df, colours)

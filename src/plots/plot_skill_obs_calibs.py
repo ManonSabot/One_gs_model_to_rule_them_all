@@ -380,7 +380,7 @@ def heatmap(df, gs=True, E=True, A=True, what='NSE'):
 
 
 # Import Data
-what = 'RMSE'
+what = 'SMAPE'
 df = pd.read_csv('/mnt/c/Users/le_le/Work/One_gs_model_to_rule_them_all/output/simulations/obs_driven/all_%ss.csv' % (what))
 
 plt.rcParams['text.usetex'] = True  # use LaTeX

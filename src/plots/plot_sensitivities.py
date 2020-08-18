@@ -20,6 +20,7 @@ warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 # general modules
 import os  # check for files, paths
+import sys  # check for files, paths
 import numpy as np  # array manipulations, math operators
 import pandas as pd  # read/write dataframes, csv files
 import itertools
@@ -31,6 +32,10 @@ import scipy.signal as signal
 from pygam import LinearGAM  # fit the functional shapes
 import matplotlib.ticker as ticker
 from matplotlib.lines import Line2D
+
+# change the system path to load modules from TractLSM
+script_dir = os.path.dirname(os.path.realpath(sys.argv[0]))
+sys.path.append(os.path.abspath(os.path.join(script_dir, '..')))
 
 # own modules
 from TractLSM import conv, cst
@@ -58,8 +63,7 @@ class plt_setup(object):
 
         # colors
         plt.rcParams['axes.prop_cycle'] = cycler(color=['#8da0cb', '#66c2a5',
-                                                        '#fc8d62', '#a6d854',
-                                                        '#e78ac3'])
+                                                        '#fc8d62'])
 
         # labels, text, annotations
         plt.rcParams['text.usetex'] = True  # use LaTeX
@@ -150,8 +154,6 @@ def update_var_names(array):
     array = [e.replace('Tair', '$T_{a}$') for e in array]
     array = [e.replace('Ps', r'$\varPsi_{s}$') for e in array]
     array = [e.replace('VPD', '$D_{a}$') for e in array]
-    array = [e.replace('PPFD', '$PAR$') for e in array]
-    array = [e.replace('u', '$u$') for e in array]
 
     return array
 
@@ -159,7 +161,7 @@ def update_var_names(array):
 def which_model(short):
 
     if short == 'std1':
-        lab = 'Reference'
+        lab = r'Medlyn-$\beta$'
 
     if short == 'tuz':
         lab = 'Tuzet'
@@ -197,12 +199,12 @@ def which_model(short):
 def plot_sensitivities(df, figname):
 
     plt_setup()  # rendering
-    fig = plt.figure(figsize=(6, 4.5))  # declaring the figure
+    fig = plt.figure(figsize=(7., 5.))  # declaring the figure
 
     iter = 2
 
     # calculate the sensitivities
-    for mod in ['std1', 'tuz', 'sox1', 'wue', 'cgn', 'pmax', 'cmax', 'lcst',
+    for mod in ['std1', 'tuz', 'sox1', 'wue', 'cmax', 'pmax', 'cgn', 'lcst',
                 'sox2', 'cap', 'mes']:
 
         # initialise the axis for the plot
@@ -214,9 +216,12 @@ def plot_sensitivities(df, figname):
 
         # which are the five dominant features across all variables?
         sub = df[df['output'].str.contains('(%s)' % (mod))].copy()
-        drivers, idxs = dominant_features(sub)
+        #drivers, idxs = dominant_features(sub)
+        #print(drivers, idxs)
+        drivers = ['Ps', 'VPD', 'Tair', 'PPFD', 'CO2']
+        idxs = ['ST', 'ST', 'ST', 'ST', 'ST']
 
-        for var in ['gs', 'Pleaf', 'Ci', 'E', 'A']:
+        for var in ['gs', 'Pleaf', 'Ci']:
 
             sub = df[df['output'] == '%s(%s)' % (var, mod)].copy()
             sub = sub[sub['driver'].isin(drivers)]
@@ -229,7 +234,8 @@ def plot_sensitivities(df, figname):
             for driver, e in zip(drivers, idxs):
 
                 values += [sub[sub['driver'] == driver][e].values[0]]
-                xlabels += ['%s*' % (driver) if e == 'ST' else driver]
+                #xlabels += ['%s*' % (driver) if e == 'ST' else driver]
+                xlabels += [driver]
 
             try:
                 xlabels = update_var_names(xlabels)
@@ -266,22 +272,19 @@ def plot_sensitivities(df, figname):
                     label.set_horizontalalignment('right')
 
                 if var == 'gs':
-                    var = '$g_{s}$'
+                    var = 'S$_T$($g_{s}$)'
 
                 if var == 'Pleaf':
-                    var = r'$\varPsi_{l}$'
-
-                if var == 'E':
-                    var = '$E$'
+                    var = r'S$_T$($\varPsi_{l}$)'
 
                 if var == 'Ci':
-                    var = '$C_{i}$'
-
-                if var == 'A':
-                    var = '$A_{n}$'
+                    var = r'S$_T$($C_{i}$)'
 
                 # plot the data
-                ax.plot(angles, values, label=var)
+                l = ax.plot(angles, values)
+                ax.fill(angles, values, ec=l[0].get_color(), alpha=0.2,
+                        label=var)
+
 
                 if mod == 'gs2':
                     pad = 8.
@@ -298,9 +301,24 @@ def plot_sensitivities(df, figname):
         ax.tick_params(axis='x', which='major', pad=-9.)
 
         if iter == 2:
-            ax.legend(loc=1, bbox_to_anchor=(-0.9, 1.25))
+            ax.legend(loc=1, bbox_to_anchor=(-0.75, 0.9))
 
         iter += 1
+
+    ax = fig.add_axes([0.125, 0.7, 0.06, 0.06], projection='polar')
+    ax.set_zorder(-1)
+
+    # setup ticks and labels
+    ax.set_rgrids([0., 0.25, 0.5, 0.75, 1], ['0', '', '', '', '1'])
+    plt.ylim(0., 1.)
+
+    # draw lines angles
+    ax.set_thetagrids(np.degrees([0, 45, 90]), [])
+    ax.set_thetamin(-90)
+    ax.set_thetamax(0)
+
+    ax.spines['polar'].set_color(plt.rcParams['grid.color'])
+    ax.spines['polar'].set_linewidth(plt.rcParams['grid.linewidth'])
 
     fig.savefig(figname)
     plt.close()
@@ -312,11 +330,12 @@ def plot_sensitivities(df, figname):
 
 base_dir = get_main_dir()
 figname = os.path.join(os.path.join(os.path.join(base_dir, 'output'),
-                       'figures'), 'model_sensitivities.png')
+                       'plots'), 'model_sensitivities_total.png')
 
 if not os.path.isfile(figname):
-    fname = os.path.join(os.path.join(os.path.join(base_dir, 'output'),
-                         'Sensitivities'), 'overview_of_sensitivities.csv')
+    fname = os.path.join(os.path.join(os.path.join(os.path.join(base_dir,
+                         'output'), 'simulations'), 'idealised'),
+                         'overview_of_sensitivities.csv')
     df = (pd.read_csv(fname, header=[0]).dropna(axis=0, how='all')
             .dropna(axis=1, how='all').squeeze())
     plot_sensitivities(df, figname)

@@ -61,8 +61,11 @@ class plt_setup(object):
             colours = ['#1a1a1a', '#1a1a1a', '#984ea3', '#decbe4', '#0571b0',
                        '#92c5de', '#1a9641', '#a6d96a', '#ca0020', '#f4a582',
                        '#a6611a', '#dfc27d']
-
             colours = ['#984ea3', '#decbe4', '#0571b0',
+                       '#92c5de', '#1a9641', '#a6d96a', '#ca0020', '#f4a582',
+                       '#a6611a', '#dfc27d']
+
+            colours = ['#1a1a1a', '#1a1a1a', '#984ea3', '#decbe4', '#0571b0',
                        '#92c5de', '#1a9641', '#a6d96a', '#ca0020', '#f4a582',
                        '#a6611a', '#dfc27d']
 
@@ -522,7 +525,8 @@ def plot_diag_target(df, fname, title=None):
             lw = 4.
             ax1.plot(wavg['gs(%s)' % (mod)], linewidth=lw,
                      label=which_model(mod))
-            next(ax2._get_lines.prop_cycler)  # skip over Pleaf
+            ax2.plot(davg['Pleaf(%s)' % (mod)])
+            #next(ax2._get_lines.prop_cycler)  # skip over Pleaf
             ax3.plot(davg['Ci(%s)' % (mod)], linewidth=lw)
             ax4.plot(davg['E(%s)' % (mod)], linewidth=lw)
             ax5.plot(davg['A(%s)' % (mod)], linewidth=lw)
@@ -578,7 +582,6 @@ def plot_diag_target(df, fname, title=None):
 
     fig.savefig(fname, dpi=1200, bbox_inches='tight')
     plt.close()
-    exit(1)
 
 
 def plot_diagnostics(df, fname, title=None):
@@ -703,111 +706,13 @@ def plot_perturb_target(df, fname, title=None):
     plt.close()
 
 
-def plot_behaviours(df, figname, title='', X='E', Y='A', Nbins=3):
-
-    fig = plt.figure(figsize=(12, 12))
-    plt.subplots_adjust(wspace=0.015)
-    axes = fig.subplots(nrows=Nbins, ncols=Nbins, sharex=True, sharey=True)
-
-    df0 = df.copy()  # avoids directly modifying the df
-
-    # normalise the variables of interest
-    Xmax = df0[df0.filter(like='%s(' % (X)).columns].max().max()
-    Ymax = df0[df0.filter(like='%s(' % (Y)).columns].max().max()
-
-    if X == 'Pleaf':
-        Xmin = df0[df0.filter(like='%s(' % (X)).columns].min().min()
-        df0[df0.filter(like='%s(' % (X)).columns] /= Xmin
-
-    else:
-        df0[df0.filter(like='%s(' % (X)).columns] /= Xmax
-
-    if Y == 'Pleaf':
-        Ymin = df0[df0.filter(like='%s(' % (Y)).columns].min().min()
-        df0[df0.filter(like='%s(' % (Y)).columns] /= Ymin
-
-    else:
-        df0[df0.filter(like='%s(' % (Y)).columns] /= Ymax
-
-    # bin the data by prescribed groups
-    #Ps_bins = pd.IntervalIndex.from_tuples([(df0['Ps'].min(), -0.5),
-    #                                        (-0.5, -0.05),
-    #                                        (-0.05, df0['Ps'].max())])
-    #df0['Ps_bins'] = pd.cut(df0['Ps'], Ps_bins)
-    #VPD_bins = pd.IntervalIndex.from_tuples([(df0['VPD'].min(), 1.5),
-    #                                         (1.5, 3.),
-    #                                         (3., df0['VPD'].max())])
-    #df0['VPD_bins'] = pd.cut(df0['VPD'], VPD_bins)
-
-    # bin the data by equally-sized groups
-    df0['Ps_bins'] = pd.qcut(df0['Ps'], Nbins)
-    df0['VPD_bins'] = pd.qcut(df0['VPD'], Nbins)
-
-    # sort the order of the values
-    df0.sort_values(by=['Ps_bins', 'VPD_bins'], ascending=[False, True],
-                    inplace=True)
-    order = df0[['Ps_bins', 'VPD_bins']].drop_duplicates()
-    order.reset_index(drop=True, inplace=True)
-    order['order'] = order.index
-    df0 = df0.merge(order, on=['Ps_bins', 'VPD_bins'])
-
-    # split by unique group in order
-    grouped = df0.groupby(['order'])
-    dfs = [grouped.get_group(x) for x in grouped.groups]
-
-    iter = 0  # loop over dfs
-
-    for ax in axes.flat:
-
-        df = dfs[iter]
-
-        # loop over the different models
-        for mod in ['std1', 'std2', 'tuz', 'sox1', 'wue', 'cgn', 'pmax', 'cmax',
-                    'lcst', 'sox2', 'cap', 'mes']:
-
-            xx = df['%s(%s)' % (X, mod)].values
-            yy = df['%s(%s)' % (Y, mod)].values
-            mask = np.logical_or(xx == 0., yy == 0.)
-
-            # gam fit
-            gam = (LinearGAM(n_splines=7, spline_order=5)
-                            .gridsearch(xx[~mask].reshape(-1, 1), yy[~mask]))
-            px = np.linspace(np.percentile(xx[~mask], 5),
-                             np.percentile(xx[~mask], 95), num=500)
-            py = gam.predict(px)
-
-            ax.plot(px, py, linewidth=4., alpha=0.7)
-            ax.scatter(xx[~mask], yy[~mask], c=ax.lines[-1].get_color(),
-                       alpha=0.05, zorder=-1)
-
-        Ps = np.unique(df['Ps_bins'])[0]
-        VPD = np.unique(df['VPD_bins'])[0]
-
-        if iter < 3:
-            ax.set_title(r'D: %.1f to %.1f (kPa)' % (VPD.left, VPD.right))
-
-        if iter % 3 == 0:
-            ax.text(-1.25, 0.5, r'$\Psi_{leaf}$: %.4f to %.4f (MPa)'
-                               % (Ps.right, Ps.left))
-            ax.set_ylabel(r'%s$_{\rm norm}$ (-)' % (Y))
-
-        if iter > 5:
-            ax.set_xlabel(r'%s$_{\rm norm}$ (-)' % (X))
-
-        iter += 1
-
-    fig.tight_layout()
-    fig.savefig(figname, dpi=1200, bbox_inches='tight')
-    plt.close()
-
-
 def plot_impact_summary(fname, df):
 
     fig = plt.figure(figsize=(6, 4))
     plt.subplots_adjust(hspace=0.05, wspace=0.015)
     axes = fig.subplots(nrows=2, ncols=2, sharex=True, sharey='row')
 
-    labels = ['Reference', 'Tuzet', 'SOX', r'WUE-$f_{\varPsi_l}$', 'CMax',
+    labels = [r'Medlyn-$\beta$', 'Tuzet', 'SOX', r'WUE-$f_{\varPsi_l}$', 'CMax',
               'ProfitMax', 'CGainNet', 'LeastCost', 'SOX-Opt', 'CAP', 'MES']
     switch = ['tuz', 'sox1', 'wue', 'cmax', 'pmax', 'cgn', 'lcst',
               'sox2', 'cap', 'mes']
@@ -983,7 +888,7 @@ def plot_impact_summary3(fname, df):
     plt.subplots_adjust(hspace=0.05)
     axes = fig.subplots(nrows=2, ncols=1, sharex=True)
 
-    labels = ['Reference', 'Tuzet', 'SOX', r'WUE-$f_{\varPsi_l}$', 'CMax',
+    labels = [r'Medlyn-$\beta$', 'Tuzet', 'SOX', r'WUE-$f_{\varPsi_l}$', 'CMax',
               'ProfitMax', 'CGainNet', 'LeastCost', 'SOX-Opt', 'CAP', 'MES']
     switch = ['tuz', 'sox1', 'wue', 'cmax', 'pmax', 'cgn', 'lcst',
               'sox2', 'cap', 'mes']
@@ -1161,6 +1066,7 @@ ifdir = os.path.join(os.path.join(os.path.join(base_dir, 'input'),
 ofdir = os.path.join(os.path.join(os.path.join(base_dir, 'output'),
                      'simulations'), 'idealised')
 
+"""
 # univariate experiments
 df, __ = read_csv(os.path.join(ofdir, 'all_cumulative_impacts.csv'))
 
@@ -1169,13 +1075,11 @@ xpe_names = ['%s_%s_%s' % (e[2], e[1], e[0]) for e in combis if
 df = df[df['xpe'].isin(xpe_names)]
 df.set_index('xpe', inplace=True)
 
-#plot_impact_summary('summary_impacts.png', df)
-#plot_impact_summary2('summary_impacts_2.png', df)
+plot_impact_summary('summary_impacts.png', df)
+plot_impact_summary2('summary_impacts_2.png', df)
 plot_impact_summary3('summary_impacts_3.png', df)
 plot_impact_summary4('summary_impacts_4.png', df)
-
-exit(1)
-
+"""
 
 # path to input data
 fname1 = os.path.join(ifdir, 'wet_calibration.csv')
@@ -1214,14 +1118,14 @@ for combi in combis:  # loop over all the possibilities
     if combi == combis[0]:  # reset ifdir to plot the calib. targets
         ifdir = ifdir.replace('simulations', 'calibrations')
 
-    for gb in [False, True]:  # either account for variations in gb or not
+    for multi in [False, True]:
 
-        opath = os.path.join(ofdir, 'inf_gb')
-        ofig = os.path.join(figdir, 'inf_gb')
+        opath = os.path.join(ofdir, 'univar_change')
+        ofig = os.path.join(figdir, 'univar_change')
 
-        if gb:  # the calling order for gb matters!
-            opath = opath.replace('inf_gb', 'var_gb')
-            ofig = ofig.replace('inf_gb', 'var_gb')
+        if multi:  # the calling order matters!
+            opath = opath.replace('univar', 'multivar')
+            ofig = ofig.replace('univar', 'multivar')
 
         if not os.path.isdir(ofig):
             os.makedirs(ofig)
@@ -1249,7 +1153,7 @@ for combi in combis:  # loop over all the possibilities
                                'idealised_setup'), 'training_targets.png')
 
         if not os.path.isfile(figname):
-            figtitle = r'Reference (Medlyn-$\beta$) stomatal conductance'
+            figtitle = r'Reference (Medlyn-$\beta$)'
             if training == trainings[0]:
                 plot_targets(df2, df3, figname, title=figtitle)
 
@@ -1268,62 +1172,49 @@ for combi in combis:  # loop over all the possibilities
 
         # now get the actual model outputs
         fname3 = os.path.join(opath, '%s_%s_%s.csv' % (atm, soil, training))
-        df3, __ = read_csv(fname3)
 
-        if training == 'wet':
-            if atm == 'highD':  # apply the atm perturbations as necessary
-                df1['VPD'] *= 2.
+        try:
+            df3, __ = read_csv(fname3)
 
-            elif atm == 'highCa':
-                df1['CO2'] *= 2.
+            if training == 'wet':
+                if atm == 'highD':  # apply the atm perturbations as necessary
+                    df1['VPD'] *= 2.
 
-            # reset the atmosphere to the default
-            if atm == 'highD':
-                df1['VPD'] /= 2.
+                elif atm == 'highCa':
+                    df1['CO2'] *= 2.
 
-            elif atm == 'highCa':
-                df1['CO2'] /= 2.
+                # reset the atmosphere to the default
+                if atm == 'highD':
+                    df1['VPD'] /= 2.
 
-        # plot the calibrated gs
-        if (soil == training) and (atm == 'insample') and not gb:
+                elif atm == 'highCa':
+                    df1['CO2'] /= 2.
+
+            # plot the calibrated gs
+            if (soil == training) and (atm == 'insample') and not multi:
+                figname = os.path.join(os.path.join(ofig, training),
+                                       'calib_variables.png')
+
+                # now I need to merge those two functions into a single function!!!
+                if not os.path.isfile(figname):
+                    plot_diag_target(df3, figname, title='Calibrated models')
+
+            # diagnostic plots
             figname = os.path.join(os.path.join(ofig, training),
-                                   'calib_variables.png')
-
-            # now I need to merge those two functions into a single function!!!
-            if not os.path.isfile(figname):
-                plot_diag_target(df3, figname, title='Calibrated models')
-
-        # diagnostic plots
-        figname = os.path.join(os.path.join(ofig, training),
-                               'diag_out_running_%s_%s.png' % (atm, soil))
-
-        if not os.path.isfile(figname):
-            plot_diagnostics(df3, figname,
-                             title='%s atm, %s soil' % (atm, soil))
-
-        # example impact on gs
-        if (atm == 'insample') and (soil == 'dry'):
-            figname = os.path.join(os.path.join(ofig, training),
-                                   'perturb_gs_%s.png' % (soil))
+                                   'diag_out_running_%s_%s.png' % (atm, soil))
 
             if not os.path.isfile(figname):
-                plot_perturb_target(df3, figname,
-                                    title='Severe drydown impacts')
+                plot_diagnostics(df3, figname,
+                                 title='%s atm, %s soil' % (atm, soil))
 
-else:
-    dfs = (pd.read_csv(fname, header=[0]).dropna(axis=0, how='all')
-                                         .dropna(axis=1, how='all').squeeze())
+            # example impact on gs
+            if (atm == 'insample') and (soil == 'dry'):
+                figname = os.path.join(os.path.join(ofig, training),
+                                       'perturb_gs_%s.png' % (soil))
 
-# model behaviours
-for Ca in np.unique(dfs['CO2']):
+                if not os.path.isfile(figname):
+                    plot_perturb_target(df3, figname,
+                                        title='Severe drydown impacts')
 
-    df = dfs[dfs['CO2'] == Ca]
-
-    for x, y in zip(['E', 'gs', 'Pleaf', 'Ci', 'Pleaf', 'Ci'],
-                    ['A', 'E', 'gs', 'gs', 'Ci', 'A']):
-
-        figname = os.path.join(figdir, '%s(%s)_%sppm.png' % (y, x,
-                               str(int(Ca * conv.MILI * conv.FROM_kPa))))
-
-        if not os.path.isfile(figname):
-            plot_behaviours(df, figname, X=x, Y=y)
+        except FileNotFoundError:
+            pass

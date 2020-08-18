@@ -879,6 +879,9 @@ def clean_up_data():
                     .squeeze())
             df = df.loc[:, ~df.eq(-9999).all()]  # get rid of -9999 everywhere
 
+            if 'ManyPeaksRange' in file:  # Ca fixed to something plausible
+                df['CO2S'] = 375.  # actually right for 2003, not 400!
+
             # make sure the headers follow the convention and adjust units
             df, missing = unify_headers_units(df)
 

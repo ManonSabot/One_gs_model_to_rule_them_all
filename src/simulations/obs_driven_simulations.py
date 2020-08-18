@@ -34,11 +34,11 @@ sys.path.append(os.path.abspath(os.path.join(script_dir, '..')))
 from TractLSM import InForcings  # generate met data & read default params
 from TractLSM.Utils import get_main_dir  # get the project's directory
 from TractLSM.Utils import read_csv  # read in files
-from TractLSM.SPAC import water_potential  # soil modules
+from TractLSM.SPAC import water_potential, hydraulics  # soil
 from TractLSM import hrun  # run the models
 
-#==============================================================================
 
+#==============================================================================
 
 def build_calibrated_forcing(training):
 
@@ -392,7 +392,7 @@ if not os.path.isfile(fname):
     smapes = model_performance(dfs, which='SMAPE')
     smapes.to_csv(fname, index=False, na_rep='', encoding='utf-8')
 
-fname = os.path.join(os.path.dirname(ofdir), 'all_logged_ratios.csv')
+fname = os.path.join(os.path.dirname(ofdir), 'all_logs.csv')
 
 if not os.path.isfile(fname):
     logs = model_performance(dfs, which='LOG_Ratio')
