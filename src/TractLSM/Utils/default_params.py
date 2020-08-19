@@ -52,7 +52,7 @@ class default_params(object):  # default inputs needed to run model
         self.tmax = 24.  # degC
         self.rain_day = 0.  # mm d-1
         self.RH = 30.  # relative humidity, %
-        self.sw_rad_day = 1080. * 10.  # W m-2, for 10 daylight hours
+        self.sw_rad_day = 1080. * 12.  # W m-2, for 12 daylight hours
         self.Patm = 101.325  # kPa
         self.u = 2.  # m s-1
 
@@ -128,7 +128,7 @@ class default_params(object):  # default inputs needed to run model
         self.kmaxS2 = self.kmaxS1 * 2.  # kmax from SOX-Opt
         self.ksc_prev = self.kmaxS2 * 0.7  #  first guessed k(opt) in SOX-Opt
         self.krlC = self.kmax  # fixed root-leaf conductance in CAP
-        self.krlM = self.krlC   # fixed root-leaf conductance in MES
+        self.krlM = self.kmax   # fixed root-leaf conductance in MES
         self.ratiocrit = 0.05  # degree stom control? kcrit = N%(kmax)
 
         # soil-root maximum hydraulic conductances

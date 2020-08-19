@@ -174,7 +174,7 @@ def get_met_data_wg(d, Ndays):
 
             # bound the inputs for them to still be acceptable
             if (u0 < 0.) or (u0 > 30.):
-                u0 = d.u0
+                u0 = d.u
 
         ppfd[i], tdays[i], precip[i], vpd[i], u[i] = weather.main(d.lat, d.lon,
                                                                   doy,
