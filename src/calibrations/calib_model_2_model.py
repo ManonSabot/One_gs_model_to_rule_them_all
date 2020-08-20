@@ -264,7 +264,7 @@ def prep_training_N_target(profile, sub=None):
 
 #==============================================================================
 
-to_fit = True
+to_fit = False
 sample = None # None, 1, 2, or 3
 
 swaters = ['wet', 'inter']  # two different soil moisture profiles
@@ -404,9 +404,17 @@ else:  # read over the calibration files and analyse these outputs
 
                             odf = odf.append(dic, ignore_index=True)
 
-            # rank the solvers (absolute ranking)
-            odf['Rank'] = (odf.groupby(['Model', 'training', 'sub-sample'])
-                              ['BIC'].rank().astype(int))
+            # add the median param info to rerank the models
+            by = ['Model', 'training', 'sub-sample']
+            odf['med1'] = (odf['v1'] / odf.groupby(by)['v1'].transform('median')
+                           - 1.).abs()
+            odf['med2'] = (odf['v2'] / odf.groupby(by)['v2'].transform('median')
+                           - 1.).abs()
+
+            # rank the solvers (absolute rankings)
+            odf['Rank'] = (odf.sort_values(['BIC', 'med1', 'med2', 'Ntotal'])
+                              .groupby(by)['BIC'].rank(method='first')
+                              .astype(int))
 
         # column order
         columns = ['Model', 'training', 'sub-sample', 'solver', 'Rank', 'BIC',
@@ -419,39 +427,38 @@ else:  # read over the calibration files and analyse these outputs
         odf = (pd.read_csv(fname, header=[0]).dropna(axis=0, how='all')
                  .dropna(axis=1, how='all').squeeze())
 
+    # best three solvers
+    subw = (odf[odf['training'] == 'wet'].groupby('solver')['Rank'].mean()
+               .nsmallest(n=3).index.tolist())
+    subi = (odf[odf['training'] == 'inter'].groupby('solver')['Rank']
+               .mean().nsmallest(n=3).index.tolist())
+    subset = odf.groupby('solver')['Rank'].mean().nsmallest(n=3).index.tolist()
+
+    # are the three best solvers the same regardless of training?
+    if set(subset) == set(subw) == set(subi):
+        print('All top 3 solvers are the same:', subset)
+    # if not, are the three overall best in each training's four best?
+    else:
+        subw = (odf[odf['training'] == 'wet'].groupby('solver')['Rank']
+                   .mean().nsmallest(n=4).index.tolist())
+        subi = (odf[odf['training'] == 'inter'].groupby('solver')['Rank']
+                   .mean().nsmallest(n=4).index.tolist())
+
+        if (set(subw).issuperset(set(subset)) and
+            set(subi).issuperset(set(subset))):
+            print('Overall top 3 solvers are in each top 4 solvers:', subset)
+
+        else:  # the 'best solvers' are too different, rethink the method
+            msg = 'Abort: the best solvers change with the type of training!'
+            raise ValueError(msg)
+
     fname = os.path.join(os.path.join(os.path.join(os.path.join(base_dir,
                          'output'), 'calibrations'), 'idealised'),
                          'top_3_fits.csv')
 
     if not os.path.isfile(fname):
-        subw = (odf[odf['training'] == 'wet'].groupby('solver')['Rank'].mean()
-                   .nsmallest(n=3).index.tolist())
-        subi = (odf[odf['training'] == 'inter'].groupby('solver')['Rank']
-                   .mean().nsmallest(n=3).index.tolist())
-        subset = (odf.groupby('solver')['Rank'].mean().nsmallest(n=3).index
-                     .tolist())
 
-        # are the three best solvers the same regardless of training?
-        if set(subset) == set(subw) == set(subi):
-            print('All top 3 solvers are the same')
-            print(subset)
-
-        # if not, are the three overall best in each training's four best?
-        else:
-            subw = (odf[odf['training'] == 'wet'].groupby('solver')['Rank']
-                       .mean().nsmallest(n=4).index.tolist())
-            subi = (odf[odf['training'] == 'inter'].groupby('solver')['Rank']
-                       .mean().nsmallest(n=4).index.tolist())
-
-            if (set(subw).issuperset(set(subset)) and
-                set(subi).issuperset(set(subset))):
-                print('Overall top 3 solvers are in each top 4 solvers')
-                print(subset)
-
-            else:  # the 'best solvers' are too different, rethink the method
-                msg = 'Abort: the best solvers change with the training!'
-                raise ValueError(msg)
-
+        """
         odf = (odf[np.logical_and(odf['solver'].isin(subset),
                                   odf['sub-sample'] == 0)]
                   .drop(['sub-sample'], axis=1))
@@ -459,26 +466,13 @@ else:  # read over the calibration files and analyse these outputs
         # re-rank the solvers
         odf['Rank'] = (odf.groupby(['Model', 'training'])['BIC'].rank()
                           .astype(int))
+        """
 
-        # column order
-        columns = ['Model', 'training', 'solver', 'Rank', 'BIC', 'Ntotal', 'p1',
-                   'v1', 'p2', 'v2']
+        # check that there are no duplicated ranks within a group
+        eq = (odf.groupby(['Model', 'training'])['Rank'].nunique()
+                 .le(len(odf['solver'].unique()) - 1))
 
-        # best 3
-        odf[columns].to_csv(fname, index=False, na_rep='', encoding='utf-8')
-
-    else:
-        odf = (pd.read_csv(fname, header=[0]).dropna(axis=0, how='all')
-                 .dropna(axis=1, how='all').squeeze())
-
-    fname = os.path.join(os.path.join(os.path.join(os.path.join(base_dir,
-                         'output'), 'calibrations'), 'idealised'),
-                         'best_fit.csv')
-
-    if not os.path.isfile(fname):  # pick best param
-
-        # are there several equal best ranks within a group?
-        eq = odf.groupby(['Model', 'training'])['Rank'].nunique().le(2)
+        """
         eq_models = eq[eq == True].index.get_level_values(0)
         eq_trainings = eq[eq == True].index.get_level_values(1)
 
@@ -488,56 +482,101 @@ else:  # read over the calibration files and analyse these outputs
                                    odf['training'] == eq_trainings[i])
             sub = odf[where]
 
-            # if min rank duplicated, assign 1 to median params
+            for j in range(len(sub['sub-sample'].unique())):
+
+                subsub = sub[sub['sub-sample'] == float(j)]
+                med = subsub['v1'].median()
+                Rmin = subsub['Rank'].min()
+                dup = subsub['Rank'].duplicated()
+
+            # if rank duplicated, rerank by median param
             if len(sub[sub['Rank'] == sub['Rank'].min()]) > 1:
                 odf['Rank'][where] = 3  # deal with duplicated Rank = 1
                 idx = sub[sub['v1'] == sub['v1'].median()].index
 
-                if len(idx) > 1:  # if params are equal, pick fastest
+                if len(idx) > 1:  # if params are still equal, pick fastest
                     sub = sub.loc[idx]
                     idx = sub[sub['Ntotal'] == sub['Ntotal'].min()].index
 
                 odf.loc[idx, 'Rank'] = 1
+        """
+
+        if not any(eq):  # no duplicates, things working properly
+
+            keep = []
+
+            for m in odf['Model'].unique():
+
+                sub = odf[odf['Model'] == m]
+                subset = (sub.groupby(['solver'])['Rank'].mean().nsmallest(n=3)
+                             .index.tolist())
+                isub = sub[sub['solver'].isin(subset)].index.tolist()
+                keep += [isub]
+
+            keep = pd.Index([e for sublist in keep for e in sublist])
+            sdf = odf.loc[keep]
+            sdf.reset_index(inplace=True)
+
+            # column order
+            columns = ['Model', 'training', 'sub-sample', 'solver', 'Rank',
+                       'BIC', 'Ntotal', 'p1', 'v1', 'p2', 'v2']
+
+            # within best 3
+            sdf[columns].to_csv(fname, index=False, na_rep='', encoding='utf-8')
+
+    else:
+        sdf = (pd.read_csv(fname, header=[0]).dropna(axis=0, how='all')
+                 .dropna(axis=1, how='all').squeeze())
+
+    fname = os.path.join(os.path.join(os.path.join(os.path.join(base_dir,
+                         'output'), 'calibrations'), 'idealised'),
+                         'best_fit.csv')
+
+    if not os.path.isfile(fname):  # pick best param
+
+        # full timeseries
+        sdf = sdf[sdf['sub-sample'] == 0.]
+        odf = odf[odf['sub-sample'] == 0.]
+
+        # min rank is the best param
+        sdf['Rank'] = (sdf.groupby(['Model', 'training'])['Rank'].rank()
+                           .astype(int))
+        sdf = sdf[sdf['Rank'] == 1].drop(['Rank'], axis=1)
 
         # add params to Tuzet, WUE-LWP, CGainNet, CMax
-        odf['p3'] = np.nan  # own kmax
-        odf['v3'] = np.nan
+        sdf['p3'] = np.nan  # own kmax
+        sdf['v3'] = np.nan
 
         # specific param names on a per model basis
-        odf['p2'].loc[odf['Model'] == 'WUE-LWP'] = 'kmaxWUE'
-        odf['p2'].loc[odf['Model'] == 'CGainNet'] = 'kmaxCN'
-        odf['p3'].loc[odf['Model'] == 'Tuzet'] = 'kmaxT'
-        odf['p3'].loc[odf['Model'] == 'CMax'] = 'kmaxCM'
+        sdf['p2'].loc[sdf['Model'] == 'WUE-LWP'] = 'kmaxWUE'
+        sdf['p2'].loc[sdf['Model'] == 'CGainNet'] = 'kmaxCN'
+        sdf['p3'].loc[sdf['Model'] == 'Tuzet'] = 'kmaxT'
+        sdf['p3'].loc[sdf['Model'] == 'CMax'] = 'kmaxCM'
 
-        for training in odf['training'].unique():  # add the param values
+        for training in sdf['training'].unique():  # add the param values
 
-            sub = odf[odf['training'] == training]
+            sub1 = sdf[sdf['training'] == training]
+            sub2 = odf[odf['training'] == training]
 
-            for solver in sub['solver'].unique():
+            for m in ['WUE-LWP', 'CGainNet', 'Tuzet', 'CMax']:
 
-                # own kmax
-                value = (sub[np.logical_and(sub['solver'] == solver,
-                         sub['Model'] == 'ProfitMax')]).v1
+                solver = sub1[sub1['Model'] == m].solver.values[0]
+                kval = (sub2[np.logical_and(sub2['solver'] == solver,
+                        sub2['Model'] == 'ProfitMax')]).v1  # own kmax
+                idx = sub1[np.logical_and(sub1['Model'] == m,
+                                          sub1['solver'] == solver)].index
 
-                idx = (sub[np.logical_and(sub['solver'] == solver,
-                                         sub['Model'].isin(['WUE-LWP',
-                                                            'CGainNet']))]
-                          .index)
-                odf.loc[idx, 'v2'] = float(value)
+                if m in ['WUE-LWP', 'CGainNet']:
+                    sdf.loc[idx, 'v2'] = float(kval)
 
-                idx = (sub[np.logical_and(sub['solver'] == solver,
-                                         sub['Model'].isin(['Tuzet', 'CMax']))]
-                          .index)
-                odf.loc[idx, 'v3'] = float(value)
-
-        # Rank = 1 is assumed to be the best param
-        odf = odf[odf['Rank'] == 1].drop(['Rank'], axis=1)
+                else:
+                    sdf.loc[idx, 'v3'] = float(kval)
 
         # column order
         columns = ['Model', 'training', 'solver', 'BIC', 'Ntotal', 'p1',
                    'v1', 'p2', 'v2', 'p3', 'v3']
 
         # best calibrations
-        odf[columns].to_csv(fname, index=False, na_rep='', encoding='utf-8')
+        sdf[columns].to_csv(fname, index=False, na_rep='', encoding='utf-8')
 
     exit(1)
