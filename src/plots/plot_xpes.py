@@ -58,35 +58,44 @@ class plt_setup(object):
 
         # colors
         if colours is None:  # use the default colours
-            colours = ['#1a1a1a', '#1a1a1a', '#984ea3', '#decbe4', '#0571b0',
+            colours = ['#1a1a1a', '#984ea3', '#decbe4', '#0571b0',
                        '#92c5de', '#1a9641', '#a6d96a', '#ca0020', '#f4a582',
-                       '#a6611a', '#dfc27d']
-            colours = ['#984ea3', '#decbe4', '#0571b0',
-                       '#92c5de', '#1a9641', '#a6d96a', '#ca0020', '#f4a582',
-                       '#a6611a', '#dfc27d']
-
-            colours = ['#1a1a1a', '#1a1a1a', '#984ea3', '#decbe4', '#0571b0',
-                       '#92c5de', '#1a9641', '#a6d96a', '#ca0020', '#f4a582',
-                       '#a6611a', '#dfc27d']
+                       '#a6611a', '#dfc27d']  # '#1a1a1a',
 
         plt.rcParams['axes.prop_cycle'] = cycler(color=colours)
 
         # labels, text, annotations
         plt.rcParams['text.usetex'] = True  # use LaTeX
-        plt.rcParams['text.latex.preamble'] = [r'\usepackage{avant}',
-                                               r'\usepackage{mathpazo}',
+        main_font = r'\usepackage[sfdefault,light]{merriweather}'
+        plt.rcParams['text.latex.preamble'] = [main_font,
+                                               r'\usepackage{mathpazo}'
                                                r'\usepackage{amsmath}']
-        plt.rcParams['font.size'] = 7.
-        plt.rcParams['xtick.labelsize'] = 7.
-        plt.rcParams['ytick.labelsize'] = 7.
+        plt.rcParams['font.size'] = 6.
         plt.rcParams['axes.labelsize'] = 7.
+        plt.rcParams['xtick.labelsize'] = 6.
+        plt.rcParams['ytick.labelsize'] = 6.
 
         # lines
         plt.rcParams['lines.linewidth'] = 1.5
 
+        # markers
+        plt.rcParams['lines.markersize'] = 8.
+        plt.rcParams['lines.markeredgewidth'] = 0.5
+
+        # patches (e.g. the shapes in the legend)
+        plt.rcParams['patch.linewidth'] = 0.5
+        plt.rcParams['patch.edgecolor'] = 'k'
+        plt.rcParams['patch.force_edgecolor'] = True  # ensure it's used
+
         # legend
-        plt.rcParams['legend.fontsize'] = 10.
+        plt.rcParams['legend.fontsize'] = 7.
         plt.rcParams['legend.framealpha'] = 1
+        plt.rcParams['legend.edgecolor'] = 'w'
+        plt.rcParams['legend.borderpad'] = 0.5
+
+        # grid
+        plt.rcParams['grid.color'] = '#bdbdbd'
+        plt.rcParams['grid.linewidth'] = 0.25
 
 
 def figsize(nrows, ncols, width=4.5, height=3.25):
@@ -189,34 +198,34 @@ def which_model(short):
         lab = r'Medlyn-$f_{\varPsi_{l,pd}}$'
 
     elif short == 'tuz':
-        lab = 'Tuzet'
+        lab = r'Tuzet'
 
     elif short == 'sox1':
-        lab = 'Eller'
+        lab = r'Eller'
 
     elif short == 'sox2':
-        lab = 'SOX$_\mathrm{\mathsf{opt}}$'
+        lab = r'SOX$_\mathrm{\mathsf{opt}}$'
 
     elif short == 'wue':
         lab = r'WUE-$f_{\varPsi_l}$'
 
     elif short == 'cgn':
-        lab = 'CGainNet'
+        lab = r'CGain'
 
     elif short == 'pmax':
-        lab = 'ProfitMax'
+        lab = r'ProfitMax'
 
     elif short == 'cmax':
-        lab = 'CMax'
+        lab = r'CMax'
 
     elif short == 'lcst':
-        lab = 'LeastCost'
+        lab = r'LeastCost'
 
     elif short == 'cap':
-        lab = 'CAP'
+        lab = r'CAP'
 
     elif short == 'mes':
-        lab = 'MES'
+        lab = r'MES'
 
     else:
         lab = None
@@ -501,87 +510,137 @@ def get_P12(Px1, Px2, x1, x2):
     return P12
 
 
-def plot_diag_target(df, fname, title=None):
+def plot_diag_target(df, fname, Ca=40., title=None):
 
-    fig = plt.figure(figsize=(6, 6))
-    GS = fig.add_gridspec(15, 4, wspace=0.5, hspace=0.5)
-    ax1 = fig.add_subplot(GS[:6, :])
-    ax2 = fig.add_subplot(GS[7:11, :2])
-    ax3 = fig.add_subplot(GS[7:11, 2:])
-    ax4 = fig.add_subplot(GS[11:, :2], sharex=ax2)
-    ax5 = fig.add_subplot(GS[11:, 2:], sharex=ax3)
+    fig, axes = plt.subplots(figsize=(6, 6), nrows=3, ncols=2, sharex=True)
+    plt.subplots_adjust(hspace=0.1, wspace=0.35)
+    axes = [e for sub in axes for e in sub]
+    axes[1].axis('off')  # mask frame of first row second column
+    iax = axes[2].inset_axes([0.68, 0.68, 0.32, 0.32])   # inset axis for LWP
 
-    # each week's diurnal gs
-    wavg, __, __ = weekly(df.copy())
-
-    # avg diurnal of Pleaf, Ci, etc wHen photosynthesis happens
-    davg = df.groupby(['hod']).mean()
+    # avg diurnals
+    davg = df[df != 9999.].groupby(['hod']).mean()
     davg = davg[davg[davg.filter(like='gs(').columns].sum(axis=1) > 0.]
+    dmin = df.replace(0., np.nan).groupby(['hod']).min()
+    dmin = dmin.loc[davg.index]
+    dmax = df[df != 9999.].groupby(['hod']).max()
+    dmax = dmax.loc[davg.index]
 
-    for mod in ['std1', 'std2', 'tuz', 'sox1', 'wue', 'cmax', 'pmax', 'cgn',
+    # smooth the min-max diurnals
+    B, A = signal.butter(3, 0.4)
+
+    for mod in ['std1', 'tuz', 'sox1', 'wue', 'cmax', 'pmax', 'cgn',
                 'lcst', 'sox2', 'cap', 'mes']:
 
         if mod == 'std1':
+            lw = 0.
+            alpha = 0.1
+            axes[0].fill_between(davg.index,
+                                 signal.filtfilt(B, A, dmin['gs(%s)' % (mod)]),
+                                 signal.filtfilt(B, A, dmax['gs(%s)' % (mod)]),
+                                 color='gray', linewidth=lw, alpha=alpha)
+            axes[2].fill_between(davg.index,
+                                 signal.filtfilt(B, A,
+                                                 dmin['Pleaf(%s)' % (mod)]),
+                                 signal.filtfilt(B, A,
+                                                 dmax['Pleaf(%s)' % (mod)]),
+                                 color='gray', linewidth=lw, alpha=alpha)
+            axes[4].fill_between(davg.index,
+                                 signal.filtfilt(B, A, dmin['Ci(%s)' % (mod)])
+                                 / Ca,
+                                 signal.filtfilt(B, A, dmax['Ci(%s)' % (mod)])
+                                 / Ca, color='gray', linewidth=lw, alpha=alpha)
+            axes[3].fill_between(davg.index,
+                                 signal.filtfilt(B, A, dmin['E(%s)' % (mod)]),
+                                 signal.filtfilt(B, A, dmax['E(%s)' % (mod)]),
+                                 color='gray', linewidth=lw, alpha=alpha)
+            axes[5].fill_between(davg.index,
+                                 signal.filtfilt(B, A, dmin['A(%s)' % (mod)]),
+                                 signal.filtfilt(B, A, dmax['A(%s)' % (mod)]),
+                                 color='gray', linewidth=lw, alpha=alpha)
             lw = 4.
-            ax1.plot(wavg['gs(%s)' % (mod)], linewidth=lw,
-                     label=which_model(mod))
-            ax2.plot(davg['Pleaf(%s)' % (mod)])
-            #next(ax2._get_lines.prop_cycler)  # skip over Pleaf
-            ax3.plot(davg['Ci(%s)' % (mod)], linewidth=lw)
-            ax4.plot(davg['E(%s)' % (mod)], linewidth=lw)
-            ax5.plot(davg['A(%s)' % (mod)], linewidth=lw)
-
-        #elif mod == 'std2':
-
-        elif mod != 'std2':
-            ax1.plot(wavg['gs(%s)' % (mod)],
-                     label=which_model(mod))
-            ax2.plot(davg['Pleaf(%s)' % (mod)])
-            ax3.plot(davg['Ci(%s)' % (mod)])
-            ax4.plot(davg['E(%s)' % (mod)])
-            ax5.plot(davg['A(%s)' % (mod)])
+            alpha = 1.
 
         else:
+            lw = plt.rcParams['lines.linewidth']
+            alpha = 0.95
 
-            for ax in [ax1, ax2, ax3, ax4, ax5]:
+        axes[0].plot(davg['gs(%s)' % (mod)], linewidth=lw, alpha=alpha,
+                     label=which_model(mod))
 
-                next(ax._get_lines.prop_cycler)
+        if mod == 'std1':
+            iax.plot(davg['Pleaf(%s)' % (mod)],
+                     linewidth=plt.rcParams['lines.linewidth'], alpha=alpha)
+            axes[2].plot(davg['Pleaf(%s)' % (mod)], linewidth=lw, alpha=alpha)
+
+        elif mod in ['sox1', 'sox2', 'lcst']:
+            iax.plot(davg['Pleaf(%s)' % (mod)], linewidth=lw, alpha=alpha)
+            next(axes[2]._get_lines.prop_cycler)
+
+        else:
+            axes[2].plot(davg['Pleaf(%s)' % (mod)], linewidth=lw, alpha=alpha)
+            next(iax._get_lines.prop_cycler)
+
+        axes[4].plot(davg['Ci(%s)' % (mod)] / Ca, linewidth=lw, alpha=alpha)
+        axes[3].plot(davg['E(%s)' % (mod)], linewidth=lw, alpha=alpha)
+        axes[5].plot(davg['A(%s)' % (mod)], linewidth=lw, alpha=alpha)
 
     # add VC info
-    P50 = -3.13
-    P88 = -4.9
-    P12 = get_P12(P50, P88, 50., 88.)
-    ax2.axhline(P12, linestyle=':', linewidth=1.)
-    ax2.text(davg.index[0] - 0.25, P12 - 0.75, 'P12')
-    ax2.axhline(P50, linestyle=':', linewidth=1.)
-    ax2.text(davg.index[0] - 0.25, P50 - 0.75, 'P50')
-    ax2.axhline(P88, linestyle=':', linewidth=1.)
-    ax2.text(davg.index[0] - 0.25, P88 - 0.75, 'P88')
+    P12 = get_P12(-3.13, -4.9, 50., 88.)
+    axes[2].axhline(P12, linestyle=':', linewidth=1.)
+    iax.axhline(P12, linestyle=':', linewidth=1.)
+    iax.axhline(-3.13, linestyle=':', linewidth=1.)
+    iax.axhline(-4.9, linestyle=':', linewidth=1.)
+    iax.xaxis.set_major_locator(plt.NullLocator())
 
-    ax1.set_ylabel('g$_{s}$ (mol m$^{-2}$ s$^{-1}$)', fontsize=10.)
-    ax1.set_xlim(-2., len(wavg) + 1.)
-    ax1.set_xticks([len(wavg) / 8., len(wavg) * 3. / 8., len(wavg) * 5. / 8.,
-                    len(wavg) * 7. / 8.])
-    ax1.set_xticklabels(['week 1', 'week 2', 'week 3', 'week 4'])
+    axes[0].set_ylabel(r'$g_{s}$ (mol m$^{-2}$ s$^{-1}$)')
+    axes[2].set_ylabel(r'$\Psi$$_{l}$ (MPa)')
+    axes[4].set_ylabel(r'$C_{i}$ : $C_{a}$ (-)')
+    axes[3].set_ylabel(r'$E$ (mmol m$^{-2}$ s$^{-1}$)')
+    axes[5].set_ylabel(r'$A_n$ ($\mu$mol m$^{-2}$ s$^{-1}$)')
+    axes[-2].set_xlabel(r'hod (h)')
+    axes[-1].set_xlabel(r'hod (h)')
 
-    ax2.set_ylabel('$\Psi_{l}$ (MPa)')
-    ax3.set_ylabel('$C_{i}$ (Pa)')
-    ax4.set_ylabel('E (mmol m$^{-2}$ s$^{-1}$)')
-    ax5.set_ylabel('A ($\mu$mol m$^{-2}$ s$^{-1}$)')
-    ax4.set_xlabel('hod (h)')
-    ax5.set_xlabel('hod (h)')
+    for ax in axes:  # format axes ticks
 
-    for ax in [ax1, ax2, ax3, ax4, ax5]:
-
+        ax.xaxis.set_major_locator(ticker.MaxNLocator(4))
         ax.yaxis.set_major_locator(ticker.MaxNLocator(4))
+        ax.set_xticklabels(ax.get_xticks())  # force LaTex
+        ax.set_yticklabels(ax.get_yticks())  # force LaTex
+        ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%.d'))
 
-        if (ax == ax4) or (ax == ax5):
-            ax.xaxis.set_major_locator(ticker.MaxNLocator(4))
+        if (ax == axes[3]) or (ax == axes[4]):
+            ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
 
-    ax1.legend(bbox_to_anchor=(1.05, 1.05), loc=2, frameon=False)
+    # split the legend in several parts
+    x0 = 1.35
+    xdiff = 0.5
+    y0 = 1.
+    ydiff = 0.18
+    handles, labels = axes[0].get_legend_handles_labels()
+    leg1 = axes[0].legend(handles[:1], labels[:1], bbox_to_anchor=(x0, y0),
+                          loc=2)
+    leg2 = axes[0].legend(handles[1:3], labels[1:3],
+                          bbox_to_anchor=(x0, y0 - ydiff), loc=2)
+    leg3 = axes[0].legend(handles[3:5], labels[3:5],
+                          bbox_to_anchor=(x0, y0 - 2.5 * ydiff), loc=2)
+    leg4 = axes[0].legend(handles[5:7], labels[5:7],
+                          bbox_to_anchor=(x0, y0 - 4. * ydiff), loc=2)
+    leg5 = axes[0].legend(handles[7:9], labels[7:9],
+                          bbox_to_anchor=(x0 + xdiff, y0 - 2.5 * ydiff - 0.008),
+                          loc=2)
+    axes[0].legend(handles[9:], labels[9:],
+                   bbox_to_anchor=(x0 + xdiff, y0 - 4. * ydiff), loc=2)
+    axes[0].add_artist(leg1)
+    axes[0].add_artist(leg2)
+    axes[0].add_artist(leg3)
+    axes[0].add_artist(leg4)
+    axes[0].add_artist(leg5)
 
     fig.savefig(fname, dpi=1200, bbox_inches='tight')
     plt.close()
+
+    return
 
 
 def plot_diagnostics(df, fname, title=None):
@@ -713,7 +772,7 @@ def plot_impact_summary(fname, df):
     axes = fig.subplots(nrows=2, ncols=2, sharex=True, sharey='row')
 
     labels = [r'Medlyn-$\beta$', 'Tuzet', 'SOX', r'WUE-$f_{\varPsi_l}$', 'CMax',
-              'ProfitMax', 'CGainNet', 'LeastCost', 'SOX-Opt', 'CAP', 'MES']
+              'ProfitMax', 'CGain', 'LeastCost', 'SOX-Opt', 'CAP', 'MES']
     switch = ['tuz', 'sox1', 'wue', 'cmax', 'pmax', 'cgn', 'lcst',
               'sox2', 'cap', 'mes']
 
@@ -802,7 +861,7 @@ def plot_impact_summary2(fname, df):
     axes = fig.subplots(nrows=2, ncols=2, sharex=True, sharey='row')
 
     labels = ['Tuzet', 'SOX', r'WUE-$f_{\varPsi_l}$', 'CMax',
-              'ProfitMax', 'CGainNet', 'LeastCost', 'SOX-Opt', 'CAP', 'MES']
+              'ProfitMax', 'CGain', 'LeastCost', 'SOX-Opt', 'CAP', 'MES']
     switch = ['tuz', 'sox1', 'wue', 'cmax', 'pmax', 'cgn', 'lcst',
               'sox2', 'cap', 'mes']
 
@@ -889,7 +948,7 @@ def plot_impact_summary3(fname, df):
     axes = fig.subplots(nrows=2, ncols=1, sharex=True)
 
     labels = [r'Medlyn-$\beta$', 'Tuzet', 'SOX', r'WUE-$f_{\varPsi_l}$', 'CMax',
-              'ProfitMax', 'CGainNet', 'LeastCost', 'SOX-Opt', 'CAP', 'MES']
+              'ProfitMax', 'CGain', 'LeastCost', 'SOX-Opt', 'CAP', 'MES']
     switch = ['tuz', 'sox1', 'wue', 'cmax', 'pmax', 'cgn', 'lcst',
               'sox2', 'cap', 'mes']
 
@@ -974,7 +1033,7 @@ def plot_impact_summary4(fname, df):
     axes = fig.subplots(nrows=2, ncols=1, sharex=True)
 
     labels = ['Tuzet', 'SOX', r'WUE-$f_{\varPsi_l}$', 'CMax',
-              'ProfitMax', 'CGainNet', 'LeastCost', 'SOX-Opt', 'CAP', 'MES']
+              'ProfitMax', 'CGain', 'LeastCost', 'SOX-Opt', 'CAP', 'MES']
     switch = ['tuz', 'sox1', 'wue', 'cmax', 'pmax', 'cgn', 'lcst',
               'sox2', 'cap', 'mes']
 
@@ -1197,7 +1256,8 @@ for combi in combis:  # loop over all the possibilities
 
                 # now I need to merge those two functions into a single function!!!
                 if not os.path.isfile(figname):
-                    plot_diag_target(df3, figname, title='Calibrated models')
+                    plot_diag_target(df3, figname, Ca=df1.loc[0, 'CO2'],
+                                     title='Calibrated models')
 
             # diagnostic plots
             figname = os.path.join(os.path.join(ofig, training),

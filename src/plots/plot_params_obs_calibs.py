@@ -16,7 +16,6 @@ sys.path.append(os.path.abspath(os.path.join(script_dir, '..')))
 from TractLSM import conv, cst
 from TractLSM.Utils import get_main_dir  # get the project's directory
 from TractLSM.Utils import read_csv  # read in files
-from TractLSM.SPAC.hydraulics import Weibull_params, f
 
 fdir = '/mnt/c/Users/le_le/Work/One_gs_model_to_rule_them_all/input/calibrations/obs_driven/'
 
@@ -46,20 +45,17 @@ for file in os.listdir(fdir):
             else:
                 x += ['$%s.$ $%s$' % (site_spp[-2][0], site_spp[-1])]
 
-            b, c = Weibull_params(df1.loc[0])
-            thresh = df1['Ps'].quantile(0.25)  # only keep 'wetter' soil
-            df2 = df2[df1['Ps'] >= thresh]
+            thresh1 = df2['E'].quantile(0.25)  # only keep 'wetter' soil
+            thresh2 = df1['Ps'].quantile(0.25)
+            df2 = df2[np.logical_and(df2['E'] >= thresh1, df1['Ps'] >= thresh2)]
             df2.reset_index(inplace=True)
 
             kmax = []
 
             for i in range(len(df2)):
 
-                if df2.loc[i, 'hod'] >= 8. and df2.loc[i, 'hod'] <= 17.:
-
-                    kmax += [df2.loc[i, 'E'] /
-                             quad(f, df2.loc[i, 'Pleaf'], df1.loc[i, 'Ps'],
-                                  args=(b, c))[0]]
+                kmax += [df2.loc[i, 'E'] / np.abs(df2.loc[i, 'Pleaf'] -
+                                                  df1.loc[i, 'Ps'])]
 
             kmax = np.array(kmax)
             bp = ax.boxplot(kmax[~np.isnan(kmax)], positions=[pos],

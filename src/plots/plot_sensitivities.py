@@ -176,7 +176,7 @@ def which_model(short):
         lab = r'WUE-$f_{\varPsi_l}$'
 
     if short == 'cgn':
-        lab = 'CGainNet'
+        lab = 'CGain'
 
     if short == 'pmax':
         lab = 'ProfitMax'

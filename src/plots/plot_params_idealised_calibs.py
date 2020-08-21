@@ -45,7 +45,7 @@ from TractLSM.Utils import get_main_dir  # get the project's directory
 
 #==============================================================================
 
-def main(fname1, fname2, fname3, models, calibs='both', orientation='both',
+def main(fname1, fname2, fname3, calibs='both', orientation='both',
          colours=None):
 
     base_dir = get_main_dir()
@@ -70,16 +70,15 @@ def main(fname1, fname2, fname3, models, calibs='both', orientation='both',
         for orientation in ['landscape', 'portrait']:
 
             plt_setup(calibs, orientation, colours=colours)  # rendering
-            calib_info_plot(df1.copy(), df2.copy(), df3.copy(), models,
-                            calibs=calibs, orientation=orientation)
+            calib_info_plot(df1.copy(), df2.copy(), df3.copy(), calibs=calibs,
+                            orientation=orientation)
 
         solver_info_plot(df1)
 
     else:
         plt_setup(calibs, orientation, colours=colours)  # rendering
         solver_info_plot(df1.copy())
-        calib_info_plot(df1, df2, df3, models, calibs=calibs,
-                        orientation=orientation)
+        calib_info_plot(df1, df2, df3, calibs=calibs, orientation=orientation)
 
     return
 
@@ -122,18 +121,18 @@ class plt_setup(object):
 
         # labels, text, annotations
         plt.rcParams['text.usetex'] = True  # use LaTeX
-        plt.rcParams['text.latex.preamble'] = [r'\usepackage[sfdefault,light]{merriweather}',
+        main_font = r'\usepackage[sfdefault,light]{merriweather}'
+        plt.rcParams['text.latex.preamble'] = [main_font,
                                                r'\usepackage{mathpazo}'
                                                r'\usepackage{amsmath}']
         plt.rcParams['font.size'] = 6.
+        plt.rcParams['axes.labelsize'] = 7.
         plt.rcParams['xtick.labelsize'] = 6.
         plt.rcParams['ytick.labelsize'] = 7.
 
         if orientation == 'portrait':
             plt.rcParams['xtick.labelsize'] = 7.
             plt.rcParams['ytick.labelsize'] = 6.
-
-        plt.rcParams['axes.labelsize'] = 7.
 
         # lines
         plt.rcParams['lines.linewidth'] = 2.
@@ -268,21 +267,33 @@ def solver_info_plot(df):
     return
 
 
-def update_model_names(df, models):
-
-    # replace the model names
-    df.replace({'Model': {'SOX': 'Eller'}}, inplace=True)
-    df.Model = df.Model.astype('category')
-    df.Model.cat.set_categories(models, inplace=True)
-
-    return df
-
-
 def normalise_params_by_group(df, by):
 
     # normalise
     df['norm_v1'] = df['v1'] / df.groupby(by)['v1'].transform('median')
     df['norm_v2'] = df['v2'] / df.groupby(by)['v2'].transform('median')
+
+    return df
+
+
+def automate_model_order(df):
+
+    df0 = normalise_params_by_group(df, ['Model', 'training', 'sub-sample'])
+    df0['div'] = np.nanmean(np.array([np.abs(df0['norm_v1'] - 1.),
+                                      np.abs(df0['norm_v2'] - 1.)]), axis=0 )
+    df0 = (df0.groupby('Model')['div'].sum().sort_values()
+              .drop(index='Medlyn-LWP'))
+    df0.rename(index={'SOX': 'Eller', 'CGainNet': 'CGain'}, inplace=True)
+
+    return df0.index.to_list()
+
+
+def update_model_names(df, models):
+
+    # replace the model names
+    df.replace({'Model': {'SOX': 'Eller', 'CGainNet': 'CGain'}}, inplace=True)
+    df.Model = df.Model.astype('category')
+    df.Model.cat.set_categories(models, inplace=True)
 
     return df
 
@@ -351,6 +362,30 @@ def scaled_data(data, sc=0.5):
         datas = np.asarray([e for ee in datas for e in ee])
 
     return datas
+
+
+def parameter_names(df):
+
+    pdf = df.copy().replace({'p1': {'kmax': r'$k_{max}$', 'g1T': r'$g_{1,Tuz}$',
+                                    'kmaxS1': r'$k_{max}$',
+                                    'Lambda': r'$\lambda$', 'Alpha': '$a$',
+                                    'kmaxLC': r'$k_{max}$',
+                                    'kmaxS2': r'$k_{max}$',
+                                    'krlC': r'$k_{rl}$', 'krlM': r'$k_{rl}$'}})
+    params = [[pdf.loc[i, 'p1'], pdf.loc[i, 'p2']] for i in range(len(pdf))]
+    params = [str(e) for ee in params for e in ee
+              if str(e) not in ['nan', 'kmaxCN', 'kmaxWUE']]
+
+    # deal with special characters and font case
+    params[params.index('PrefT')] = r'$\varPsi_{ref}$'
+    params[params.index('Beta')] = '$b$'  # I should be able to put those in laterss
+    params[params.index('beta')] = r'$\varpi$'
+    params[params.index('BoA')] = r'$\eta$'
+    params[params.index('ksc_prev')] = r'$k_{\varPsi_l(t_0)}$'
+    params[params.index('PcritC')] = r'$\varPsi_{\varphi,lim}$'
+    params[params.index('PcritM')] = r'$\varPsi_{\varphi,lim}$'
+
+    return params
 
 
 def slice_vplot(vplot, side, ec=None, alpha=0.7):
@@ -435,8 +470,7 @@ def custom_legend(calibs, orientation):
     return leg
 
 
-def calib_info_plot(df1, df2, df3, models, calibs='wet',
-                    orientation='landscape'):
+def calib_info_plot(df1, df2, df3, calibs='wet', orientation='landscape'):
 
     # user-defined plot attributes
     vscale = 0.45  # scaling factor around the median
@@ -460,10 +494,13 @@ def calib_info_plot(df1, df2, df3, models, calibs='wet',
     fs = (6., 3.)
 
     if orientation == 'portrait':
-        fs = (3.5, 5.)
+        fs = (3.25, 6.)
 
     # declare the figure and the axes
     fig, ax = plt.subplots(nrows=1, figsize=fs)
+
+    # model order?
+    models = automate_model_order(df1.copy())
 
     # modify and order model names across all dfs
     df1 = update_model_names(df1, models)
@@ -484,6 +521,9 @@ def calib_info_plot(df1, df2, df3, models, calibs='wet',
     df3, w, i = sorted_data(df3, norm_wet=w, norm_inter=i)
     best_w = scaled_data(w, sc=vscale)
     best_i = scaled_data(i, sc=vscale)
+
+    # param names in model order?
+    params = parameter_names(w)
 
     # where are there 2nd params?
     all = np.array([i for i in range(len(wet1)) if np.nansum(wet1[i]) != 0.])
@@ -596,20 +636,20 @@ def calib_info_plot(df1, df2, df3, models, calibs='wet',
 
     else:
         ax.legend(handles=custom_legend(calibs, orientation), loc=1,
-                  bbox_to_anchor=[1., 1.015])
+                  bbox_to_anchor=[1., 1.01])
 
     # add grid and format the axes
-    ppos = np.asarray([0.25, 0.5, 0.9, 1., 1.1, 2., 4.])
+    lpos = np.asarray([0.25, 0.5, 0.9, 1., 1.1, 2., 4.])
     mpos = np.copy(pos)
     mpos[isec - 1] += (mpos[isec] - mpos[isec - 1] ) / 2.
     mpos = np.delete(mpos, isec)
     mlines = np.copy(pos) + pscale / 2.
     mlines[isec] += pspace * 2. / 3.
     mlines = np.delete(mlines, isec - 1)
-    custom_grid(mlines, -(vscale ** ppos), ax, orientation)
+    custom_grid(mlines, -(vscale ** lpos), ax, orientation)
 
     if orientation == 'landscape':
-        ax.set_yticks(-(vscale ** ppos))
+        ax.set_yticks(-(vscale ** lpos))
         ax.set_ylim(bottom=-(vscale ** 0.15))  # crops the data but looks nicer
         ax.set_ylim(top=-(vscale ** 4.5))  # crops the data but looks nicer
 
@@ -623,7 +663,7 @@ def calib_info_plot(df1, df2, df3, models, calibs='wet',
         ax.set_xticks(mpos)
 
     else:
-        ax.set_xticks(-(vscale ** ppos))
+        ax.set_xticks(-(vscale ** lpos))
         ax.set_xlim(left=-(vscale ** 0.15))  # crops the data but looks nicer
         ax.set_xlim(right=-(vscale ** 4.5))  # crops the data but looks nicer
 
@@ -634,28 +674,22 @@ def calib_info_plot(df1, df2, df3, models, calibs='wet',
             ax.set_xlim(right=-(vscale ** 4.5))  # crops the data but looks nicer
             ax.set_ylim([np.amin(pos) - 0.6, np.amax(pos) + 0.55])
 
-        ax.set_yticks(mpos)
+        ax.set_yticks(mpos + 0.15)
 
     # nicer display of the model names and normalised param values
     pvals = ['0.25', '0.5', '0.9', '', '1.1', '2', '4']
-    mnames = models[:]  # creates a copy of slice
-    idx = [i for i, e in enumerate(mnames) if '-' in e]
-    change_to = [r'WUE-$f_{\varPsi_l}$', 'SOX$_\mathrm{\mathsf{opt}}$']
-
-    for i, e in enumerate(idx):
-
-        mnames[e] = change_to[i]
-
-    if calibs == 'wet':
-        if orientation == 'landscape':
-            mnames = mnames[1:]
-
-        else:
-            mnames = mnames[:-1]
+    models[models.index('WUE-LWP')] = r'WUE-$f_{\varPsi_l}$'
+    models[models.index('SOX-OPT')] = r'SOX$_\mathrm{\mathsf{opt}}$'
 
     if orientation == 'landscape':
         ax.set_yticklabels(pvals)
-        ax.set_xticklabels(mnames, rotation=25., size=7.)
+        ax.set_xticklabels(models, va='top', rotation=25., size=7.)
+
+        for i in range(len(params)):  # add param names
+
+            t = ax.text(pos[i], -(vscale ** 0.2), params[i], va='top',
+                        ha='center')
+            t.set_bbox(dict(boxstyle='round', fc='w', ec='none', alpha=0.8))
 
         # move the y labels to the right side
         ax.yaxis.set_label_position('right')
@@ -664,9 +698,23 @@ def calib_info_plot(df1, df2, df3, models, calibs='wet',
 
     else:
         ax.set_xticklabels(pvals)
-        ax.set_yticklabels(mnames, size=7., ha='left')
+        ax.set_yticklabels(models, ha='left', va='top', size=7.)
+
+        for i in range(len(params)):  # add param names
+
+            if i != len(params) - 1:
+                t = ax.text(-(vscale ** 3.6), pos[i] - 0.175, params[i],
+                            ha='right', va='top')
+
+            else:
+                t = ax.text(-(vscale ** 1.6), pos[i] - 0.175, params[i],
+                            ha='right', va='top')
+
         ax.tick_params(axis='y', direction='in', pad=-8.)
-        plt.setp(ax.get_yticklabels(), backgroundcolor='w')
+        plt.setp(ax.get_yticklabels(), bbox=dict(boxstyle='round', fc='w',
+                                                 ec='none'))
+
+        # add param names
         ax.set_xlabel('Normalised parameter values')
 
     # remove the ticks themselves
@@ -691,10 +739,7 @@ if __name__ == "__main__":
     fname1 = 'overview_of_fits.csv'  # all the solvers' info
     fname2 = 'top_3_fits.csv'  # 3 best solvers
     fname3 = 'best_fit.csv'  # best solvers
-    models = ['Tuzet', 'Eller', 'ProfitMax', 'CGainNet', 'WUE-LWP', 'CMax',
-              'LeastCost', 'SOX-OPT', 'CAP', 'MES']
     calibs = 'both'  # or wet or inter
     orientation = 'both'  # or landscape or portrait
 
-    main(fname1, fname2, fname3, models, calibs=calibs,
-         orientation=orientation)
+    main(fname1, fname2, fname3, calibs=calibs, orientation=orientation)

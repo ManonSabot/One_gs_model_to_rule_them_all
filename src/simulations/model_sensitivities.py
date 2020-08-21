@@ -180,7 +180,7 @@ for i in range(len(dfs)):
     if not os.path.isfile(fname):  # generate the sensitivity outputs
 
         df3 = hrun(fname, dfs[i], len(dfs[i]), 'Farquhar',
-                   models=['Medlyn', 'Tuzet', 'SOX12', 'WUE', 'CGainNet',
+                   models=['Medlyn', 'Tuzet', 'SOX12', 'WUE', 'CGain',
                            'ProfitMax', 'CMax', 'LeastCost', 'CAP', 'MES'],
                    inf_gb=True)  # run the models
         #df3.columns = df3.columns.droplevel(level=1)  # drop the units
@@ -194,7 +194,7 @@ df3, __ = read_csv(fname)  # load outputs
 
 fname = os.path.join(os.path.join(os.path.join(os.path.join(base_dir, 'output'),
                      'simulations'), 'idealised'),
-                     'overview_of_sensitivities_no_NaNs.csv')
+                     'overview_of_sensitivities.csv')
 
 if not os.path.isfile(fname):
 
@@ -214,8 +214,6 @@ if not os.path.isfile(fname):
 
     # where 9999., the output is effectively 0.
     df3.replace(9999., 0., inplace=True)  # all NaNs to zero
-
-    # alternative option: reframe the problem PER each model
 
     # create a summary of outputs df
     summarise = df3.columns.to_list()

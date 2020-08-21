@@ -313,8 +313,8 @@ for file in os.listdir(ipath):  # loop over all the possibilities
     if not os.path.isfile(fname):  # create file if it doesn't exist
 
         df2 = hrun(fname, df1, len(df1.index), 'Farquhar',
-                   models=['Medlyn2', 'Tuzet', 'SOX12', 'WUE', 'CGainNet',
-                           'ProfitMax', 'CMax', 'LeastCost', 'CAP', 'MES'],
+                   models=['Medlyn2', 'Tuzet', 'SOX12', 'ProfitMax', 'WUE',
+                           'CMax', 'CGain', 'LeastCost', 'CAP', 'MES'],
                    resolution='low')
         df2.columns = df2.columns.droplevel(level=1)
 

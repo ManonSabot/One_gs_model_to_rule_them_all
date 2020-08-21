@@ -227,8 +227,8 @@ for combi in combis:  # loop over all the possibilities
     df1['sw'], df1['Ps'] = soil_water(df1, combi[1])
 
     # run the models
-    models = ['Medlyn12', 'Tuzet', 'SOX12', 'ProfitMax', 'CGainNet', 'WUE',
-              'CMax', 'LeastCost', 'CAP', 'MES']
+    models = ['Medlyn12', 'Tuzet', 'SOX12', 'ProfitMax', 'CGain', 'WUE', 'CMax',
+              'LeastCost', 'CAP', 'MES']
 
     fname = os.path.join(ofdir, '%s.csv' % (xpe))
 

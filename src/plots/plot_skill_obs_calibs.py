@@ -68,7 +68,7 @@ def which_model(short):
         lab = r'WUE-$f_{\varPsi_l}$'
 
     elif short == 'cgn':
-        lab = 'CGainNet'
+        lab = 'CGain'
 
     elif short == 'pmax':
         lab = 'ProfitMax'
