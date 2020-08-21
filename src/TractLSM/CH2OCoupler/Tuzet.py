@@ -101,8 +101,8 @@ def Tuzet(p, photo='Farquhar', res='low', threshold_conv=0.1, iter_max=40,
 
     # initialise gs over A
     g0 = 1.e-9  # g0 ~ 0, removing it entirely introduces errors
-    Cs_umol_mol = Cs * conv.MILI * conv.FROM_kPa  # umol mol-1
-    gsoA = g0 + (p.g1T * fw) / Cs_umol_mol
+    Cs_umol_mol = Cs * conv.MILI / p.Patm  # umol mol-1
+    gsoA = g0 + conv.GcvGw * (p.g1T * fw) / Cs_umol_mol
 
     # iter on the solution until it is stable enough
     iter = 0
@@ -117,8 +117,8 @@ def Tuzet(p, photo='Farquhar', res='low', threshold_conv=0.1, iter_max=40,
                                              gs_over_A=gsoA)
 
         # stomatal conductance, with fwsoil effect
-        Cs_umol_mol = Cs * conv.MILI * conv.FROM_kPa
-        gsoA = g0 + (p.g1T * fw) / Cs_umol_mol
+        Cs_umol_mol = Cs * conv.MILI / p.Patm
+        gsoA = g0 + conv.GcvGw * (p.g1T * fw) / Cs_umol_mol
         gs = np.maximum(cst.zero, conv.GwvGc * gsoA * An)
 
         # calculate new trans, gw, gb, mol.m-2.s-1
@@ -126,8 +126,8 @@ def Tuzet(p, photo='Farquhar', res='low', threshold_conv=0.1, iter_max=40,
         new_Tleaf, __ = leaf_temperature(p, trans, Tleaf=Tleaf, inf_gb=inf_gb)
 
         # new Cs (in Pa)
-        boundary_CO2 = (conv.ref_kPa * conv.FROM_MILI * An / (gb * conv.GbcvGb
-                        + gs * conv.GcvGw))
+        boundary_CO2 = p.Patm * conv.FROM_MILI * An / (gb * conv.GbcvGb +
+                                                       gs * conv.GcvGw)
         Cs = np.maximum(cst.zero, np.minimum(p.CO2, p.CO2 - boundary_CO2))
 
         # force stop when atm. conditions yield E < 0. (non-physical)
@@ -140,7 +140,7 @@ def Tuzet(p, photo='Farquhar', res='low', threshold_conv=0.1, iter_max=40,
             np.isclose(gs, cst.zero, rtol=cst.zero, atol=cst.zero))):
             break
 
-        # no convergence, iterate on leaf temperature
+        # no convergence, iterate on leaf temperature (and unstable Ci)
         Tleaf = new_Tleaf
         iter += 1
 

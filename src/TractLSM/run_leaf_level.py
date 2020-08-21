@@ -207,7 +207,7 @@ def over_time(idata, step, Nsteps, dic, photo, resolution, inf_gb):
                     dic['wue']['E'], dic['wue']['gs'], dic['wue']['gb'], \
                     dic['wue']['Tleaf'], dic['wue']['Pleaf'] = (9999.,) * 8
 
-        if 'cgn' in dic.keys():  # CGainNet
+        if 'cgn' in dic.keys():  # CGain
             try:
                 dic['cgn']['A'], dic['cgn']['Ci'], dic['cgn']['Rublim'], \
                     dic['cgn']['E'], dic['cgn']['gs'], dic['cgn']['gb'], \
@@ -388,8 +388,8 @@ def run(fname, df, Nsteps, photo, models=['Medlyn', 'ProfitMax'],
         dic['wue'] = subdic.copy()
         output_dic['wue'] = subdic2.copy()
 
-    # CGainNet model
-    if ('CGainNet' in models) or ('CGainNet'.lower() in models):
+    # CGain model
+    if ('CGain' in models) or ('CGain'.lower() in models):
         dic['cgn'] = subdic.copy()
         output_dic['cgn'] = subdic2.copy()
 

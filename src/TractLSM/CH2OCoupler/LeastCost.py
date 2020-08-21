@@ -122,7 +122,7 @@ def least_cost(p, photo='Farquhar', res='low', inf_gb=False):
 
     # expression of optimization
     Ci, mask = Ci_sup_dem(p, trans, photo=photo, res=res, inf_gb=inf_gb)
-    expr = np.abs(dEoAdXi(p, trans[mask], Ci, inf_gb=inf_gb) + p.BoA *
+    expr = np.abs(dEoAdXi(p, trans[mask], Ci, inf_gb=inf_gb) + p.Eta *
                   dVmaxoAdXi(p, trans[mask], Ci, inf_gb=inf_gb))
 
     # deal with edge cases by rebounding the solution

@@ -145,7 +145,7 @@ def supply_max(p, photo='Farquhar', case=1, res='low', threshold_conv=0.1,
             dA = As - Acol  # ambient - colimitation
 
             # dAdCi (in mol H2O) is needed to calculate gs, mmol-1 m-2 s-1
-            dAdCi = dA * conv.GwvGc / (dCi * conv.FROM_kPa)
+            dAdCi = dA * conv.GwvGc * p.Patm / dCi
 
             # kcost, unitless
             cost_pd, __ = kcost(p, Pleaf_pd, Pleaf_pd)
@@ -157,7 +157,7 @@ def supply_max(p, photo='Farquhar', case=1, res='low', threshold_conv=0.1,
             dkcostdP = dkcost / dP * 1. / cost_pd  # MPa-1
 
             # xi, the loss of xylem cost of stomatal opening, mmol m-2 s-1
-            dq = Dleaf * conv.FROM_kPa  # unitless, equivalent to D / Patm
+            dq = Dleaf / p.Patm  # unitless, equivalent to D / Patm
             Xi = 2. * p.kmaxS1 * (cost_pd ** 2.) * dP / (dq * dkcost)
 
             # calculate gs at the co-limitation point, mmol m-2 s-1
@@ -209,8 +209,8 @@ def supply_max(p, photo='Farquhar', case=1, res='low', threshold_conv=0.1,
             Ci = Cs - p.Patm * conv.FROM_MILI * An / (conv.GcvGw * gs)  # Pa
 
         # new Cs (in Pa)
-        boundary_CO2 = (conv.ref_kPa * conv.FROM_MILI * An /
-                        (gb * conv.GbcvGb + gs * conv.GcvGw))
+        boundary_CO2 = p.Patm * conv.FROM_MILI * An / (gb * conv.GbcvGb +
+                                                       gs * conv.GcvGw)
         Cs = np.maximum(cst.zero, np.minimum(p.CO2, p.CO2 - boundary_CO2))
 
         if (np.isclose(trans, cst.zero, rtol=cst.zero, atol=cst.zero) or

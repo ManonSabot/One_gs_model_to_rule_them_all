@@ -82,7 +82,7 @@ def Cgain_plc(p, photo='Farquhar', res='low', inf_gb=False):
     # expression of optimization
     cost = fPLC(p, P)
     Ci, mask = Ci_sup_dem(p, trans, photo=photo, res=res, inf_gb=inf_gb)
-    expr = A_trans(p, trans[mask], Ci, inf_gb=inf_gb) - p.beta * cost[mask]
+    expr = A_trans(p, trans[mask], Ci, inf_gb=inf_gb) - p.Kappa * cost[mask]
 
     # deal with edge cases by rebounding the solution
     gc, gs, gb, __ = leaf_energy_balance(p, trans[mask], inf_gb=inf_gb)

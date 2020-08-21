@@ -233,7 +233,7 @@ def Ci_sup_dem(p, trans, photo='Farquhar', res='low', Vmax25=None, phi=None,
                                         Vmax25=Vmax25, inf_gb=inf_gb)
 
     # Cs < Ca, used to ensure physical solutions
-    boundary_CO2 = (conv.ref_kPa * conv.FROM_MILI * A_ref / (gb * conv.GbcvGb +
+    boundary_CO2 = (p.Patm * conv.FROM_MILI * A_ref / (gb * conv.GbcvGb +
                     gs * conv.GcvGw))
     Cs = np.minimum(p.CO2, p.CO2 - boundary_CO2)  # Pa
 
