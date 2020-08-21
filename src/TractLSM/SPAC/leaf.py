@@ -419,7 +419,7 @@ def quad(a, b, c, large_root=True):
         return 0.5 * (-b - (b ** 2. - 4. * a * c) ** 0.5) / a
 
 
-def quad_solve_Ci(Cs, gs_over_A, Rleaf, gamstar, v1, v2):
+def quad_solve_Ci(p, Cs, gs_over_A, Rleaf, gamstar, v1, v2):
 
     """
     Solves for Ci starting from Cs, according to the standard quadratic
@@ -452,9 +452,9 @@ def quad_solve_Ci(Cs, gs_over_A, Rleaf, gamstar, v1, v2):
     """
 
     # unit conversions, from Pa to μmol mol-1
-    Csi = Cs * conv.MILI * conv.FROM_kPa
-    gammastar = gamstar * conv.MILI * conv.FROM_kPa
-    V2 = v2 * conv.MILI * conv.FROM_kPa
+    Csi = Cs * conv.MILI / p.Patm
+    gammastar = gamstar * conv.MILI / p.Patm
+    V2 = v2 * conv.MILI / p.Patm
 
     g0 = 1.e-9  # removing g0 introduces a solving error
 
@@ -464,10 +464,10 @@ def quad_solve_Ci(Cs, gs_over_A, Rleaf, gamstar, v1, v2):
     c = - ((1. - Csi * gs_over_A) * (v1 * gammastar + V2 * Rleaf) + g0 * V2 *
            Csi)
 
-    ref_root = quad(a, b, c) * conv.ref_kPa * conv.FROM_MILI
+    ref_root = quad(a, b, c) * p.Patm * conv.FROM_MILI
 
     if (ref_root > Cs) or (ref_root < cst.zero):
-        return quad(a, b, c, large_root=False) * conv.ref_kPa * conv.FROM_MILI
+        return quad(a, b, c, large_root=False) * p.Patm * conv.FROM_MILI
 
     else:
         return ref_root
@@ -623,7 +623,7 @@ def calc_photosynthesis(p, trans, Ci_s, photo, smooth=True, Tleaf=None,
 
     # rubisco-limited photosynthesis rate (De Pury & Farquhar, 1997)
     if gs_over_A is not None:
-        Ci = quad_solve_Ci(Ci_s, gs_over_A, Rleaf, gamstar, Vmax, Km)
+        Ci = quad_solve_Ci(p, Ci_s, gs_over_A, Rleaf, gamstar, Vmax, Km)
         Ci_c = Ci  # track Ci to know which one was used
 
     if given_gs:
@@ -654,7 +654,7 @@ def calc_photosynthesis(p, trans, Ci_s, photo, smooth=True, Tleaf=None,
         J = (1. - p.tau_l - p.albedo_l) * p.alpha * p.PPFD
 
     if gs_over_A is not None:
-        Ci = quad_solve_Ci(Ci_s, gs_over_A, Rleaf, gamstar, J, 2. * gamstar)
+        Ci = quad_solve_Ci(p, Ci_s, gs_over_A, Rleaf, gamstar, J, 2. * gamstar)
 
     if given_gs:
         Aj = quad(1., Rleaf - J - (Ci + 2. * gamstar) * gsc / (p.Patm *
