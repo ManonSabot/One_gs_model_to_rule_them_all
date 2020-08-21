@@ -47,25 +47,25 @@ class default_params(object):  # default inputs needed to run model
     def __init__(self):
 
         # information used by the weather generator
-        self.doy = 180.  # day of the year
-        self.tmin = 2.  # degC
-        self.tmax = 24.  # degC
+        self.doy = 150.  # day of the year
+        self.tmin = 5.  # degC
+        self.tmax = 25.  # degC
         self.rain_day = 0.  # mm d-1
         self.RH = 30.  # relative humidity, %
-        self.sw_rad_day = 1080. * 12.  # W m-2, for 12 daylight hours
+        self.sw_rad_day = 1080. * 10.  # W m-2, for 10 daylight hours
         self.Patm = 101.325  # kPa
         self.u = 2.  # m s-1
 
-        # location is generally important!
-        self.lat = 38.569120
-        self.lon = -80.018519
+        # location of the former Duke FACE
+        self.lat = 36.
+        self.lon = -79.
 
         # gas concentrations
         self.CO2 = 41.55  # Pa, ~410 ppm as of early 2020
         self.O2 = 20.8  # kPa
 
         # photosynthesis related
-        self.Vmax25 = 34.  # max carboxyl rate @ 25 degC (umol m-2 s-1)
+        self.Vmax25 = 35.  # max carboxyl rate @ 25 degC (umol m-2 s-1)
         self.gamstar25 = 4.22  # CO2 compensation point @ 25 degC (Pa)
         self.Tref = 25.  # ref T for Vmax25, gamstar, deltaS, Hd
         self.JV = 1.67  # Jmax25 to Vmax25 ratio (Medlyn et al., 2002)
@@ -111,9 +111,9 @@ class default_params(object):  # default inputs needed to run model
         # stomata
         self.g1 = 2.4942  # sensitivity of gs to VPD and An (kPa0.5)
         self.g1T = 3.5  # sensitivity of gs to LWP and An (unitless)
-        self.beta = 5.  # max water use in C units (umol m-2 s-1)
+        self.Kappa = 5.  # max water use in C units (umol m-2 s-1)
         self.Lambda = 5.  # WUE term (mol H2O mol-1 C)
-        self.BoA = 200.  # cost of Rd:Vcmax to cost of sapwood:E (unitless)
+        self.Eta = 200.  # cost of Rd:Vcmax to cost of sapwood:E (unitless)
 
         # hydraulics
         self.P50 = 3.13  # xylem pressure at P50 (-MPa) - P. tadea
@@ -142,7 +142,7 @@ class default_params(object):  # default inputs needed to run model
         self.PcritC = -self.P50  # critical LWP for stomatal closure (MPa)
         self.PcritM = -self.P50  # critical LWP for stomatal closure (MPa)
         self.Alpha = 5.  # coef of parabolic cost function (mol m-2 s-1 MPa-2)
-        self.Beta = 5.  # coef of parabolic cost function (mol m-2 s-1 MPa-1)
+        self.Beta = 1.  # coef of parabolic cost function (mol m-2 s-1 MPa-1)
 
         # soil
         self.ground_area = 1.  # m2

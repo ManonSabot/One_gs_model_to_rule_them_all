@@ -100,19 +100,25 @@ def soil_water(df, profile):
     track = 1
 
     if profile == 'wet':
+        start = sw[0]
         rate = -1.5 / len(df) * (np.log(sw[0]) - np.log(df['fc'][0]))
         sw_min = (sw[0] + df['fc'][0]) / 2.25
 
     if profile == 'inter':
-        rate = -8. / len(df) * (np.log(sw[0]) - np.log(df['fc'][0]))
+        start = 0.9 * sw[0]
+        rate = -4. / len(df) * (np.log(sw[0]) - np.log(df['fc'][0]))
         sw_min = (df['fc'][0] + df['pwp'][0]) / 2.
 
     for i in range(len(df)):
 
-        sw[i] = sw[i-1]
+        if i == 0:
+            sw[i] = start
+
+        else:
+            sw[i] = sw[i-1]
 
         if df['PPFD'].iloc[i] > 50.:
-            sw[i] = np.maximum(sw[0] / (1. - rate * track), sw_min)
+            sw[i] = np.maximum(start / (1. - rate * track), sw_min)
             track += 1
 
     # now get the soil water potentials matching the soil moisture profile
@@ -134,7 +140,6 @@ def check_X_Y(swaters):
     if not os.path.isfile(fname1):  # create file if it doesn't exist
         params = InForcings().defparams
         params.doy = random.randrange(92, 275)  # random day within GS
-        params.doy = 183
         InForcings().run(fname1, params, Ndays=7*4)
 
     for profile in swaters:
@@ -185,6 +190,7 @@ def subsample(training, target, sample):
 
         ssub = np.asarray(training.loc[training['doy'].isin(sub)].index)
 
+        """
         # there are small differences in day time hours... same sizes?
         if sample > 1:  # the first distribution is the reference size
             ref = np.load(fname.replace('%d.npy' % (sample), '1.npy'))
@@ -202,6 +208,7 @@ def subsample(training, target, sample):
             if diff < 0:  # randomly remove the excess
                 rm = np.random.randint(0, len(ssub), size=abs(diff))
                 ssub = np.delete(ssub, rm)
+        """
 
         np.save(fname, ssub)
 
@@ -265,8 +272,8 @@ def prep_training_N_target(profile, sub=None):
 
 #==============================================================================
 
-to_fit = False
-sample = None # None, 1, 2, or 3
+to_fit = True
+sample = 3 # None, 1, 2, or 3
 
 swaters = ['wet', 'inter']  # two different soil moisture profiles
 
@@ -278,13 +285,13 @@ odf = pd.DataFrame(columns=['Model', 'training', 'solver', 'BIC', 'Rank', 'p1',
 base_dir = get_main_dir()  # working paths
 
 check_X_Y(swaters)  # check that the training calibration files exist
-exit(1)
 
 if to_fit:
 
     for swater in swaters:  # loop over the training soil moisture profiles
 
         X, Y = prep_training_N_target(swater, sub=sample)
+        
         opath = os.path.join(os.path.join(os.path.join(base_dir, 'output'),
                              'calibrations'), 'idealised')
 

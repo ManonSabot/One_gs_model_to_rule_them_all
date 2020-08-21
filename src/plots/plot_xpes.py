@@ -115,23 +115,30 @@ def soil_water(df, profile):
     track = 1
 
     if profile == 'wet':
+        start = sw[0]
         rate = -1.5 / len(df) * (np.log(sw[0]) - np.log(df['fc'][0]))
         sw_min = (sw[0] + df['fc'][0]) / 2.25
 
     if profile == 'inter':
-        rate = -8. / len(df) * (np.log(sw[0]) - np.log(df['fc'][0]))
+        start = 0.9 * sw[0]
+        rate = -4. / len(df) * (np.log(sw[0]) - np.log(df['fc'][0]))
         sw_min = (df['fc'][0] + df['pwp'][0]) / 2.
 
     if profile == 'dry':
-        rate = -16. / len(df) * (np.log(sw[0]) - np.log(df['fc'][0]))
+        start = 0.8 * sw[0]
+        rate = -12. / len(df) * (np.log(sw[0]) - np.log(df['fc'][0]))
         sw_min = df['pwp'][0] / 2.
 
     for i in range(len(df)):
 
-        sw[i] = sw[i-1]
+        if i == 0:
+            sw[i] = start
+
+        else:
+            sw[i] = sw[i-1]
 
         if df['PPFD'].iloc[i] > 50.:
-            sw[i] = np.maximum(sw[0] / (1. - rate * track), sw_min)
+            sw[i] = np.maximum(start / (1. - rate * track), sw_min)
             track += 1
 
     # now get the soil water potentials matching the soil moisture profile
@@ -295,7 +302,7 @@ def plot_forcings(df, fname, title=""):
     axes[4].tick_params(direction='in')
 
     render_ylabels(axes[0], 'PAR', 'W m$^{-2}$')
-    render_ylabels(axes[4], 'PAR', r'$\si{\micro}$mol m$^{-2}$ s$^{-1}$')
+    render_ylabels(axes[4], 'PAR', r'$\mu$mol m$^{-2}$ s$^{-1}$')
     render_ylabels(axes[1], 'Air temperature', '$^\circ$C')
     render_ylabels(axes[2], 'Vapour pressure deficit', 'kPa')
     #axes[0].set_ylabel(r'PAR (W m$^{-2}$)')
@@ -1141,7 +1148,8 @@ plot_impact_summary4('summary_impacts_4.png', df)
 """
 
 # path to input data
-fname1 = os.path.join(ifdir, 'wet_calibration.csv')
+#fname1 = os.path.join(ifdir, 'wet_calibration.csv')
+fname1 = os.path.join(ifdir, 'training_x.csv')
 df1, __ = read_csv(fname1)
 
 # initialise soil moisture forcings
