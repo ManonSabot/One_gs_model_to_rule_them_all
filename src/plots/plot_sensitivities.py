@@ -51,39 +51,45 @@ class plt_setup(object):
     def __init__(self):
 
         # saving the figure
-        plt.rcParams['savefig.dpi'] = 200.  # resolution
+        plt.rcParams['savefig.dpi'] = 1200.  # resolution
         plt.rcParams['savefig.bbox'] = 'tight'  # no excess side padding
         plt.rcParams['savefig.pad_inches'] = 0.05  # padding to use
         plt.rcParams['savefig.jpeg_quality'] = 100
-        plt.style.use('seaborn-ticks')
 
         # figure spacing
         plt.rcParams['figure.subplot.wspace'] = 0.6
         plt.rcParams['figure.subplot.hspace'] = 0.4
 
         # colors
-        plt.rcParams['axes.prop_cycle'] = cycler(color=['#8da0cb', '#66c2a5',
-                                                        '#fc8d62'])
+        plt.rcParams['axes.facecolor'] = '#d9d9d9'
+        plt.rcParams['axes.edgecolor'] = 'w'
+        plt.rcParams['axes.prop_cycle'] = cycler(color=['#fc8d62', '#7570b3',
+                                                        '#1b9e77'])
 
         # labels, text, annotations
         plt.rcParams['text.usetex'] = True  # use LaTeX
-        plt.rcParams['text.latex.preamble'] = [r'\usepackage{avant}',
-                                               r'\usepackage{mathpazo}',
+        main_font = r'\usepackage[sfdefault,light]{merriweather}'
+        plt.rcParams['text.latex.preamble'] = [main_font,
+                                               r'\usepackage{mathpazo}'
                                                r'\usepackage{amsmath}']
-        plt.rcParams['axes.titlesize'] = 9.
-        plt.rcParams['xtick.labelsize'] = 6.
-        plt.rcParams['ytick.labelsize'] = 6.
+        plt.rcParams['font.size'] = 8.
+        plt.rcParams['axes.labelsize'] = 7.
+        plt.rcParams['xtick.labelsize'] = 7.
+        plt.rcParams['ytick.labelsize'] = 7.
 
         # lines
         plt.rcParams['lines.linewidth'] = 0.9
 
         # grid
-        plt.rcParams['grid.color'] = 'grey'
-        plt.rcParams['grid.linewidth'] = 0.25
+        plt.rcParams['axes.linewidth'] = 0.75
+        plt.rcParams['grid.color'] = plt.rcParams['axes.edgecolor']
+        plt.rcParams['grid.linewidth'] = plt.rcParams['axes.linewidth']
 
         # legend
         plt.rcParams['legend.fontsize'] = 7.
+        plt.rcParams['legend.facecolor'] = 'w'
         plt.rcParams['legend.edgecolor'] = 'w'
+        plt.rcParams['legend.borderpad'] = 0.
 
 
 def dominant_features(df):
@@ -234,7 +240,6 @@ def plot_sensitivities(df, figname):
             for driver, e in zip(drivers, idxs):
 
                 values += [sub[sub['driver'] == driver][e].values[0]]
-                #xlabels += ['%s*' % (driver) if e == 'ST' else driver]
                 xlabels += [driver]
 
             try:
@@ -250,14 +255,11 @@ def plot_sensitivities(df, figname):
 
                 # setup ticks and labels
                 plt.xticks(angles[:-1], xlabels)
-                plt.yticks([0.25, 0.5, 0.75], [])
-                plt.ylim(0., 1.)
+                ax.set_ylim(0., 1.)
 
                 # draw lines angles and labels
-                ax.set_rlabel_position(0)  # y is radially centered around 0
+                ax.set_rgrids([0., 0.25, 0.5, 0.75, 1], [])
                 ax.set_thetagrids(np.degrees(angles), xlabels)
-                ax.spines['polar'].set_color(plt.rcParams['grid.color'])
-                ax.spines['polar'].set_linewidth(plt.rcParams['grid.linewidth'])
 
                 # adjust label alignment based on where it is in the circle
                 for label, angle in zip(ax.get_xticklabels(), angles):
@@ -272,18 +274,17 @@ def plot_sensitivities(df, figname):
                     label.set_horizontalalignment('right')
 
                 if var == 'gs':
-                    var = 'S$_T$($g_{s}$)'
+                    var = '$g_s$'
 
                 if var == 'Pleaf':
-                    var = r'S$_T$($\varPsi_{l}$)'
+                    var = r'$\varPsi_{l}$'
 
                 if var == 'Ci':
-                    var = r'S$_T$($C_{i}$)'
+                    var = r'$C_i$'
 
                 # plot the data
-                l = ax.plot(angles, values)
-                ax.fill(angles, values, ec=l[0].get_color(), alpha=0.2,
-                        label=var)
+                l = ax.plot(angles, values, label=var)
+                ax.fill(angles, values, ec=l[0].get_color(), alpha=0.3)
 
 
                 if mod == 'gs2':
@@ -301,24 +302,21 @@ def plot_sensitivities(df, figname):
         ax.tick_params(axis='x', which='major', pad=-9.)
 
         if iter == 2:
-            ax.legend(loc=1, bbox_to_anchor=(-0.75, 0.9))
+            ax.legend(loc=1, bbox_to_anchor=(-0.75, 0.9), facecolor='w')
 
         iter += 1
 
-    ax = fig.add_axes([0.125, 0.7, 0.06, 0.06], projection='polar')
+    ax = fig.add_axes([0.125, 0.8, 0.06, 0.06], projection='polar')
     ax.set_zorder(-1)
 
     # setup ticks and labels
+    ax.set_rlabel_position(45)
     ax.set_rgrids([0., 0.25, 0.5, 0.75, 1], ['0', '', '', '', '1'])
-    plt.ylim(0., 1.)
+    ax.set_rmax(1.)
 
     # draw lines angles
-    ax.set_thetagrids(np.degrees([0, 45, 90]), [])
-    ax.set_thetamin(-90)
-    ax.set_thetamax(0)
-
-    ax.spines['polar'].set_color(plt.rcParams['grid.color'])
-    ax.spines['polar'].set_linewidth(plt.rcParams['grid.linewidth'])
+    ax.set_thetagrids(np.degrees([0, -45]), [])
+    plt.title('Reading Key:', fontsize=6.)
 
     fig.savefig(figname)
     plt.close()
@@ -332,10 +330,10 @@ base_dir = get_main_dir()
 figname = os.path.join(os.path.join(os.path.join(base_dir, 'output'),
                        'plots'), 'model_sensitivities_total.png')
 
-if not os.path.isfile(figname):
-    fname = os.path.join(os.path.join(os.path.join(os.path.join(base_dir,
+#if not os.path.isfile(figname):
+fname = os.path.join(os.path.join(os.path.join(os.path.join(base_dir,
                          'output'), 'simulations'), 'idealised'),
                          'overview_of_sensitivities.csv')
-    df = (pd.read_csv(fname, header=[0]).dropna(axis=0, how='all')
+df = (pd.read_csv(fname, header=[0]).dropna(axis=0, how='all')
             .dropna(axis=1, how='all').squeeze())
-    plot_sensitivities(df, figname)
+plot_sensitivities(df, figname)
