@@ -690,19 +690,18 @@ def add_vars_to_csv(df, site, species):
 
     """
 
-    columns = ['Patm', 'u', 'CO2', 'O2', 'Vmax25', 'gamstar25', 'Tref', 'JV',
-               'Rlref', 'TRlref', 'Kc25', 'Ko25', 'alpha', 'c1', 'c2', 'c3',
-               'c4', 'eps_l', 'albedo_l', 'tau_l', 'chi_l', 'kn', 'Ev', 'Ej',
-               'Egamstar', 'Ec', 'Eo', 'deltaSv', 'deltaSj', 'Hdv', 'Hdj',
-               'height', 'LAI', 'max_leaf_width', 'g1', 'g1T', 'Kappa',
-               'Lambda', 'Eta', 'P50', 'P88', 'kmax', 'kmaxT', 'kmaxWUE',
-               'kmaxCN', 'kmaxCM', 'kmaxLC', 'kmaxS1', 'kmaxS2', 'ksc_prev',
-               'krlC', 'krlM', 'ratiocrit', 'ksrmaxC', 'ksrmaxM', 'sref',
-               'srefT', 'PrefT', 'PcritC', 'PcritM', 'Alpha', 'Beta',
-               'ground_area', 'Ztop', 'Zbottom', 'Ps', 'Psie', 'hyds',
-               'theta_sat', 'fc', 'pwp', 'bch']
-    units = ['[kPa]', '[m s-1]', '[Pa]', '[kPa]', '[umol m-2 s-1]', '[Pa]',
-             '[deg C]', '[-]', '[umol m-2 s-1]', '[deg C]', '[Pa]', '[Pa]',
+    columns = ['O2', 'Vmax25', 'gamstar25', 'Tref', 'JV', 'Rlref', 'TRlref',
+               'Kc25', 'Ko25', 'alpha', 'c1', 'c2', 'c3', 'c4', 'eps_l',
+               'albedo_l', 'tau_l', 'chi_l', 'kn', 'Ev', 'Ej', 'Egamstar',
+               'Ec', 'Eo', 'deltaSv', 'deltaSj', 'Hdv', 'Hdj', 'height', 'LAI',
+               'max_leaf_width', 'g1', 'g1T', 'Kappa', 'Lambda', 'Eta', 'P50',
+               'P88', 'kmax', 'kmaxT', 'kmaxWUE', 'kmaxCN', 'kmaxCM', 'kmaxLC',
+               'kmaxS1', 'kmaxS2', 'ksc_prev', 'krlC', 'krlM', 'ratiocrit',
+               'ksrmaxC', 'ksrmaxM', 'sref', 'srefT', 'PrefT', 'PcritC',
+               'PcritM', 'Alpha', 'Beta', 'ground_area', 'Ztop', 'Zbottom',
+               'Psie', 'hyds', 'theta_sat', 'fc', 'pwp', 'bch']
+    units = ['[kPa]', '[umol m-2 s-1]', '[Pa]', '[deg C]', '[-]',
+             '[umol m-2 s-1]', '[deg C]', '[Pa]', '[Pa]',
              '[mol(photon) mol(e-)-1]', '[-]', '[-]', '[-]', '[-]', '[-]',
              '[-]', '[-]', '[-]', '[-]', '[J mol-1]', '[J mol-1]', '[J mol-1]',
              '[J mol-1]', '[J mol-1]', '[J mol-1 K-1]', '[J mol-1 K-1]',
@@ -716,23 +715,23 @@ def add_vars_to_csv(df, site, species):
              '[mmol m-2 s-1 MPa-1]', '[-]', '[mmol m-2 s-1 MPa-1]',
              '[mmol m-2 s-1 MPa-1]', '[MPa-1]', '[MPa-1]', '[MPa]', '[MPa]',
              '[MPa]', '[mol m-2 s-1 MPa-2]', '[mol m-2 s-1 MPa-1]', '[m2]',
-             '[m]', '[m]', '[MPa]', '[MPa]', '[m s-1]', '[m3 m-3]', '[m3 m-3]',
+             '[m]', '[m]', '[MPa]', '[m s-1]', '[m3 m-3]', '[m3 m-3]',
              '[m3 m-3]', '[-]']
 
     d = default_params()
-    df2 = pd.DataFrame([(d.Patm, d.u, d.CO2, d.O2, d.Vmax25, d.gamstar25,
-                         d.Tref, d.JV, d.Rlref, d.TRlref, d.Kc25, d.Ko25,
-                         d.alpha, d.c1, d.c2, d.c3, d.c4, d.eps_l, d.albedo_l,
-                         d.tau_l, d.chi_l, d.kn, d.Ev, d.Ej, d.Egamstar, d.Ec,
-                         d.Eo, d.deltaSv, d.deltaSj, d.Hdv, d.Hdj, d.height,
-                         d.LAI, d.max_leaf_width, d.g1, d.g1T, d.Kappa,
-                         d.Lambda, d.Eta, d.P50, d.P88, d.kmax, d.kmaxT,
-                         d.kmaxWUE, d.kmaxCN, d.kmaxCM, d.kmaxLC, d.kmaxS1,
-                         d.kmaxS2, d.ksc_prev, d.krlC, d.krlM, d.ratiocrit,
-                         d.ksrmaxC, d.ksrmaxM, d.sref, d.srefT, d.PrefT,
-                         d.PcritC, d.PcritM, d.Alpha, d.Beta, d.ground_area,
-                         d.Ztop, d.Zbottom, d.Ps, d.Psie, d.hyds, d.theta_sat,
-                         d.fc, d.pwp, d.bch)], columns=columns)
+    df2 = pd.DataFrame([(d.O2, d.Vmax25, d.gamstar25, d.Tref, d.JV, d.Rlref,
+                         d.TRlref, d.Kc25, d.Ko25, d.alpha, d.c1, d.c2, d.c3,
+                         d.c4, d.eps_l, d.albedo_l, d.tau_l, d.chi_l, d.kn,
+                         d.Ev, d.Ej, d.Egamstar, d.Ec, d.Eo, d.deltaSv,
+                         d.deltaSj, d.Hdv, d.Hdj, d.height, d.LAI,
+                         d.max_leaf_width, d.g1, d.g1T, d.Kappa, d.Lambda,
+                         d.Eta, d.P50, d.P88, d.kmax, d.kmaxT, d.kmaxWUE,
+                         d.kmaxCN, d.kmaxCM, d.kmaxLC, d.kmaxS1, d.kmaxS2,
+                         d.ksc_prev, d.krlC, d.krlM, d.ratiocrit, d.ksrmaxC,
+                         d.ksrmaxM, d.sref, d.srefT, d.PrefT, d.PcritC,
+                         d.PcritM, d.Alpha, d.Beta, d.ground_area, d.Ztop,
+                         d.Zbottom, d.Psie, d.hyds, d.theta_sat, d.fc, d.pwp,
+                         d.bch)], columns=columns)
 
     df2.columns = pd.MultiIndex.from_tuples(list(zip(columns, units)))
     df = pd.concat([df, df2], axis=1)
