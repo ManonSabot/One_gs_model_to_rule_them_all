@@ -543,9 +543,9 @@ def est_one_point_vcmax(F, Photo, Ci, Tleaf, Pressure=None, Rd=None):
 
 if __name__ == "__main__":
 
-    species = 'Cochlospermum_gillivraei'
-    df1, __ = read_csv('/mnt/c/Users/le_le/Work/One_gs_model_to_rule_them_all/input/calibrations/obs_driven/ManyPeaksRange_%s_x.csv' % species)
-    df2, __ = read_csv('/mnt/c/Users/le_le/Work/One_gs_model_to_rule_them_all/input/calibrations/obs_driven/ManyPeaksRange_%s_y.csv' % species)
+    species = 'Eucalyptus_capillosa'
+    df1, __ = read_csv('/mnt/c/Users/le_le/Work/One_gs_model_to_rule_them_all/input/calibrations/obs_driven/Corrigin_%s_x.csv' % species)
+    df2, __ = read_csv('/mnt/c/Users/le_le/Work/One_gs_model_to_rule_them_all/input/calibrations/obs_driven/Corrigin_%s_y.csv' % species)
 
     deg2kelvin = 273.15
 

@@ -1,3 +1,39 @@
+Corrigin.csv
+======================
+2 species (size=N) at 1 site.s:
+Eucalyptus capillosa (270), Eucalyptus salmonophloiia (53)
+
+Hydraulic traits available for Eucalyptus capillosa
+
+Missing hydraulic traits for 1 species
+
+LWPpdmax: -3.2 MPa and LWPpdmin: -4.4 MPa across all remaining data
+
+The dataset is missing:
+PFT2v, VPD_A, VPD_L, Rdark, SWC, SWP, sampleheight, nperc, SLA, leaflen, LWP, LeafNum
+N.B: LAI is available
+N.B: height is available
+
+
+ManyPeaksRange.csv
+======================
+4 species (size=N) at 1 site.s:
+Alphitonia excelsa (167), Austromyrtus bidwillii (57), Brachychiton australis (104), Cochlospermum gillivraei (100)
+
+Hydraulic traits available for Alphitonia excelsa
+
+Hydraulic traits available for Austromyrtus bidwillii
+
+Hydraulic traits available for Brachychiton australis
+
+Hydraulic traits available for Cochlospermum gillivraei
+
+LWPpdmax: -0.175 MPa and LWPpdmin: -2.2 MPa across all remaining data
+
+The dataset is missing:
+PFT2v, VPD_A, VPD_L, RH, BLCond, Ci, Rdark, PARout, SWC, SWP, altitude, Totalheight, LAI, sampleheight, canopyposition, nperc, SLA, leafage, leafsize, leaflen, Treatment, Comments
+
+
 Panama.csv
 ======================
 9 species (size=N) at 2 site.s:
@@ -19,5 +55,55 @@ LWPpdmax: -0.325 MPa and LWPpdmin: -2.175 MPa across all remaining data
 
 The dataset is missing:
 opt, fitgroup, PFT2v, VPD_A, VPD_L, Rdark, SWC, SWP, Totalheight, LAI, sampleheight, nperc, SLA, leafage, leaflen, Season, Treatment, TreeNum, Comments
+
+
+Richmond.csv
+======================
+4 species (size=N) at 1 site.s:
+Eucalyptus cladocalyx (90), Eucalyptus dunnii (92), Eucalyptus melliodora (73), Eucalyptus saligna (78)
+
+Hydraulic traits available for Eucalyptus cladocalyx
+
+Hydraulic traits available for Eucalyptus dunnii
+
+Hydraulic traits available for Eucalyptus saligna
+
+Missing hydraulic traits for 1 species
+
+LWPpdmax: -0.05 MPa and LWPpdmin: -1.4 MPa across all remaining data
+
+The dataset is missing:
+PFT2v, VPD_A, VPD_L, Rdark, PARout, SWC, SWP, Totalheight, LAI, sampleheight, nperc, SLA, leafage, leafsize, leaflen, LeafNum
+
+
+Sevilleta.csv
+======================
+2 species (size=N) at 1 site.s:
+Juniperus monosperma (38), Pinus edulis (53)
+
+Hydraulic traits available for Juniperus monosperma
+
+Hydraulic traits available for Pinus edulis
+
+LWPpdmax: -0.8 MPa and LWPpdmin: -5.6 MPa across all remaining data
+
+The dataset is missing:
+Tregion, PFT2v, VPD_A, VPD_L, BLCond, Rdark, PARout, SWP, Totalheight, LAI, sampleheight, canopyposition, nperc, SLA, leafage, leafsize, leaflen, Season, GrowthTair, LeafNum
+N.B: SWC is available
+
+
+SouthFrance.csv
+======================
+1 species (size=N) at 2 site.s:
+Quercus ilex (32), Quercus ilex (45)
+
+Hydraulic traits available for Quercus ilex
+
+LWPpdmax: -0.35 MPa and LWPpdmin: -3.4 MPa across all remaining data
+
+The dataset is missing:
+PFT2v, VPD_A, VPD_L, BLCond, PARout, SWC, SWP, sampleheight, leafsize, leaflen, LeafNum
+N.B: LAI is available
+N.B: height is available
 
 
