@@ -80,18 +80,15 @@ def prep_training_N_target(ifile, ofile):
     df1['Rnet'] = net_radiation(df1)
     df1['scale2can'] = 1.
 
-    # exclude Rnet < 0. and reindex
-    Y = df2['gs'][df1['Rnet'] > 0.] * 1000.  # mmol m-2 s-1
-    X = df1[df1['Rnet'] > 0.]
-    X.reset_index(inplace=True, drop=True)
-    Y.reset_index(inplace=True, drop=True)
+    # in mmol m-2 s-1
+    Y = df2['gs'] * 1000.
 
-    return X, Y
+    return df1, Y
 
 
 #==============================================================================
 
-to_fit = False
+to_fit = True
 
 # declare empty dataframe which will be used to analyse the calibrations
 odf = pd.DataFrame(columns=['Model', 'training', 'solver', 'BIC', 'Rank', 'p1',
@@ -109,8 +106,11 @@ if to_fit:
     xfiles = sorted([e for e in os.listdir(ipath) if e.endswith('_x.csv')])
     yfiles = sorted([e for e in os.listdir(ipath) if e.endswith('_y.csv')])
 
-    xfiles = xfiles[8:9]
-    yfiles = yfiles[8:9]
+    xfiles = xfiles[13:14]
+    yfiles = yfiles[13:14]
+
+    #print(xfiles)
+    #exit(1)
 
     for ifile, ofile in zip(xfiles, yfiles):  # loop over the files
 
@@ -130,7 +130,7 @@ if to_fit:
             nlmfit = NLMFIT(method=test, store=out, inf_gb=False)
 
             __ = nlmfit.run(XX, Y, 'Medlyn-LWP', g1=True)
-            __ = nlmfit.run(XX, Y, 'SOX')
+            __ = nlmfit.run(XX, Y, 'Eller')
             __ = nlmfit.run(XX, Y, 'SOX-OPT')
             __ = nlmfit.run(XX, Y, 'CAP')
             __ = nlmfit.run(XX, Y, 'MES')
@@ -141,7 +141,7 @@ if to_fit:
             XX['kmax'] = fkmax['kmax']
             __ = nlmfit.run(XX, Y, 'Tuzet')
             __ = nlmfit.run(XX, Y, 'WUE-LWP')
-            __ = nlmfit.run(XX, Y, 'CGainNet')
+            __ = nlmfit.run(XX, Y, 'CGain')
             __ = nlmfit.run(XX, Y, 'CMax')
 
     exit(1)
@@ -256,13 +256,13 @@ else:  # read over the calibration files and analyse these outputs
 
                 odf.loc[idx, 'Rank'] = 1
 
-        # add params to Tuzet, WUE-LWP, CGainNet, CMax
+        # add params to Tuzet, WUE-LWP, CGain, CMax
         odf['p3'] = np.nan  # own kmax
         odf['v3'] = np.nan
 
         # specific param names on a per model basis
         odf['p2'].loc[odf['Model'] == 'WUE-LWP'] = 'kmaxWUE'
-        odf['p2'].loc[odf['Model'] == 'CGainNet'] = 'kmaxCN'
+        odf['p2'].loc[odf['Model'] == 'CGain'] = 'kmaxCN'
         odf['p3'].loc[odf['Model'] == 'Tuzet'] = 'kmaxT'
         odf['p3'].loc[odf['Model'] == 'CMax'] = 'kmaxCM'
 
@@ -278,7 +278,7 @@ else:  # read over the calibration files and analyse these outputs
 
                 idx = (sub[np.logical_and(sub['solver'] == solver,
                                          sub['Model'].isin(['WUE-LWP',
-                                                            'CGainNet']))]
+                                                            'CGain']))]
                           .index)
                 odf.loc[idx, 'v2'] = float(value)
 

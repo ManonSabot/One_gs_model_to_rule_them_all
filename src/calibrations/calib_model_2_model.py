@@ -134,6 +134,7 @@ def check_X_Y(swaters):
     if not os.path.isfile(fname1):  # create file if it doesn't exist
         params = InForcings().defparams
         params.doy = random.randrange(92, 275)  # random day within GS
+        params.doy = 183
         InForcings().run(fname1, params, Ndays=7*4)
 
     for profile in swaters:
@@ -277,6 +278,7 @@ odf = pd.DataFrame(columns=['Model', 'training', 'solver', 'BIC', 'Rank', 'p1',
 base_dir = get_main_dir()  # working paths
 
 check_X_Y(swaters)  # check that the training calibration files exist
+exit(1)
 
 if to_fit:
 
@@ -305,7 +307,7 @@ if to_fit:
             if swater == 'inter':  # no point in calibrating this when wet
                 __ = nlmfit.run(XX, Y, 'Medlyn-LWP')
 
-            __ = nlmfit.run(XX, Y, 'SOX')
+            __ = nlmfit.run(XX, Y, 'Eller')
             __ = nlmfit.run(XX, Y, 'SOX-OPT')
             __ = nlmfit.run(XX, Y, 'CAP')
             __ = nlmfit.run(XX, Y, 'MES')
@@ -316,7 +318,7 @@ if to_fit:
             XX['kmax'] = fkmax['kmax']
             __ = nlmfit.run(XX, Y, 'Tuzet')
             __ = nlmfit.run(XX, Y, 'WUE-LWP')
-            __ = nlmfit.run(XX, Y, 'CGainNet')
+            __ = nlmfit.run(XX, Y, 'CGain')
             __ = nlmfit.run(XX, Y, 'CMax')
 
         exit(1)
@@ -543,13 +545,13 @@ else:  # read over the calibration files and analyse these outputs
                            .astype(int))
         sdf = sdf[sdf['Rank'] == 1].drop(['Rank'], axis=1)
 
-        # add params to Tuzet, WUE-LWP, CGainNet, CMax
+        # add params to Tuzet, WUE-LWP, CGain, CMax
         sdf['p3'] = np.nan  # own kmax
         sdf['v3'] = np.nan
 
         # specific param names on a per model basis
         sdf['p2'].loc[sdf['Model'] == 'WUE-LWP'] = 'kmaxWUE'
-        sdf['p2'].loc[sdf['Model'] == 'CGainNet'] = 'kmaxCN'
+        sdf['p2'].loc[sdf['Model'] == 'CGain'] = 'kmaxCN'
         sdf['p3'].loc[sdf['Model'] == 'Tuzet'] = 'kmaxT'
         sdf['p3'].loc[sdf['Model'] == 'CMax'] = 'kmaxCM'
 
@@ -558,7 +560,7 @@ else:  # read over the calibration files and analyse these outputs
             sub1 = sdf[sdf['training'] == training]
             sub2 = odf[odf['training'] == training]
 
-            for m in ['WUE-LWP', 'CGainNet', 'Tuzet', 'CMax']:
+            for m in ['WUE-LWP', 'CGain', 'Tuzet', 'CMax']:
 
                 solver = sub1[sub1['Model'] == m].solver.values[0]
                 kval = (sub2[np.logical_and(sub2['solver'] == solver,
@@ -566,7 +568,7 @@ else:  # read over the calibration files and analyse these outputs
                 idx = sub1[np.logical_and(sub1['Model'] == m,
                                           sub1['solver'] == solver)].index
 
-                if m in ['WUE-LWP', 'CGainNet']:
+                if m in ['WUE-LWP', 'CGain']:
                     sdf.loc[idx, 'v2'] = float(kval)
 
                 else:

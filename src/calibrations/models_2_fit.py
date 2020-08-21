@@ -60,15 +60,16 @@ def floop(p, model, photo='Farquhar', inf_gb=True):
         P, trans = hydraulics(p, kmax=p.kmaxT)  # hydraulics
         fw = fLWP(p, p.Psie)  # moisture stress function
 
-    if 'SOX' not in model: # initialise gs over A
+    if (model == 'Medlyn-LWP') or (model == 'Tuzet'): # init. gs over A
         g0 = 1.e-9  # g0 ~ 0, removing it entirely introduces errors
         Cs_umol_mol = Cs * conv.MILI / p.Patm  # umol mol-1
 
         if model == 'Medlyn-LWP':
-            gsoA = g0 + (1. + p.g1 * fw / (Dleaf ** 0.5)) / Cs_umol_mol
+            gsoA = g0 + (conv.GcvGw * (1. + p.g1 * fw / (Dleaf ** 0.5))
+                         / Cs_umol_mol)
 
         else:
-            gsoA = g0 + (p.g1T * fw) / Cs_umol_mol
+            gsoA = g0 + conv.GcvGw * (p.g1T * fw) / Cs_umol_mol
 
     # iter on the solution until it is stable enough
     iter = 0
@@ -79,7 +80,7 @@ def floop(p, model, photo='Farquhar', inf_gb=True):
             Pleaf = P[np.nanargmin(np.abs(trans - E))]
             fw = fLWP(p, Pleaf)
 
-        if model == 'SOX':
+        if model == 'Eller':
             Cicol = calc_colim_Ci(p, Cs, Tleaf, photo)
             dCi = Cs - Cicol  # Pa
 
@@ -151,10 +152,11 @@ def floop(p, model, photo='Farquhar', inf_gb=True):
             Cs_umol_mol = Cs * conv.MILI / p.Patm
 
             if model == 'Medlyn-LWP':
-                gsoA = g0 + (1. + p.g1 * fw / (Dleaf ** 0.5)) / Cs_umol_mol
+                gsoA = g0 + (conv.GcvGw * (1. + p.g1 * fw / (Dleaf ** 0.5))
+                             / Cs_umol_mol)
 
             else:
-                gsoA = g0 + (p.g1T * fw) / Cs_umol_mol
+                gsoA = g0 + conv.GcvGw * (p.g1T * fw) / Cs_umol_mol
 
             gs = np.maximum(cst.zero, conv.GwvGc * gsoA * An)
 
@@ -162,7 +164,7 @@ def floop(p, model, photo='Farquhar', inf_gb=True):
         E, real_zero, gw, gb, Dleaf = calc_trans(p, Tleaf, gs, inf_gb=inf_gb)
         new_Tleaf, __ = leaf_temperature(p, E, Tleaf=Tleaf, inf_gb=inf_gb)
 
-        if model == 'SOX':  # calculate An
+        if model == 'Eller':  # calculate An
             An, __, __ = calc_photosynthesis(p, 0., Cs, photo, Tleaf=Tleaf,
                                              gsc=conv.U * conv.GcvGw * gs)
 
@@ -185,9 +187,9 @@ def floop(p, model, photo='Farquhar', inf_gb=True):
             real_zero = None
 
         # check for convergence
-        if ((real_zero is None) or (iter > 40) or ((iter > 1) and real_zero and
-           (abs(Tleaf - new_Tleaf) <= 0.1) and not np.isclose(gs, cst.zero,
-           rtol=cst.zero, atol=cst.zero))):
+        if ((real_zero is None) or (iter > 40) or ((iter > 1) and real_zero
+            and (abs(Tleaf - new_Tleaf) <= 0.1) and not
+            np.isclose(gs, cst.zero, rtol=cst.zero, atol=cst.zero))):
             break
 
         # no convergence, iterate on leaf temperature
@@ -235,12 +237,12 @@ def fmtx(p, model, photo='Farquhar', inf_gb=True):
     elif (model != 'CAP') and (model != 'MES'):
         Ci, mask = Ci_sup_dem(p, trans, photo=photo, inf_gb=inf_gb)
 
-    if model == 'CGainNet':
+    if model == 'CGain':
         cost = fPLC(p, P[mask])
-        expr = A_trans(p, trans[mask], Ci, inf_gb=inf_gb) - p.beta * cost
+        expr = A_trans(p, trans[mask], Ci, inf_gb=inf_gb) - p.Kappa * cost
 
     if model == 'LeastCost':
-        expr = np.abs(dEoAdXi(p, trans[mask], Ci, inf_gb=inf_gb) + p.BoA *
+        expr = np.abs(dEoAdXi(p, trans[mask], Ci, inf_gb=inf_gb) + p.Eta *
                       dVmaxoAdXi(p, trans[mask], Ci, inf_gb=inf_gb))
 
     # leaf energy balance
@@ -282,7 +284,7 @@ def fmtx(p, model, photo='Farquhar', inf_gb=True):
         check = expr[np.logical_and(gc[mask] > cst.zero, gs[mask] < 1.5 * gb)]
 
     try:
-        if (model == 'ProfitMax') or (model == 'CGainNet'):
+        if (model == 'ProfitMax') or (model == 'CGain'):
             idx = np.isclose(expr, max(check))
 
         else:
@@ -316,7 +318,7 @@ def fres(params, model, inputs, target, inf_gb):
         except ValueError:  # do not account for ancillary params
             pass
 
-    if model in ['Medlyn-LWP', 'Tuzet', 'SOX']:
+    if model in ['Medlyn-LWP', 'Tuzet', 'Eller']:
         ymodel = np.asarray([floop(inputs[step].copy(), model, inf_gb=inf_gb)
                              for step in range(len(inputs))])
 

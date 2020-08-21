@@ -65,7 +65,7 @@ class NLMFIT(object):
             if g1:
                 params.add('g1', p0.g1, min=0.05, max=20.)
 
-        if model == 'SOX':
+        if model == 'Eller':
             params.add('kmaxS1', p0.kmaxS1, min=0.01, max=30.)
 
         if model == 'ProfitMax':
@@ -84,8 +84,8 @@ class NLMFIT(object):
         if model == 'WUE-LWP':
             params.add('Lambda', p0.Lambda, min=0.1, max=100.)
 
-        if model == 'CGainNet':
-            params.add('beta', p0.beta, min=0.1, max=100.)
+        if model == 'CGain':
+            params.add('Kappa', p0.Kappa, min=0.1, max=100.)
 
         if model == 'CMax':
             params.add('Alpha', p0.Alpha, min=0.5, max=80.)
@@ -99,7 +99,7 @@ class NLMFIT(object):
 
         if model == 'LeastCost':
             params.add('kmaxLC', p0.kmaxLC, min=0.05, max=30.)
-            params.add('BoA', p0.BoA, min=0.1, max=250.)
+            params.add('Eta', p0.Eta, min=0.1, max=250.)
 
         if model == 'CAP':
             params.add('krlC', p0.krlC, min=0.05, max=100.)
