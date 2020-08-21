@@ -292,15 +292,15 @@ for training in site_spp:  # loop over the site x spp combinations
 
 for file in os.listdir(ipath):  # loop over all the possibilities
 
-    # load input data into a dataframe
-    df1, __ = read_csv(os.path.join(ipath, file))
-    df1.fillna(method='ffill', inplace=True)
-
     # output dir paths
     ofdir = os.path.join(ipath.replace('input', 'output'), 'all_site_spp')
 
     if not os.path.isdir(ofdir):
         os.makedirs(ofdir)
+
+    # load input data into a dataframe
+    df1, __ = read_csv(os.path.join(ipath, file))
+    df1.fillna(method='ffill', inplace=True)
 
     # add the necessary extra variables
     df1['Ps_pd'] = df1['Ps'].copy()  # pre-dawn Ps
@@ -311,7 +311,6 @@ for file in os.listdir(ipath):  # loop over all the possibilities
     fname = os.path.join(ofdir, '%s.csv' % (file.split('_calibrated')[0]))
 
     if not os.path.isfile(fname):  # create file if it doesn't exist
-
         df2 = hrun(fname, df1, len(df1.index), 'Farquhar',
                    models=['Medlyn2', 'Tuzet', 'SOX12', 'ProfitMax', 'WUE',
                            'CMax', 'CGain', 'LeastCost', 'CAP', 'MES'],
