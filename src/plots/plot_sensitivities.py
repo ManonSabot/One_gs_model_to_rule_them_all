@@ -61,9 +61,9 @@ class plt_setup(object):
         plt.rcParams['figure.subplot.hspace'] = 0.4
 
         # colors
-        plt.rcParams['axes.facecolor'] = '#d9d9d9'
-        plt.rcParams['axes.edgecolor'] = 'w'
-        plt.rcParams['axes.prop_cycle'] = cycler(color=['#fc8d62', '#7570b3',
+        plt.rcParams['axes.facecolor'] = 'w'
+        plt.rcParams['axes.edgecolor'] = '#aaaaaa'
+        plt.rcParams['axes.prop_cycle'] = cycler(color=['#d95f02', '#7570b3',
                                                         '#1b9e77'])
 
         # labels, text, annotations
@@ -76,19 +76,20 @@ class plt_setup(object):
         plt.rcParams['axes.labelsize'] = 7.
         plt.rcParams['xtick.labelsize'] = 7.
         plt.rcParams['ytick.labelsize'] = 7.
+        plt.rcParams['ytick.major.pad'] = -2.
 
         # lines
-        plt.rcParams['lines.linewidth'] = 0.9
+        plt.rcParams['lines.linewidth'] = 1.25
 
         # grid
-        plt.rcParams['axes.linewidth'] = 0.75
+        plt.rcParams['axes.linewidth'] = 0.5
         plt.rcParams['grid.color'] = plt.rcParams['axes.edgecolor']
         plt.rcParams['grid.linewidth'] = plt.rcParams['axes.linewidth']
 
         # legend
         plt.rcParams['legend.fontsize'] = 7.
-        plt.rcParams['legend.facecolor'] = 'w'
-        plt.rcParams['legend.edgecolor'] = 'w'
+        plt.rcParams['legend.facecolor'] = 'none'
+        plt.rcParams['legend.edgecolor'] = 'none'
         plt.rcParams['legend.borderpad'] = 0.
 
 
@@ -205,7 +206,7 @@ def which_model(short):
 def plot_sensitivities(df, figname):
 
     plt_setup()  # rendering
-    fig = plt.figure(figsize=(7., 5.))  # declaring the figure
+    fig = plt.figure(figsize=(5., 7.))  # declaring the figure
 
     iter = 2
 
@@ -214,7 +215,7 @@ def plot_sensitivities(df, figname):
                 'sox2', 'cap', 'mes']:
 
         # initialise the axis for the plot
-        ax = plt.subplot(3, 4, iter, polar=True)
+        ax = plt.subplot(4, 3, iter, polar=True)
 
         # plot in radar chart
         ax.set_theta_offset(0.5 * np.pi)
@@ -253,25 +254,35 @@ def plot_sensitivities(df, figname):
                 values += [values[0]]
                 angles += [angles[0]]
 
-                # setup ticks and labels
-                plt.xticks(angles[:-1], xlabels)
-                ax.set_ylim(0., 1.)
-
                 # draw lines angles and labels
                 ax.set_rgrids([0., 0.25, 0.5, 0.75, 1], [])
+                ax.set_ylim(0., 1.)
                 ax.set_thetagrids(np.degrees(angles), xlabels)
 
                 # adjust label alignment based on where it is in the circle
                 for label, angle in zip(ax.get_xticklabels(), angles):
 
-                  if angle in (0, np.pi):
-                    label.set_horizontalalignment('center')
+                    if angle in [0., np.pi]:
+                        label.set_horizontalalignment('center')
+                        label.set_verticalalignment('bottom')
 
-                  elif 0 < angle < np.pi:
-                    label.set_horizontalalignment('left')
+                    elif 0. < angle < np.pi:
+                        label.set_horizontalalignment('left')
 
-                  else:
-                    label.set_horizontalalignment('right')
+                        if 0. < angle < np.pi / 2.:
+                            label.set_verticalalignment('bottom')
+
+                        else:
+                            label.set_verticalalignment('top')
+
+                    else:
+                        label.set_horizontalalignment('right')
+
+                        if np.pi < angle < 3. * np.pi / 2.:
+                            label.set_verticalalignment('top')
+
+                        else:
+                            label.set_verticalalignment('bottom')
 
                 if var == 'gs':
                     var = '$g_s$'
@@ -284,7 +295,7 @@ def plot_sensitivities(df, figname):
 
                 # plot the data
                 l = ax.plot(angles, values, label=var)
-                ax.fill(angles, values, ec=l[0].get_color(), alpha=0.3)
+                ax.fill(angles, values, ec=l[0].get_color(), alpha=0.4)
 
 
                 if mod == 'gs2':
@@ -302,11 +313,11 @@ def plot_sensitivities(df, figname):
         ax.tick_params(axis='x', which='major', pad=-9.)
 
         if iter == 2:
-            ax.legend(loc=1, bbox_to_anchor=(-0.75, 0.9), facecolor='w')
+            ax.legend(loc=1, bbox_to_anchor=(-0.8, 0.55))
 
         iter += 1
 
-    ax = fig.add_axes([0.125, 0.8, 0.06, 0.06], projection='polar')
+    ax = fig.add_axes([0.18, 0.81, 0.075, 0.075], projection='polar')
     ax.set_zorder(-1)
 
     # setup ticks and labels
@@ -316,7 +327,7 @@ def plot_sensitivities(df, figname):
 
     # draw lines angles
     ax.set_thetagrids(np.degrees([0, -45]), [])
-    plt.title('Reading Key:', fontsize=6.)
+    plt.title('Reading Key:', fontsize=6., pad=2.)
 
     fig.savefig(figname)
     plt.close()
