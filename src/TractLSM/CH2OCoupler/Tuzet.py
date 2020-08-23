@@ -102,7 +102,7 @@ def Tuzet(p, photo='Farquhar', res='low', threshold_conv=0.1, iter_max=40,
     # initialise gs over A
     g0 = 1.e-9  # g0 ~ 0, removing it entirely introduces errors
     Cs_umol_mol = Cs * conv.MILI / p.Patm  # umol mol-1
-    gsoA = g0 + conv.GcvGw * (p.g1T * fw) / Cs_umol_mol
+    gsoA = g0 + p.g1T * fw / Cs_umol_mol
 
     # iter on the solution until it is stable enough
     iter = 0
@@ -118,7 +118,7 @@ def Tuzet(p, photo='Farquhar', res='low', threshold_conv=0.1, iter_max=40,
 
         # stomatal conductance, with fwsoil effect
         Cs_umol_mol = Cs * conv.MILI / p.Patm
-        gsoA = g0 + conv.GcvGw * (p.g1T * fw) / Cs_umol_mol
+        gsoA = g0 + p.g1T * fw / Cs_umol_mol
         gs = np.maximum(cst.zero, conv.GwvGc * gsoA * An)
 
         # calculate new trans, gw, gb, mol.m-2.s-1

@@ -106,7 +106,7 @@ def soil_water(df, profile):
 
     if profile == 'inter':
         start = 0.9 * sw[0]
-        rate = -4. / len(df) * (np.log(sw[0]) - np.log(df['fc'][0]))
+        rate = -5. / len(df) * (np.log(sw[0]) - np.log(df['fc'][0]))
         sw_min = (df['fc'][0] + df['pwp'][0]) / 2.
 
     for i in range(len(df)):
@@ -291,7 +291,7 @@ if to_fit:
     for swater in swaters:  # loop over the training soil moisture profiles
 
         X, Y = prep_training_N_target(swater, sub=sample)
-        
+
         opath = os.path.join(os.path.join(os.path.join(base_dir, 'output'),
                              'calibrations'), 'idealised')
 

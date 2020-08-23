@@ -65,11 +65,10 @@ def floop(p, model, photo='Farquhar', inf_gb=True):
         Cs_umol_mol = Cs * conv.MILI / p.Patm  # umol mol-1
 
         if model == 'Medlyn-LWP':
-            gsoA = g0 + (conv.GcvGw * (1. + p.g1 * fw / (Dleaf ** 0.5))
-                         / Cs_umol_mol)
+            gsoA = g0 + (1. + p.g1 * fw / (Dleaf ** 0.5)) / Cs_umol_mol
 
         else:
-            gsoA = g0 + conv.GcvGw * (p.g1T * fw) / Cs_umol_mol
+            gsoA = g0 + p.g1T * fw / Cs_umol_mol
 
     # iter on the solution until it is stable enough
     iter = 0
@@ -152,11 +151,10 @@ def floop(p, model, photo='Farquhar', inf_gb=True):
             Cs_umol_mol = Cs * conv.MILI / p.Patm
 
             if model == 'Medlyn-LWP':
-                gsoA = g0 + (conv.GcvGw * (1. + p.g1 * fw / (Dleaf ** 0.5))
-                             / Cs_umol_mol)
+                gsoA = g0 + (1. + p.g1 * fw / (Dleaf ** 0.5)) / Cs_umol_mol
 
             else:
-                gsoA = g0 + conv.GcvGw * (p.g1T * fw) / Cs_umol_mol
+                gsoA = g0 + p.g1T * fw / Cs_umol_mol
 
             gs = np.maximum(cst.zero, conv.GwvGc * gsoA * An)
 

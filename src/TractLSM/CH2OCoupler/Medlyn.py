@@ -122,7 +122,7 @@ def solve_std(p, sw, photo='Farquhar', res='low', case=1, threshold_conv=0.1,
     # initialise gs over A
     g0 = 1.e-9  # g0 ~ 0, removing it entirely introduces errors
     Cs_umol_mol = Cs * conv.MILI / p.Patm  # umol mol-1
-    gsoA = g0 + conv.GcvGw * (1. + g1 / (Dleaf ** 0.5)) / Cs_umol_mol
+    gsoA = g0 + (1. + g1 / (Dleaf ** 0.5)) / Cs_umol_mol
 
     # iter on the solution until it is stable enough
     iter = 0
@@ -134,7 +134,7 @@ def solve_std(p, sw, photo='Farquhar', res='low', case=1, threshold_conv=0.1,
 
         # stomatal conductance, with moisture stress effect
         Cs_umol_mol = Cs * conv.MILI / p.Patm
-        gsoA = g0 + conv.GcvGw * (1. + g1 / (Dleaf ** 0.5)) / Cs_umol_mol
+        gsoA = g0 + (1. + g1 / (Dleaf ** 0.5)) / Cs_umol_mol
         gs = np.maximum(cst.zero, conv.GwvGc * gsoA * An)
 
         # calculate new trans, gw, gb, mol.m-2.s-1

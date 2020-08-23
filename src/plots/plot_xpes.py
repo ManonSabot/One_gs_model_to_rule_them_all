@@ -89,7 +89,6 @@ class plt_setup(object):
 
         # legend
         plt.rcParams['legend.fontsize'] = 7.
-        plt.rcParams['legend.framealpha'] = 1
         plt.rcParams['legend.edgecolor'] = 'w'
         plt.rcParams['legend.borderpad'] = 0.5
 
@@ -121,7 +120,7 @@ def soil_water(df, profile):
 
     if profile == 'inter':
         start = 0.9 * sw[0]
-        rate = -4. / len(df) * (np.log(sw[0]) - np.log(df['fc'][0]))
+        rate = -5. / len(df) * (np.log(sw[0]) - np.log(df['fc'][0]))
         sw_min = (df['fc'][0] + df['pwp'][0]) / 2.
 
     if profile == 'dry':
