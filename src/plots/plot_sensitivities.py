@@ -63,8 +63,8 @@ class plt_setup(object):
         # colors
         plt.rcParams['axes.facecolor'] = 'w'
         plt.rcParams['axes.edgecolor'] = '#aaaaaa'
-        plt.rcParams['axes.prop_cycle'] = cycler(color=['#d95f02', '#7570b3',
-                                                        '#1b9e77'])
+        plt.rcParams['axes.prop_cycle'] = cycler(color=['#eec903', '#8d64d6',
+                                                        '#2bb189'])
 
         # labels, text, annotations
         plt.rcParams['text.usetex'] = True  # use LaTeX
@@ -206,16 +206,20 @@ def which_model(short):
 def plot_sensitivities(df, figname):
 
     plt_setup()  # rendering
-    fig = plt.figure(figsize=(5., 7.))  # declaring the figure
+    fig = plt.figure(figsize=(7., 5.5))  # declaring the figure
 
     iter = 2
+
+    drivers, idxs = dominant_features(df.copy())
+    drivers.remove('CO2')
+    drivers += ['CO2']
 
     # calculate the sensitivities
     for mod in ['std1', 'tuz', 'sox1', 'wue', 'cmax', 'pmax', 'cgn', 'lcst',
                 'sox2', 'cap', 'mes']:
 
         # initialise the axis for the plot
-        ax = plt.subplot(4, 3, iter, polar=True)
+        ax = plt.subplot(3, 4, iter, polar=True)
 
         # plot in radar chart
         ax.set_theta_offset(0.5 * np.pi)
@@ -223,10 +227,6 @@ def plot_sensitivities(df, figname):
 
         # which are the five dominant features across all variables?
         sub = df[df['output'].str.contains('(%s)' % (mod))].copy()
-        #drivers, idxs = dominant_features(sub)
-        #print(drivers, idxs)
-        drivers = ['Ps', 'VPD', 'Tair', 'PPFD', 'CO2']
-        idxs = ['ST', 'ST', 'ST', 'ST', 'ST']
 
         for var in ['gs', 'Pleaf', 'Ci']:
 
@@ -286,16 +286,20 @@ def plot_sensitivities(df, figname):
 
                 if var == 'gs':
                     var = '$g_s$'
+                    zorder = 1
 
                 if var == 'Pleaf':
                     var = r'$\varPsi_{l}$'
+                    zorder = 2
 
                 if var == 'Ci':
                     var = r'$C_i$'
+                    zorder = 3
 
                 # plot the data
-                l = ax.plot(angles, values, label=var)
-                ax.fill(angles, values, ec=l[0].get_color(), alpha=0.4)
+                l = ax.plot(angles, values, zorder=zorder, label=var)
+                ax.fill(angles, values, ec=l[0].get_color(), alpha=0.25,
+                        zorder=zorder)
 
 
                 if mod == 'gs2':
@@ -317,7 +321,7 @@ def plot_sensitivities(df, figname):
 
         iter += 1
 
-    ax = fig.add_axes([0.18, 0.81, 0.075, 0.075], projection='polar')
+    ax = fig.add_axes([0.17, 0.8, 0.065, 0.065], projection='polar')
     ax.set_zorder(-1)
 
     # setup ticks and labels

@@ -380,7 +380,7 @@ def heatmap(df, gs=True, E=True, A=True, what='NSE'):
 
 
 # Import Data
-what = 'SMAPE'
+what = 'NSE'
 df = pd.read_csv('/mnt/c/Users/le_le/Work/One_gs_model_to_rule_them_all/output/simulations/obs_driven/all_%ss.csv' % (what))
 
 plt.rcParams['text.usetex'] = True  # use LaTeX
@@ -402,4 +402,4 @@ order = ['San_Lorenzo_Carapa_guianensis',
          'Sevilleta_Juniperus_monosperma', 'Sevilleta_Pinus_edulis']
 
 # make the figure
-heatmap(df[['variable'] + order], what=what) #, E=False, A=False)
+heatmap(df[['variable'] + order], what=what, E=False, A=False)

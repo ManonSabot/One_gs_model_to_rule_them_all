@@ -58,9 +58,9 @@ class plt_setup(object):
 
         # colors
         if colours is None:  # use the default colours
-            colours = ['#1a1a1a', '#984ea3', '#decbe4', '#0571b0',
-                       '#92c5de', '#1a9641', '#a6d96a', '#ca0020', '#f4a582',
-                       '#a6611a', '#dfc27d']  # '#1a1a1a',
+            colours = ['#1a1a1a', '#332288', '#A182BF', '#1087E8', '#9BE2FD',
+                       '#117733', '#A6D96A', '#A2A203', '#ECEC3A', '#A42565',
+                       '#F9AAB7']
 
         plt.rcParams['axes.prop_cycle'] = cycler(color=colours)
 
@@ -473,6 +473,44 @@ def plot_all_perturbations(df, fname, title=""):
     plt.close()
 
 
+def plot_perturb_target(df, fname, title=None):
+
+    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6, 3))
+
+    wavg, wmax, wmin = weekly(df)
+
+    # set the control aside
+    ax.plot(wavg['gs(std1)'], linewidth=3.5, label='Reference')
+
+    for i, mod in enumerate(['std2', 'tuz', 'sox1', 'wue', 'cgn', 'pmax',
+                             'cmax', 'lcst', 'sox2', 'cap', 'mes']):
+
+        if (mod != 'std2'):
+            #if mod == 'chi':
+            #    wavg['gs(%s)' % (mod)] = np.convolve(wavg['gs(%s)' % (mod)],
+            #                                         np.ones((4,)) / 4,
+            #                                         mode='same')
+
+            ax.plot(wavg['gs(%s)' % (mod)], linewidth=2.,
+                    label=which_model(mod))
+
+        else:
+            next(ax._get_lines.prop_cycler)
+
+    ax.set_ylabel('g$_{s}$ (mol m$^{-2}$ s$^{-1}$)', fontsize=14.)
+
+    ax.set_xlim([0, len(wavg)])
+    ax.set_xticks([48. * 0.5, 48. * 1.5, 48. * 2.5, 48. * 3.5])
+    ax.set_xticklabels(['week 1', 'week 2', 'week 3', 'week 4'])
+    ax.yaxis.set_major_locator(ticker.MaxNLocator(6))
+
+    ax.legend(bbox_to_anchor=(1.05, 0.), loc=3, frameon=False)
+
+    plt.suptitle(title, fontsize=16.)
+    fig.savefig(fname, dpi=1200, bbox_inches='tight')
+    plt.close()
+
+
 def get_P12(Px1, Px2, x1, x2):
 
 
@@ -516,13 +554,17 @@ def get_P12(Px1, Px2, x1, x2):
     return P12
 
 
-def plot_diag_target(df, fname, Ca=40., title=None):
+def plot_diag_target(df, fname, Ca=40., P50=None, P88=None, title=None):
 
     fig, axes = plt.subplots(figsize=(6, 6), nrows=3, ncols=2, sharex=True)
     plt.subplots_adjust(hspace=0.1, wspace=0.35)
     axes = [e for sub in axes for e in sub]
-    axes[1].axis('off')  # mask frame of first row second column
-    iax = axes[2].inset_axes([0.68, 0.68, 0.32, 0.32])   # inset axis for LWP
+    axes[0].axis('off')  # mask frame of first row second column
+
+    # VC info
+    if (P50 is not None) and (P88 is not None):
+        P12 = get_P12(P50, P88, 50., 88.)
+        axes[3].axhline(P12, linestyle=':', linewidth=1.)
 
     # avg diurnals
     davg = df[df != 9999.].groupby(['hod']).mean()
@@ -531,6 +573,13 @@ def plot_diag_target(df, fname, Ca=40., title=None):
     dmin = dmin.loc[davg.index]
     dmax = df[df != 9999.].groupby(['hod']).max()
     dmax = dmax.loc[davg.index]
+
+    # inset axis for LWP
+    if any(davg[davg.filter(like='Pleaf(').columns] < P50):
+        iax = axes[3].inset_axes([0.68, 0.68, 0.32, 0.32])
+        iax.axhline(P12, linestyle=':', linewidth=1.)
+        iax.axhline(P50, linestyle=':', linewidth=1.)
+        iax.axhline(P88, linestyle=':', linewidth=1.)
 
     # smooth the min-max diurnals
     B, A = signal.butter(3, 0.4)
@@ -541,71 +590,63 @@ def plot_diag_target(df, fname, Ca=40., title=None):
         if mod == 'std1':
             lw = 0.
             alpha = 0.1
-            axes[0].fill_between(davg.index,
+            axes[1].fill_between(davg.index,
                                  signal.filtfilt(B, A, dmin['gs(%s)' % (mod)]),
                                  signal.filtfilt(B, A, dmax['gs(%s)' % (mod)]),
                                  color='gray', linewidth=lw, alpha=alpha)
             axes[2].fill_between(davg.index,
+                                 signal.filtfilt(B, A, dmin['E(%s)' % (mod)]),
+                                 signal.filtfilt(B, A, dmax['E(%s)' % (mod)]),
+                                 color='gray', linewidth=lw, alpha=alpha)
+            axes[3].fill_between(davg.index,
                                  signal.filtfilt(B, A,
                                                  dmin['Pleaf(%s)' % (mod)]),
                                  signal.filtfilt(B, A,
                                                  dmax['Pleaf(%s)' % (mod)]),
                                  color='gray', linewidth=lw, alpha=alpha)
             axes[4].fill_between(davg.index,
+                                 signal.filtfilt(B, A, dmin['A(%s)' % (mod)]),
+                                 signal.filtfilt(B, A, dmax['A(%s)' % (mod)]),
+                                 color='gray', linewidth=lw, alpha=alpha)
+            axes[5].fill_between(davg.index,
                                  signal.filtfilt(B, A, dmin['Ci(%s)' % (mod)])
                                  / Ca,
                                  signal.filtfilt(B, A, dmax['Ci(%s)' % (mod)])
                                  / Ca, color='gray', linewidth=lw, alpha=alpha)
-            axes[3].fill_between(davg.index,
-                                 signal.filtfilt(B, A, dmin['E(%s)' % (mod)]),
-                                 signal.filtfilt(B, A, dmax['E(%s)' % (mod)]),
-                                 color='gray', linewidth=lw, alpha=alpha)
-            axes[5].fill_between(davg.index,
-                                 signal.filtfilt(B, A, dmin['A(%s)' % (mod)]),
-                                 signal.filtfilt(B, A, dmax['A(%s)' % (mod)]),
-                                 color='gray', linewidth=lw, alpha=alpha)
             lw = 4.
             alpha = 1.
 
         else:
             lw = plt.rcParams['lines.linewidth']
-            alpha = 0.95
+            alpha = 0.9
 
-        axes[0].plot(davg['gs(%s)' % (mod)], linewidth=lw, alpha=alpha,
+        axes[1].plot(davg['gs(%s)' % (mod)], linewidth=lw, alpha=alpha,
                      label=which_model(mod))
+        axes[2].plot(davg['E(%s)' % (mod)], linewidth=lw, alpha=alpha)
 
         if mod == 'std1':
             iax.plot(davg['Pleaf(%s)' % (mod)],
                      linewidth=plt.rcParams['lines.linewidth'], alpha=alpha)
-            axes[2].plot(davg['Pleaf(%s)' % (mod)], linewidth=lw, alpha=alpha)
+            axes[3].plot(davg['Pleaf(%s)' % (mod)], linewidth=lw, alpha=alpha)
 
-        elif mod in ['sox1', 'sox2', 'lcst']:
+        elif any(davg['Pleaf(%s)' % (mod)] < P50):
             iax.plot(davg['Pleaf(%s)' % (mod)], linewidth=lw, alpha=alpha)
-            next(axes[2]._get_lines.prop_cycler)
+            next(axes[3]._get_lines.prop_cycler)
 
         else:
-            axes[2].plot(davg['Pleaf(%s)' % (mod)], linewidth=lw, alpha=alpha)
+            axes[3].plot(davg['Pleaf(%s)' % (mod)], linewidth=lw, alpha=alpha)
             next(iax._get_lines.prop_cycler)
 
-        axes[4].plot(davg['Ci(%s)' % (mod)] / Ca, linewidth=lw, alpha=alpha)
-        axes[3].plot(davg['E(%s)' % (mod)], linewidth=lw, alpha=alpha)
-        axes[5].plot(davg['A(%s)' % (mod)], linewidth=lw, alpha=alpha)
+        axes[4].plot(davg['A(%s)' % (mod)], linewidth=lw, alpha=alpha)
+        axes[5].plot(davg['Ci(%s)' % (mod)] / Ca, linewidth=lw, alpha=alpha)
 
-    # add VC info
-    P12 = get_P12(-3.13, -4.9, 50., 88.)
-    axes[2].axhline(P12, linestyle=':', linewidth=1.)
-    iax.axhline(P12, linestyle=':', linewidth=1.)
-    iax.axhline(-3.13, linestyle=':', linewidth=1.)
-    iax.axhline(-4.9, linestyle=':', linewidth=1.)
-    iax.xaxis.set_major_locator(plt.NullLocator())
-
-    axes[0].set_ylabel(r'$g_{s}$ (mol m$^{-2}$ s$^{-1}$)')
-    axes[2].set_ylabel(r'$\Psi$$_{l}$ (MPa)')
-    axes[4].set_ylabel(r'$C_{i}$ : $C_{a}$ (-)')
-    axes[3].set_ylabel(r'$E$ (mmol m$^{-2}$ s$^{-1}$)')
-    axes[5].set_ylabel(r'$A_n$ ($\mu$mol m$^{-2}$ s$^{-1}$)')
-    axes[-2].set_xlabel(r'hod (h)')
-    axes[-1].set_xlabel(r'hod (h)')
+    axes[1].set_ylabel(r'$g_{s}$ (mol m$^{-2}$ s$^{-1}$)')
+    axes[2].set_ylabel(r'$E$ (mmol m$^{-2}$ s$^{-1}$)')
+    axes[3].set_ylabel(r'$\Psi$$_{l}$ (MPa)')
+    axes[4].set_ylabel(r'$A_n$ ($\mu$mol m$^{-2}$ s$^{-1}$)')
+    axes[5].set_ylabel(r'$C_{i}$ : $C_{a}$ (-)')
+    axes[-1].set_xlabel('hod (h)')
+    axes[-2].set_xlabel('hod (h)')
 
     for ax in axes:  # format axes ticks
 
@@ -615,35 +656,41 @@ def plot_diag_target(df, fname, Ca=40., title=None):
         ax.set_yticklabels(ax.get_yticks())  # force LaTex
         ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%.d'))
 
-        if (ax == axes[3]) or (ax == axes[4]):
+        if (ax == axes[0]) or (ax == axes[-1]):  # gs and Ci:Ca
+            ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.2f'))
+
+        else:
             ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
 
+    iax.xaxis.set_major_locator(plt.NullLocator())
+    iax.yaxis.set_major_locator(ticker.MaxNLocator(2))
+
     # split the legend in several parts
-    x0 = 1.35
+    x0 = -4. / 3.
     xdiff = 0.5
-    y0 = 1.
+    y0 = 0.95
     ydiff = 0.18
-    handles, labels = axes[0].get_legend_handles_labels()
-    leg1 = axes[0].legend(handles[:1], labels[:1], bbox_to_anchor=(x0, y0),
+    handles, labels = axes[1].get_legend_handles_labels()
+    leg1 = axes[1].legend(handles[:1], labels[:1], bbox_to_anchor=(x0, y0),
                           loc=2)
-    leg2 = axes[0].legend(handles[1:3], labels[1:3],
+    leg2 = axes[1].legend(handles[1:3], labels[1:3],
                           bbox_to_anchor=(x0, y0 - ydiff), loc=2)
-    leg3 = axes[0].legend(handles[3:5], labels[3:5],
+    leg3 = axes[1].legend(handles[3:5], labels[3:5],
                           bbox_to_anchor=(x0, y0 - 2.5 * ydiff), loc=2)
-    leg4 = axes[0].legend(handles[5:7], labels[5:7],
+    leg4 = axes[1].legend(handles[5:7], labels[5:7],
                           bbox_to_anchor=(x0, y0 - 4. * ydiff), loc=2)
-    leg5 = axes[0].legend(handles[7:9], labels[7:9],
+    leg5 = axes[1].legend(handles[7:9], labels[7:9],
                           bbox_to_anchor=(x0 + xdiff, y0 - 2.5 * ydiff - 0.008),
                           loc=2)
-    axes[0].legend(handles[9:], labels[9:],
+    axes[1].legend(handles[9:], labels[9:],
                    bbox_to_anchor=(x0 + xdiff, y0 - 4. * ydiff), loc=2)
-    axes[0].add_artist(leg1)
-    axes[0].add_artist(leg2)
-    axes[0].add_artist(leg3)
-    axes[0].add_artist(leg4)
-    axes[0].add_artist(leg5)
+    axes[1].add_artist(leg1)
+    axes[1].add_artist(leg2)
+    axes[1].add_artist(leg3)
+    axes[1].add_artist(leg4)
+    axes[1].add_artist(leg5)
 
-    fig.savefig(fname, dpi=1200, bbox_inches='tight')
+    fig.savefig(fname, dpi=300)
     plt.close()
 
     return
@@ -651,34 +698,20 @@ def plot_diag_target(df, fname, Ca=40., title=None):
 
 def plot_diagnostics(df, fname, title=None):
 
-    wavg, wmax, wmin = weekly(df)
+    wavg, __, __ = weekly(df)
 
-    fig, [[ax1, ax2], [ax3, ax4], [ax5, ax6]] = plt.subplots(nrows=3, ncols=2)
+    fig, [[ax1, ax2], [ax3, ax4], [ax5, ax6]] = plt.subplots(nrows=3, ncols=2,
+                                                             sharex=True)
 
     # set the control aside
     mod = 'std1'
     ax1.plot(wavg['E(%s)' % (mod)], '-k', linewidth=1.5, label='Medlyn')
-    ax1.plot(wmax['E(%s)' % (mod)], ':k', linewidth=1.)
-    ax1.plot(wmin['E(%s)' % (mod)], ':k', linewidth=1.)
-
     ax2.plot(wavg['Pleaf(%s)' % (mod)][wavg['Pleaf(%s)' % (mod)] > -2.5], '-k',
              linewidth=1.5, label='Medlyn-SM')
-
     ax3.plot(wavg['gs(%s)' % (mod)], '-k', linewidth=1.5, label='Medlyn')
-    ax3.plot(wmax['gs(%s)' % (mod)], ':k', linewidth=1.)
-    ax3.plot(wmin['gs(%s)' % (mod)], ':k', linewidth=1.)
-
     ax4.plot(wavg['Ci(%s)' % (mod)], '-k', linewidth=1.5, label='Medlyn')
-    ax4.plot(wmax['Ci(%s)' % (mod)], ':k', linewidth=1.)
-    ax4.plot(wmin['Ci(%s)' % (mod)], ':k', linewidth=1.)
-
     ax5.plot(wavg['A(%s)' % (mod)], '-k', linewidth=1.5, label='Medlyn')
-    ax5.plot(wmax['A(%s)' % (mod)], ':k', linewidth=1.)
-    ax5.plot(wmin['A(%s)' % (mod)], ':k', linewidth=1.)
-
     ax6.plot(wavg['Rublim(%s)' % (mod)], '-k', linewidth=1.5, label='Medlyn')
-    ax6.plot(wmax['Rublim(%s)' % (mod)], ':k', linewidth=1., label='Medlyn')
-    ax6.plot(wmin['Rublim(%s)' % (mod)], ':k', linewidth=1., label='Medlyn')
 
     col = ['#969696', '#cccccc', '#bae4bc', '#7bccc4', '#43a2ca', '#0868ac',
            '#ffffb2', '#fecc5c', '#fd8d3c', '#c994c7', '#dd1c77']
@@ -703,27 +736,15 @@ def plot_diagnostics(df, fname, title=None):
         ax6.plot(wavg['Rublim(%s)' % (mod)], linewidth=1., color=col[i],
                  label=lab)
 
+    ax1.set_xticks([48. * 0.5, 48. * 1.5, 48. * 2.5, 48. * 3.5])
+    ax1.set_xticklabels(['W1', 'W2', 'W3', 'W4'])
+
     ax1.set_ylabel('E (mmol m-2 s-1)')
     ax2.set_ylabel('Pleaf (MPa)')
     ax3.set_ylabel('gs (mol m-2 s-1)')
     ax4.set_ylabel('Ci (Pa)')
     ax5.set_ylabel('A (umol m-2 s-1)')
     ax6.set_ylabel('Rubisco limited?')
-
-    ax1.set_xticks([48. * 0.5, 48. * 1.5, 48. * 2.5, 48. * 3.5])
-    ax1.set_xticklabels(['W1', 'W2', 'W3', 'W4'])
-    ax2.set_xticks([48. * 0.5, 48. * 1.5, 48. * 2.5, 48. * 3.5])
-    ax2.set_xticklabels(['W1', 'W2', 'W3', 'W4'])
-    ax2.set_xticks([48. * 0.5, 48. * 1.5, 48. * 2.5, 48. * 3.5])
-    ax3.set_xticklabels(['W1', 'W2', 'W3', 'W4'])
-    ax3.set_xticks([48. * 0.5, 48. * 1.5, 48. * 2.5, 48. * 3.5])
-    ax3.set_xticklabels(['W1', 'W2', 'W3', 'W4'])
-    ax4.set_xticks([48. * 0.5, 48. * 1.5, 48. * 2.5, 48. * 3.5])
-    ax4.set_xticklabels(['W1', 'W2', 'W3', 'W4'])
-    ax5.set_xticks([48. * 0.5, 48. * 1.5, 48. * 2.5, 48. * 3.5])
-    ax5.set_xticklabels(['W1', 'W2', 'W3', 'W4'])
-    ax6.set_xticks([48. * 0.5, 48. * 1.5, 48. * 2.5, 48. * 3.5])
-    ax6.set_xticklabels(['W1', 'W2', 'W3', 'W4'])
 
     ax6.legend(bbox_to_anchor=(1.05, 3.5))
 
@@ -733,53 +754,14 @@ def plot_diagnostics(df, fname, title=None):
     plt.close()
 
 
-def plot_perturb_target(df, fname, title=None):
+def plot_impact_summary(df, fname):
 
-    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6, 3))
+    fig, axes = plt.subplots(figsize=(6, 3.5), nrows=2, ncols=2, sharex=True,
+                             sharey='row')
+    plt.subplots_adjust(hspace=0.1, wspace=0.065)
+    axes = [e for sub in axes for e in sub]
 
-    wavg, wmax, wmin = weekly(df)
-
-    # set the control aside
-    ax.plot(wavg['gs(std1)'], linewidth=3.5, label='Reference')
-
-    for i, mod in enumerate(['std2', 'tuz', 'sox1', 'wue', 'cgn', 'pmax',
-                             'cmax', 'lcst', 'sox2', 'cap', 'mes']):
-
-        if (mod != 'std2'):
-            #if mod == 'chi':
-            #    wavg['gs(%s)' % (mod)] = np.convolve(wavg['gs(%s)' % (mod)],
-            #                                         np.ones((4,)) / 4,
-            #                                         mode='same')
-
-            ax.plot(wavg['gs(%s)' % (mod)], linewidth=2.,
-                    label=which_model(mod))
-
-        else:
-            next(ax._get_lines.prop_cycler)
-
-    ax.set_ylabel('g$_{s}$ (mol m$^{-2}$ s$^{-1}$)', fontsize=14.)
-
-    ax.set_xlim([0, len(wavg)])
-    ax.set_xticks([48. * 0.5, 48. * 1.5, 48. * 2.5, 48. * 3.5])
-    ax.set_xticklabels(['week 1', 'week 2', 'week 3', 'week 4'])
-    ax.yaxis.set_major_locator(ticker.MaxNLocator(6))
-
-    ax.legend(bbox_to_anchor=(1.05, 0.), loc=3, frameon=False)
-
-    plt.suptitle(title, fontsize=16.)
-    fig.savefig(fname, dpi=1200, bbox_inches='tight')
-    plt.close()
-
-
-def plot_impact_summary(fname, df):
-
-    fig = plt.figure(figsize=(6, 4))
-    plt.subplots_adjust(hspace=0.05, wspace=0.015)
-    axes = fig.subplots(nrows=2, ncols=2, sharex=True, sharey='row')
-
-    labels = [r'Medlyn-$\beta$', 'Tuzet', 'SOX', r'WUE-$f_{\varPsi_l}$', 'CMax',
-              'ProfitMax', 'CGain', 'LeastCost', 'SOX-Opt', 'CAP', 'MES']
-    switch = ['tuz', 'sox1', 'wue', 'cmax', 'pmax', 'cgn', 'lcst',
+    mods = ['tuz', 'sox1', 'wue', 'cmax', 'pmax', 'cgn', 'lcst',
               'sox2', 'cap', 'mes']
 
     GPP = df.filter(like='A(').columns.to_list()
@@ -789,40 +771,23 @@ def plot_impact_summary(fname, df):
 
     iter = 0
 
-    for ax in axes.flat:
+    for ax in axes:
 
         if iter < 2:
             sub = df[GPP]
 
         else:
             sub = df[E]
-            ax.set_xticks(np.arange(0.4, 4.5))
-            ax.set_xticklabels(['Wet', 'Inter.', 'Dry', '2 x D$_a$',
-                                '2 x C$_a$'])
 
         if iter % 2 == 0:
             sub = sub.loc[twet]
-
-            if iter < 2:
-                ax.set_ylabel('GPP (gC y$^{-1}$)')
-                ax.set_title('Wet calibration')
-
-            else:
-                ax.set_ylabel('E (mm y$^{-1}$)')
-
-            # color the calibration
             ax.axvspan(0., 0.8, hatch='.' * 6, facecolor='none',
-                       edgecolor='#2e7d9b', alpha=0.1)
+                       edgecolor='#2e7d9b', alpha=0.1)  # color calib.
 
         else:
             sub = sub.loc[tinter]
-
-            if iter < 2:
-                ax.set_title('Intermediate calibration')
-
-            # color the calibration
             ax.axvspan(1., 1.8, hatch='.' * 6, facecolor='none',
-                       edgecolor='#fc8635', alpha=0.1)
+                       edgecolor='#fc8635', alpha=0.1)  # color calib.
 
         # we're plotting in reverse order
         sub = sub.iloc[::-1]
@@ -831,286 +796,52 @@ def plot_impact_summary(fname, df):
 
         # ref model
         ax.hlines(sub[sub.filter(like='std1').columns], pos[:-1], pos[1:] - 0.2,
-                  colors='#1a1a1a', linewidth=2., label=labels[0])
+                  linewidth=0.25, alpha=0.5)
+        pos += 0.0675  # necessary alignment when plotting
 
         for i, p in enumerate(pos[:-1]):
 
-            for j, model in enumerate(switch):
+            next(ax._get_lines.prop_cycler)  # skip black used for Medlyn
 
-                p += 0.075
+            for mod in mods:
+
                 val1 = sub[sub.filter(like='std1').columns].values[i][0]
-                val2 = sub[sub.filter(like=model).columns].values[i][0]
+                val2 = sub[sub.filter(like=mod).columns].values[i][0]
+                ax.vlines(p, np.minimum(val1, val2), np.maximum(val1, val2),
+                          color=next(ax._get_lines.prop_cycler)['color'],
+                          label=which_model(mod))
+                p += 0.075
 
-                if i == 0:
-                    ax.plot([p, p], [np.minimum(val1, val2),
-                            np.maximum(val1, val2)], linewidth=1.5,
-                            label=labels[j + 1])
-
-                else:
-                    ax.plot([p, p], [np.minimum(val1, val2),
-                            np.maximum(val1, val2)], linewidth=1.5)
-
-        ax.set_xlim(-0.1, 4.9)
         iter += 1
 
-    ax.legend(bbox_to_anchor=(1.05, 0.), loc=3, fontsize=6., frameon=False)
+    for ax in axes:  # format axes ticks
 
-    fig.tight_layout()
-    fig.savefig(fname, dpi=300, bbox_inches='tight')
-    plt.close()
+        ax.set_xlim(-0.1, 4.9)
 
-
-def plot_impact_summary2(fname, df):
-
-    fig = plt.figure(figsize=(6, 4))
-    plt.subplots_adjust(hspace=0.05, wspace=0.015)
-    axes = fig.subplots(nrows=2, ncols=2, sharex=True, sharey='row')
-
-    labels = ['Tuzet', 'SOX', r'WUE-$f_{\varPsi_l}$', 'CMax',
-              'ProfitMax', 'CGain', 'LeastCost', 'SOX-Opt', 'CAP', 'MES']
-    switch = ['tuz', 'sox1', 'wue', 'cmax', 'pmax', 'cgn', 'lcst',
-              'sox2', 'cap', 'mes']
-
-    GPP = df.filter(like='A(').columns.to_list()
-    E = df.filter(like='E(').columns.to_list()
-    twet = [e for e in df.index.to_list() if e.split('_')[-1] == 'wet']
-    tinter = [e for e in df.index.to_list() if e.split('_')[-1] == 'inter']
-
-    iter = 0
-
-    for ax in axes.flat:
-
-        if iter < 2:
-            sub = df[GPP]
-
-        else:
-            sub = df[E]
+        if (ax == axes[-1]) or (ax == axes[-2]):
             ax.set_xticks(np.arange(0.4, 4.5))
             ax.set_xticklabels(['Wet', 'Inter.', 'Dry', '2 x D$_a$',
                                 '2 x C$_a$'])
 
-        if iter % 2 == 0:
-            sub = sub.loc[twet]
-
-            if iter < 2:
-                ax.set_ylabel('GPP (gC y$^{-1}$)')
-                ax.set_title('Wet calibration')
-
-            else:
+            if ax == axes[-2]:
                 ax.set_ylabel('E (mm y$^{-1}$)')
 
-            # color the calibration
-            ax.axvspan(0., 0.8, hatch='.' * 6, facecolor='none',
-                       edgecolor='#2e7d9b', alpha=0.1)
-
-        else:
-            sub = sub.loc[tinter]
-
-            if iter < 2:
-                ax.set_title('Intermediate calibration')
-
-            # color the calibration
-            ax.axvspan(1., 1.8, hatch='.' * 6, facecolor='none',
-                       edgecolor='#fc8635', alpha=0.1)
-
-        # remove ref. from other models
-        sub = sub - sub[sub.filter(like='std1').columns].values
-
-        # we're plotting in reverse order
-        sub = sub.iloc[::-1]
-        sub.reset_index(inplace=True)
-        pos = np.arange(float(len(sub)))
-
-        for i, p in enumerate(pos):
-
-            for j, model in enumerate(switch):
-
-                p += 0.075
-                val = sub[sub.filter(like=model).columns].iloc[i]
-
-                if i == 0:
-                    ax.plot([p, p], [np.minimum(0., val), np.maximum(0., val)],
-                            linewidth=1.5, label=labels[j])
-
-                else:
-                    ax.plot([p, p], [np.minimum(0., val), np.maximum(0., val)],
-                            linewidth=1.5)
-
-        ax.axhline(0., color='#1a1a1a')
-        ax.set_xlim(-0.1, 4.9)
-        iter += 1
-
-    ax.legend(bbox_to_anchor=(1.05, 0.), loc=3, fontsize=6., frameon=False)
-
-    fig.tight_layout()
-    fig.savefig(fname, dpi=300, bbox_inches='tight')
-    plt.close()
-
-
-def plot_impact_summary3(fname, df):
-
-    fig = plt.figure(figsize=(5, 4))
-    plt.subplots_adjust(hspace=0.05)
-    axes = fig.subplots(nrows=2, ncols=1, sharex=True)
-
-    labels = [r'Medlyn-$\beta$', 'Tuzet', 'SOX', r'WUE-$f_{\varPsi_l}$', 'CMax',
-              'ProfitMax', 'CGain', 'LeastCost', 'SOX-Opt', 'CAP', 'MES']
-    switch = ['tuz', 'sox1', 'wue', 'cmax', 'pmax', 'cgn', 'lcst',
-              'sox2', 'cap', 'mes']
-
-    GPP = df.filter(like='A(').columns.to_list()
-    E = df.filter(like='E(').columns.to_list()
-
-    iter = 0
-
-    for iter, ax in enumerate(axes.flat):
-
-        if iter < 1:
-            sub = df[GPP]
+        elif ax == axes[0]:
             ax.set_ylabel('GPP (gC y$^{-1}$)')
+            ax.set_title('Wet calibration')
 
         else:
-            sub = df[E]
-            ax.set_xticks(np.arange(0.9, 10.5, 2.))
-            ax.set_xticklabels(['Wet', 'Intermediate', 'Dry', '2 x D$_a$',
-                                '2 x C$_a$'])
-            ax.set_ylabel('E (mm y$^{-1}$)')
+            ax.set_title('Intermediate calibration')
 
-        # color by calibration type
-        for p in np.arange(0., 10., 2.):  # wet
+        ax.yaxis.set_major_locator(ticker.MaxNLocator(5))
+        ax.set_yticklabels(ax.get_yticks())  # force LaTex
+        ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.d'))
 
-            if p == 0.:
-                ax.axvspan(p, p + 0.8, hatch='.' * 6, facecolor='none',
-                            edgecolor='#2e7d9b', alpha=0.1)
+    # legend
+    handles, labels = ax.get_legend_handles_labels()
+    ax.legend(handles[:len(mods)], labels[:len(mods)],
+              bbox_to_anchor=(1.025, 1. / 3.), loc=3)
 
-            else:
-                ax.axvspan(p, p + 0.8, facecolor='none', edgecolor='#2e7d9b',
-                           alpha=0.1)
-
-        for p in np.arange(1., 11., 2.):  # inter
-
-            if p == 3.:
-                ax.axvspan(p, p + 0.8, hatch='.' * 6, facecolor='none',
-                           edgecolor='#fc8635', alpha=0.1)
-
-            ax.axvspan(p, p + 0.8, facecolor='none', edgecolor='#fc8635',
-                       alpha=0.1)
-
-        # we're plotting in reverse order
-        sub = sub.iloc[::-1]
-        sub.reset_index(inplace=True)
-        pos = np.arange(float(len(sub)) + 1)
-
-        # ref model
-        ax.hlines(sub[sub.filter(like='std1').columns], pos[:-1], pos[1:] - 0.2,
-                  colors='#1a1a1a', linewidth=2., label=labels[0])
-
-        for i, p in enumerate(pos[:-1]):
-
-            for j, model in enumerate(switch):
-
-                p += 0.075
-                val1 = sub[sub.filter(like='std1').columns].values[i][0]
-                val2 = sub[sub.filter(like=model).columns].values[i][0]
-
-                if i == 0:
-                    ax.plot([p, p], [np.minimum(val1, val2),
-                            np.maximum(val1, val2)], linewidth=1.5,
-                            label=labels[j + 1])
-
-                else:
-                    ax.plot([p, p], [np.minimum(val1, val2),
-                            np.maximum(val1, val2)], linewidth=1.5)
-
-        ax.set_xlim(-0.1, 9.9)
-        iter += 1
-
-    ax.legend(bbox_to_anchor=(1.05, 0.), loc=3, fontsize=6., frameon=False)
-
-    fig.tight_layout()
-    fig.savefig(fname, dpi=300, bbox_inches='tight')
-    plt.close()
-
-
-def plot_impact_summary4(fname, df):
-
-    fig = plt.figure(figsize=(5, 4))
-    plt.subplots_adjust(hspace=0.05)
-    axes = fig.subplots(nrows=2, ncols=1, sharex=True)
-
-    labels = ['Tuzet', 'SOX', r'WUE-$f_{\varPsi_l}$', 'CMax',
-              'ProfitMax', 'CGain', 'LeastCost', 'SOX-Opt', 'CAP', 'MES']
-    switch = ['tuz', 'sox1', 'wue', 'cmax', 'pmax', 'cgn', 'lcst',
-              'sox2', 'cap', 'mes']
-
-    GPP = df.filter(like='A(').columns.to_list()
-    E = df.filter(like='E(').columns.to_list()
-
-    iter = 0
-
-    for iter, ax in enumerate(axes.flat):
-
-        if iter < 1:
-            sub = df[GPP]
-            ax.set_ylabel('GPP (gC y$^{-1}$)')
-
-        else:
-            sub = df[E]
-            ax.set_xticks(np.arange(0.9, 10.5, 2.))
-            ax.set_xticklabels(['Wet', 'Intermediate', 'Dry', '2 x D$_a$',
-                                '2 x C$_a$'])
-            ax.set_ylabel('E (mm y$^{-1}$)')
-
-        # color by calibration type
-        for p in np.arange(0., 10., 2.):  # wet
-
-            if p == 0.:
-                ax.axvspan(p, p + 0.8, hatch='.' * 6, facecolor='none',
-                            edgecolor='#2e7d9b', alpha=0.1)
-
-            else:
-                ax.axvspan(p, p + 0.8, facecolor='none', edgecolor='#2e7d9b',
-                           alpha=0.1)
-
-        for p in np.arange(1., 11., 2.):  # inter
-
-            if p == 3.:
-                ax.axvspan(p, p + 0.8, hatch='.' * 6, facecolor='none',
-                           edgecolor='#fc8635', alpha=0.1)
-
-            ax.axvspan(p, p + 0.8, facecolor='none', edgecolor='#fc8635',
-                       alpha=0.1)
-
-        # remove ref. from other models
-        sub = sub - sub[sub.filter(like='std1').columns].values
-
-        # we're plotting in reverse order
-        sub = sub.iloc[::-1]
-        sub.reset_index(inplace=True)
-        pos = np.arange(float(len(sub)) + 1)
-
-        for i, p in enumerate(pos[:-1]):
-
-            for j, model in enumerate(switch):
-
-                p += 0.075
-                val = sub[sub.filter(like=model).columns].iloc[i]
-
-                if i == 0:
-                    ax.plot([p, p], [np.minimum(0., val), np.maximum(0., val)],
-                            linewidth=1.5, label=labels[j])
-
-                else:
-                    ax.plot([p, p], [np.minimum(0., val), np.maximum(0., val)],
-                            linewidth=1.5)
-
-        ax.axhline(0., color='#1a1a1a')
-        ax.set_xlim(-0.1, 9.9)
-        iter += 1
-
-    ax.legend(bbox_to_anchor=(1.05, 0.), loc=3, fontsize=6., frameon=False)
-
-    fig.tight_layout()
     fig.savefig(fname, dpi=300, bbox_inches='tight')
     plt.close()
 
@@ -1131,24 +862,8 @@ ifdir = os.path.join(os.path.join(os.path.join(base_dir, 'input'),
 ofdir = os.path.join(os.path.join(os.path.join(base_dir, 'output'),
                      'simulations'), 'idealised')
 
-"""
-# univariate experiments
-df, __ = read_csv(os.path.join(ofdir, 'all_cumulative_impacts.csv'))
-
-xpe_names = ['%s_%s_%s' % (e[2], e[1], e[0]) for e in combis if
-             ((e[0] == e[1]) or (e[-1] == 'insample'))]
-df = df[df['xpe'].isin(xpe_names)]
-df.set_index('xpe', inplace=True)
-
-plot_impact_summary('summary_impacts.png', df)
-plot_impact_summary2('summary_impacts_2.png', df)
-plot_impact_summary3('summary_impacts_3.png', df)
-plot_impact_summary4('summary_impacts_4.png', df)
-"""
-
 # path to input data
-#fname1 = os.path.join(ifdir, 'wet_calibration.csv')
-fname1 = os.path.join(ifdir, 'training_x.csv')
+fname1 = os.path.join(ifdir, 'wet_calibration.csv')
 df1, __ = read_csv(fname1)
 
 # initialise soil moisture forcings
@@ -1242,28 +957,21 @@ for combi in combis:  # loop over all the possibilities
         try:
             df3, __ = read_csv(fname3)
 
-            if training == 'wet':
-                if atm == 'highD':  # apply the atm perturbations as necessary
-                    df1['VPD'] *= 2.
+            if atm == 'highD':  # apply the atm perturbations as necessary
+                df1['VPD'] *= 2.
 
-                elif atm == 'highCa':
-                    df1['CO2'] *= 2.
-
-                # reset the atmosphere to the default
-                if atm == 'highD':
-                    df1['VPD'] /= 2.
-
-                elif atm == 'highCa':
-                    df1['CO2'] /= 2.
+            elif atm == 'highCa':
+                df1['CO2'] *= 2.
 
             # plot the calibrated gs
             if (soil == training) and (atm == 'insample') and not multi:
-                figname = os.path.join(os.path.join(ofig, training),
-                                       'calib_variables.png')
+                figname = os.path.join(os.path.dirname(ofig),
+                                       'calib_variables_%s.png' % (training))
 
-                # now I need to merge those two functions into a single function!!!
                 if not os.path.isfile(figname):
                     plot_diag_target(df3, figname, Ca=df1.loc[0, 'CO2'],
+                                     P50=-df1.loc[0, 'P50'],
+                                     P88=-df1.loc[0, 'P88'],
                                      title='Calibrated models')
 
             # diagnostic plots
@@ -1283,5 +991,23 @@ for combi in combis:  # loop over all the possibilities
                     plot_perturb_target(df3, figname,
                                         title='Severe drydown impacts')
 
+            # reset the atmosphere to the default
+            if atm == 'highD':
+                df1['VPD'] /= 2.
+
+            elif atm == 'highCa':
+                df1['CO2'] /= 2.
+
         except FileNotFoundError:
             pass
+
+# summary of the univariate experiments
+df, __ = read_csv(os.path.join(ofdir, 'all_cumulative_impacts.csv'))
+
+xpe_names = ['%s_%s_%s' % (e[2], e[1], e[0]) for e in combis if
+             ((e[0] == e[1]) or (e[-1] == 'insample'))]
+df = df[df['xpe'].isin(xpe_names)]
+df.set_index('xpe', inplace=True)
+
+figname = os.path.join(os.path.dirname(ofig), 'cummulative_impacts.png')
+plot_impact_summary(df, figname)

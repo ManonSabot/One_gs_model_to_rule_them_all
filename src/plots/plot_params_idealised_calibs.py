@@ -148,7 +148,6 @@ class plt_setup(object):
 
         # legend
         plt.rcParams['legend.fontsize'] = 7.
-        plt.rcParams['legend.framealpha'] = 1
         plt.rcParams['legend.edgecolor'] = 'w'
         plt.rcParams['legend.borderpad'] = 1.
 
