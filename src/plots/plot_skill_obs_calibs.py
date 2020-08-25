@@ -171,7 +171,6 @@ def cmap_specs(df):
 
     else:
         thresh = mean / med
-        print(thresh)
 
         if (thresh < 0.8) or (thresh > 1.2):
             if (thresh < 0.1) or (thresh > 10.):
