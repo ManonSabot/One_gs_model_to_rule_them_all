@@ -1,4 +1,6 @@
 # general modules
+import os  # check for files, paths
+import sys  # check for files, paths
 import numpy as np
 import pandas as pd  # read/write dataframes, csv files
 from scipy import stats
@@ -7,8 +9,58 @@ from scipy import stats
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import colorcet as cc
-from matplotlib.colors import LinearSegmentedColormap, PowerNorm
-from mpl_toolkits.axes_grid1 import make_axes_locatable
+from matplotlib.colors import LinearSegmentedColormap, PowerNorm, LogNorm
+
+# change the system path to load modules from TractLSM
+script_dir = os.path.dirname(os.path.realpath(sys.argv[0]))
+sys.path.append(os.path.abspath(os.path.join(script_dir, '..')))
+
+# own modules
+from TractLSM.Utils import get_main_dir  # get the project's directory
+
+
+class plt_setup(object):
+
+    def __init__(self):
+
+        # saving the figure
+        plt.rcParams['savefig.dpi'] = 1200.  # resolution
+        plt.rcParams['savefig.bbox'] = 'tight'  # no excess side padding
+        plt.rcParams['savefig.pad_inches'] = 0.05  # padding to use
+        plt.rcParams['savefig.jpeg_quality'] = 100
+
+        # figure spacing
+        plt.rcParams['figure.subplot.wspace'] = 0.025
+
+        # colors
+        plt.rcParams['axes.facecolor'] = '#737373'
+
+        # labels, text, annotations
+        plt.rcParams['text.usetex'] = True  # use LaTeX
+        main_font = r'\usepackage[sfdefault,light]{merriweather}'
+        plt.rcParams['text.latex.preamble'] = [main_font,
+                                               r'\usepackage{mathpazo}'
+                                               r'\usepackage{amsmath}']
+        plt.rcParams['font.size'] = 8.
+        plt.rcParams['axes.labelsize'] = 7.
+        plt.rcParams['xtick.labelsize'] = 7.
+        plt.rcParams['ytick.labelsize'] = 7.
+        plt.rcParams['ytick.major.pad'] = -2.
+
+        # ticks
+        plt.rcParams['xtick.major.size'] = 0.
+        plt.rcParams['ytick.major.size'] = 0.
+        plt.rcParams['xtick.major.pad'] = 2
+        plt.rcParams['ytick.major.pad'] = 6
+
+        # axes limits
+        plt.rcParams['axes.autolimit_mode'] = 'data'
+
+        # spines
+        plt.rcParams['axes.spines.left'] = False
+        plt.rcParams['axes.spines.right'] = False
+        plt.rcParams['axes.spines.bottom'] = False
+        plt.rcParams['axes.spines.top'] = False
 
 
 def shift_cmap(cmap, start=0., locpoint=0.5, stop=1.0, name='centered'):
@@ -49,10 +101,7 @@ def shift_cmap(cmap, start=0., locpoint=0.5, stop=1.0, name='centered'):
 
 def which_model(short):
 
-    if short == 'std1':
-        lab = r'Medlyn-$\beta$'
-
-    elif short == 'std2':
+    if short == 'std2':
         lab = r'Medlyn-$f_{\varPsi_{l,pd}}$'
 
     elif short == 'tuz':
@@ -106,9 +155,7 @@ def model_perf(df, variable, what):
 
 def cmap_specs(df):
 
-    cmap = plt.cm.OrRd
-    cmap2 = cc.cm.CET_D1A
-    cmap3 = cc.cm.CET_D1A_r
+    cmap = cc.cm.dimgray_r
     norm = None
 
     # extra info
@@ -117,59 +164,23 @@ def cmap_specs(df):
     mean = np.nanmean(df.drop('variable', axis=1))
     med = np.nanmedian(df.drop('variable', axis=1))
 
-    # what is the data distribution
-    loc_zero = np.abs(min) / (max + np.abs(min))
-
     if min < 0.:
-
-        if loc_zero > 0.5:
-            cmap = cmap3
-
-            if loc_zero > 0.75:
-                norm = PowerNorm(gamma=np.log(0.5) / np.log(loc_zero))
-
-            else:
-                cmap = shift_cmap(cmap, locpoint=loc_zero)
-
-        else:
-            cmap = cmap2
-
-            if loc_zero < 0.25:
-                norm = PowerNorm(gamma=np.log(0.5) / np.log(loc_zero))
-
-            else:
-                cmap = shift_cmap(cmap, locpoint=loc_zero)
+        cmap = cc.cm.CET_D1A_r
+        loc_zero = np.abs(min) / (max + np.abs(min))
+        cmap = shift_cmap(cmap, locpoint=loc_zero)
 
     else:
         thresh = mean / med
+        print(thresh)
 
         if (thresh < 0.8) or (thresh > 1.2):
-            norm = PowerNorm(gamma=0.4)
+            if (thresh < 0.1) or (thresh > 10.):
+                norm = LogNorm()
+
+            else:
+                norm = PowerNorm(gamma=0.4)
 
     return cmap, norm, min, max
-
-
-def format_grid(ax, xmax, ymax):
-
-    # grid
-    #ax.grid(False, 'major')
-    #ax.grid(True, 'minor', c='w', lw=0.1)
-
-    # remove the ticks
-    ax.set_xticks([t + 0.5 for t in ax.get_xticks()], minor=True)
-    ax.set_yticks([t + 0.5 for t in ax.get_yticks()], minor=True)
-    ax.tick_params(axis='both', which='both', length=0)
-
-    # make sure left and bottom aren't cropped
-    ax.set_xlim([-0.5, xmax + 0.5])
-    ax.set_ylim([-0.5, ymax + 0.5])
-
-    # remove spines
-    for s in ax.spines.values():
-
-        s.set_visible(False)
-
-    return
 
 
 def cbar_specs(what, df):
@@ -182,7 +193,7 @@ def cbar_specs(what, df):
     if what == 'NSE':
         N1 = 50
         N2 = 150
-        cticks = np.array([min, -2.5, -1., 0., 0.1, 0.25, 0.5, 0.75, max])
+        cticks = np.array([min, -2.5, -1., 0., 0.1, 0.2, 0.4, 0.6, max])
 
     elif what == 'log':
         N1 = 100
@@ -203,7 +214,7 @@ def cbar_specs(what, df):
     elif what == 'SMAPE':
         N2 = 200
         start = 0.1
-        cticks = np.array([min, start, 0.25, 0.5, 1., 1.5, max])
+        cticks = np.array([min, start, 0.25, 0.5, 0.75, max])
 
     if what == 'RMSE':
         N2 = 200
@@ -220,66 +231,74 @@ def cbar_specs(what, df):
     return cticks[1:], bounds
 
 
-def MAP_arrow(ax, direction='horizontal'):
+def MAP_arrow(ax):
 
     ax.get_yaxis().set_visible(False)
     ax.get_xaxis().set_visible(False)
     ax.patch.set_visible(False)
 
-    for s in ax.spines.values():  # remove spines
-
-        s.set_visible(False)
-
-    if direction == 'horizontal':
-        x1 = 0.
-        x2 = x1 + 0.075
-        x3 = 1.
-        y1 = 0.
-        y2 = y1
-        y3 = y1
-        head = '->'
-
-    if direction == 'vertical':
-        x1 = 0.
-        x2 = x1
-        x3 = x1
-        y1 = 0.
-        y2 = y1 + 0.05
-        y3 = 1.
-        head = '<-'
-
     # plot arrow
-    ax.text(x1, y1, 'Mesic', va='center', ha='center',
-            transform=ax.transAxes)
-    ax.annotate('Xeric', xy=(x2, y2), xytext=(x3, y3),
+    ax.text(0., 0., 'Xeric', va='center', ha='center', transform=ax.transAxes)
+    ax.annotate('Mesic', xy=(0., 0.025), xytext=(0., 1.),
                 xycoords='axes fraction', va='center', ha='center',
-                arrowprops=dict(arrowstyle='<-', lw=1.))
+                arrowprops=dict(arrowstyle='<->', lw=1.))
 
     return
 
 
-def heatmap(df, gs=True, E=True, A=True, what='NSE'):
+def heatmap(df, fname, to_plot, what='NSE'):
 
-    to_plot = np.array(['gs', 'E', 'A'])[np.array([gs, E, A])]
-    variables = np.array(['$g_s$', '$E$', '$A_n$'])[np.array([gs, E, A])]
+    variables = np.array(['$g_s$', '$E$', '$A_n$'])[np.array(['gs' in to_plot,
+                                                              'E' in to_plot,
+                                                              'A' in to_plot])]
 
-    # setup the plotss
-    fig, axes = plt.subplots(1, len(to_plot), figsize=(4.5 * len(to_plot), 5.),
-                             sharey=True)
-
-    if len(to_plot) < 2:
-        axes = [axes]
-        df = df[df['variable'] == to_plot[0]]
+    # setup the plots
+    if len(to_plot) > 1:
+        fig, axes = plt.subplots(1, len(to_plot),
+                                 figsize=(4.5 * len(to_plot), 5.), sharey=True)
 
     else:
-        plt.subplots_adjust(wspace=0.025)
+        fig, ax = plt.subplots(figsize=(5., 5.))
+        axes = [ax]
+        df = df[df['variable'] == to_plot[0]]
 
-    # info needed for shared colorbar
-    cmap, norm, vmin, vmax = cmap_specs(df)
+    # model perf order?
+    orders = []
 
     for i in range(len(to_plot)):
 
-        axes[i].set_facecolor('#737373')  # set background colour
+        if len(to_plot) > 1:
+            sub = df.copy()[df['variable'] == to_plot[i]]
+
+        else:
+            sub = df.copy()
+
+        orders += [model_perf(sub, to_plot[i], what)]
+
+    # info needed by shared colormap, limit extremes
+    if what == 'NSE':
+        df.loc[:, df.columns != 'variable'] = \
+            (df.loc[:, df.columns != 'variable']
+               .where(df.loc[:, df.columns != 'variable'] > -5., -5.))
+
+    elif what == 'MAPE':
+        df.loc[:, df.columns != 'variable'] = \
+            (df.loc[:, df.columns != 'variable']
+               .where(df.loc[:, df.columns != 'variable'] < 500., 500.))
+
+    elif what == 'MASE':
+        df.loc[:, df.columns != 'variable'] = \
+            (df.loc[:, df.columns != 'variable']
+               .where(df.loc[:, df.columns != 'variable'] < 5., 5.))
+
+    elif what == 'RMSE':
+        df.loc[:, df.columns != 'variable'] = \
+            (df.loc[:, df.columns != 'variable']
+               .where(df.loc[:, df.columns != 'variable'] < 2., 2.))
+
+    cmap, norm, vmin, vmax = cmap_specs(df)
+
+    for i in range(len(to_plot)):
 
         # reorder the df based on model perf, only keep relevant var
         if len(to_plot) > 1:
@@ -288,9 +307,8 @@ def heatmap(df, gs=True, E=True, A=True, what='NSE'):
         else:
             sub = df.copy()
 
-        order = model_perf(sub, to_plot[i], what)
         sub = sub.drop('variable', axis=1)
-        sub = sub.reindex(index=order.index.to_list())
+        sub = sub.reindex(index=orders[i].index.to_list())
 
         # into the right formats
         models = [which_model(e) for e in sub.index.to_list()]
@@ -299,36 +317,18 @@ def heatmap(df, gs=True, E=True, A=True, what='NSE'):
                 if 'Quercus' in e else '$%s$. $%s$' % (e[-2][0], e[-1])
                 for e in spps]
         data = sub.to_numpy()
-
-        if len(to_plot) > 1:
-            data = data.T
+        data = data.T
 
         # plot the data
         hm = axes[i].imshow(data, alpha=0.8, cmap=cmap, norm=norm, vmin=vmin,
                             vmax=vmax)
 
-        # x and y axes labels
-        xlabs = spps
-        ylabs = models
-
-        if len(to_plot) > 1:
-            xlabs = models
-            ylabs = spps
-
-        if len(to_plot) > 1:
-            axes[i].set_xticks(np.arange(len(xlabs)))
-            axes[i].set_xticklabels(xlabs, rotation=90, ha='center')
-            axes[i].xaxis.tick_top()
-
-        else:
-            axes[i].set_xticks(np.arange(len(xlabs)) + 0.4)
-            axes[i].set_xticklabels(xlabs, rotation=45, ha='right')
-
-        axes[i].set_yticks(np.arange(len(ylabs)))
-        axes[i].set_yticklabels(ylabs, ha='right')
-
-        # format the axes
-        format_grid(axes[i], len(xlabs) - 1, len(ylabs) - 1)
+        #  format the axes and labels
+        axes[i].set_xticks(np.arange(len(models)) - 0.25)
+        axes[i].set_xticklabels(models, rotation=45, ha='left')
+        axes[i].xaxis.tick_top()
+        axes[i].set_yticks(np.arange(len(spps)))
+        axes[i].set_yticklabels(spps, ha='right')
 
         if len(axes) > 1:  # add title below axis
             axes[i].set_title(r'%s for %s' % (what, variables[i]), y=-0.1,
@@ -339,54 +339,60 @@ def heatmap(df, gs=True, E=True, A=True, what='NSE'):
 
     if len(axes) > 1:
         cax = fig.add_axes([1. / len(axes), -0.025,
-                            int(len(axes) / 2) / len(axes) + 0.025, 0.04])
-        #cbar = plt.colorbar(hm, cax=cax, orientation='horizontal')
-
-        if vmin < 0.:
-            cbar = plt.colorbar(hm, cax=cax, ticks=cticks, boundaries=bounds,
-                                extend='both', orientation='horizontal')
-
-        else:
-            cbar = plt.colorbar(hm, cax=cax, ticks=cticks, boundaries=bounds,
-                                spacing='proportional', extend='both',
-                                orientation='horizontal')
-
-        if (what == 'NSE') or (what == 'MAPE') or (what == 'MASE'):
-            cbar.ax.set_xticklabels([round(e, 2) for e in cticks])
-
-        else:
-            cbar.ax.set_xticklabels([round(e, 1) for e in cticks])
-
-        # add mesic - xeric arrow
-        ax = fig.add_axes([0.03, 0.148, 0.05, 0.688])
-        MAP_arrow(ax, direction='vertical')
+                            int(len(axes) / 2) / len(axes) +
+                            plt.rcParams['figure.subplot.wspace'], 0.04])
 
     else:
-        cax = make_axes_locatable(axes[0]).append_axes('right', size='5%',
-                                                        pad=0.2)
+        cax = fig.add_axes([0.25, 0.05, 0.52, 0.03])
+
+    if vmin < 0.:
         cbar = plt.colorbar(hm, cax=cax, ticks=cticks, boundaries=bounds,
-                            extend='both')
-        cbar.ax.set_yticklabels([round(e, 2) for e in cticks])
+                            extend='both', orientation='horizontal')
+
+    else:
+        cbar = plt.colorbar(hm, cax=cax, ticks=cticks, boundaries=bounds,
+                            spacing='proportional', extend='both',
+                            orientation='horizontal')
+
+    if what == 'SMAPE':
+        cbar.ax.set_xticklabels([int(e) if str(e).split('.')[1] == '0'
+                                 else round(e, 2) for e in cticks])
+
+    else:
+        cbar.ax.set_xticklabels([int(e) if str(e).split('.')[1] == '0'
+                                 else round(e, 1) for e in cticks])
+
+    if len(axes) == 1:
         cbar.set_label(r'%s for %s' % (what, variables[0]))
 
-        # add mesic - xeric arrow
-        ax = fig.add_axes([0.175, 0.825, 0.6, 0.05])
-        MAP_arrow(ax)
+    # add mesic - xeric arrow
+    if len(axes) > 1:
+        ax = fig.add_axes([0.045, 0.148, 0.05, 0.688])
 
-    fig.savefig(r'%s_skill_for_%s.png' % (what, '_'.join(to_plot)), dpi=300,
-                bbox_inches='tight')
+    else:
+        ax = fig.add_axes([-0.025, 0.135, 0.05, 0.715])
+
+    MAP_arrow(ax)
+
+    fig.savefig(fname, dpi=300)
 
     return
 
 
-# Import Data
-what = 'NSE'
-df = pd.read_csv('/mnt/c/Users/le_le/Work/One_gs_model_to_rule_them_all/output/simulations/obs_driven/all_%ss.csv' % (what))
+# PLOT
+what = 'MASE'
+to_plot = ['gs', 'E', 'A']
 
-plt.rcParams['text.usetex'] = True  # use LaTeX
-plt.rcParams['text.latex.preamble'] = [r'\usepackage{avant}',
-                                       r'\usepackage{mathpazo}',
-                                       r'\usepackage{amsmath}']
+plt_setup()  # rendering
+
+# Import Data
+base_dir = get_main_dir()  # dir paths
+ifdir = os.path.join(os.path.join(os.path.join(base_dir, 'output'),
+                     'simulations'), 'obs_driven')
+ofdir = os.path.join(os.path.join(os.path.join(base_dir, 'output'),
+                     'plots'), 'obs_performance')
+
+df = pd.read_csv(os.path.join(ifdir, 'all_%ss.csv' % (what)))
 
 # order by MAP: wet to dry
 df.set_index('model', inplace=True)
@@ -402,4 +408,8 @@ order = ['San_Lorenzo_Carapa_guianensis',
          'Sevilleta_Juniperus_monosperma', 'Sevilleta_Pinus_edulis']
 
 # make the figure
-heatmap(df[['variable'] + order], what=what, E=False, A=False)
+if what == 'NSE':
+    ofdir = os.path.dirname(ofdir)
+
+fname = os.path.join(ofdir, '%s_skill_for_%s.png' % (what, '_'.join(to_plot)))
+heatmap(df[['variable'] + order], fname, to_plot, what=what)
