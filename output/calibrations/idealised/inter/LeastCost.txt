@@ -1,104 +1,104 @@
 
 [[Fit Statistics]]
     # fitting method   = differential_evolution
-    # function evals   = 567
-    # data points      = 590
+    # function evals   = 681
+    # data points      = 706
     # variables        = 2
-    chi-square         = 123108.739
-    reduced chi-square = 209.368604
-    Akaike info crit   = 3155.01345
-    Bayesian info crit = 3163.77370
+    chi-square         = 158612.603
+    reduced chi-square = 225.301994
+    Akaike info crit   = 3826.71100
+    Bayesian info crit = 3835.83023
 [[Variables]]
-    kmaxLC:  0.33337927 +/- 0.00483649 (1.45%) (init = 1)
-    BoA:     60.2141135 +/- 3.60096932 (5.98%) (init = 200)
+    kmaxLC:  0.34635270 +/- 0.00481126 (1.39%) (init = 1)
+    Eta:     68.7678234 +/- 3.10146192 (4.51%) (init = 200)
 [[Correlations]] (unreported correlations are < 0.100)
-    C(kmaxLC, BoA) = -0.177
+    C(kmaxLC, Eta) = -0.344
 
 [[Fit Statistics]]
     # fitting method   = basinhopping
-    # function evals   = 32509
-    # data points      = 590
+    # function evals   = 31939
+    # data points      = 706
     # variables        = 2
-    chi-square         = 122973.708
-    reduced chi-square = 209.138959
-    Akaike info crit   = 3154.36596
-    Bayesian info crit = 3163.12620
+    chi-square         = 158751.388
+    reduced chi-square = 225.499131
+    Akaike info crit   = 3827.32847
+    Bayesian info crit = 3836.44770
 [[Variables]]
-    kmaxLC:  0.33097186 +/- 0.00478992 (1.45%) (init = 1)
-    BoA:     62.9092271 +/- 3.85484060 (6.13%) (init = 200)
+    kmaxLC:  0.34878813 +/- 0.00476231 (1.37%) (init = 1)
+    Eta:     68.2497735 +/- 3.35055751 (4.91%) (init = 200)
 [[Correlations]] (unreported correlations are < 0.100)
-    C(kmaxLC, BoA) = -0.191
+    C(kmaxLC, Eta) = -0.290
 
 [[Fit Statistics]]
     # fitting method   = Nelder-Mead
-    # function evals   = 154
-    # data points      = 590
+    # function evals   = 144
+    # data points      = 706
     # variables        = 2
-    chi-square         = 122925.773
-    reduced chi-square = 209.057438
-    Akaike info crit   = 3154.13593
-    Bayesian info crit = 3162.89618
+    chi-square         = 158576.764
+    reduced chi-square = 225.251085
+    Akaike info crit   = 3826.55145
+    Bayesian info crit = 3835.67068
 [[Variables]]
-    kmaxLC:  0.33265016 +/- 0.00480934 (1.45%) (init = 1)
-    BoA:     63.4552903 +/- 4.11777015 (6.49%) (init = 200)
+    kmaxLC:  0.34840637 +/- 0.00462249 (1.33%) (init = 1)
+    Eta:     69.1101628 +/- 2.90301621 (4.20%) (init = 200)
 [[Correlations]] (unreported correlations are < 0.100)
-    C(kmaxLC, BoA) = -0.203
+    C(kmaxLC, Eta) = -0.200
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 195
-    # data points      = 590
+    # function evals   = 262
+    # data points      = 706
     # variables        = 2
-    chi-square         = 122919.402
-    reduced chi-square = 209.046601
-    Akaike info crit   = 3154.10535
-    Bayesian info crit = 3162.86560
+    chi-square         = 158471.488
+    reduced chi-square = 225.101545
+    Akaike info crit   = 3826.08260
+    Bayesian info crit = 3835.20183
 [[Variables]]
-    kmaxLC:  0.33096127 +/- 0.00479084 (1.45%) (init = 1)
-    BoA:     62.8435049 +/- 3.85937472 (6.14%) (init = 200)
+    kmaxLC:  0.34869309 +/- 0.00463043 (1.33%) (init = 1)
+    Eta:     69.1119361 +/- 3.57310305 (5.17%) (init = 200)
 [[Correlations]] (unreported correlations are < 0.100)
-    C(kmaxLC, BoA) = -0.194
+    C(kmaxLC, Eta) = -0.208
 
 [[Fit Statistics]]
     # fitting method   = COBYLA
-    # function evals   = 37
-    # data points      = 590
+    # function evals   = 39
+    # data points      = 706
     # variables        = 2
-    chi-square         = 124891.756
-    reduced chi-square = 212.400945
-    Akaike info crit   = 3163.49729
-    Bayesian info crit = 3172.25753
+    chi-square         = 262018.234
+    reduced chi-square = 372.184992
+    Akaike info crit   = 4181.08722
+    Bayesian info crit = 4190.20645
 [[Variables]]
-    kmaxLC:  0.33013559 +/- 0.00498373 (1.51%) (init = 1)
-    BoA:     74.4198901 +/- 5.33565068 (7.17%) (init = 200)
+    kmaxLC:  1.22294830 +/- 1.59871351 (130.73%) (init = 1)
+    Eta:     33.9372117 +/- 1.16540133 (3.43%) (init = 200)
 [[Correlations]] (unreported correlations are < 0.100)
-    C(kmaxLC, BoA) = -0.371
+    C(kmaxLC, Eta) = -0.523
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing
-    # function evals   = 6104
-    # data points      = 590
+    # function evals   = 7244
+    # data points      = 706
     # variables        = 2
-    chi-square         = 122868.589
-    reduced chi-square = 208.960185
-    Akaike info crit   = 3153.86140
-    Bayesian info crit = 3162.62165
+    chi-square         = 158468.587
+    reduced chi-square = 225.097425
+    Akaike info crit   = 3826.06968
+    Bayesian info crit = 3835.18891
 [[Variables]]
-    kmaxLC:  0.33338976 +/- 0.00471323 (1.41%) (init = 1)
-    BoA:     61.7642843 +/- 2.86149609 (4.63%) (init = 200)
+    kmaxLC:  0.34869309 +/- 0.00498337 (1.43%) (init = 1)
+    Eta:     69.7310969 +/- 3.25876467 (4.67%) (init = 200)
 [[Correlations]] (unreported correlations are < 0.100)
-    C(kmaxLC, BoA) = -0.174
+    C(kmaxLC, Eta) = -0.488
 
 [[Fit Statistics]]
     # fitting method   = ampgo, with L-BFGS-B as local solver
-    # function evals   = 16770
-    # data points      = 590
+    # function evals   = 29415
+    # data points      = 706
     # variables        = 2
-    chi-square         = 123583.131
-    reduced chi-square = 210.175392
-    Akaike info crit   = 3157.28261
-    Bayesian info crit = 3166.04285
+    chi-square         = 158791.053
+    reduced chi-square = 225.555473
+    Akaike info crit   = 3827.50485
+    Bayesian info crit = 3836.62408
 ##  Warning: uncertainties could not be estimated:
 [[Variables]]
-    kmaxLC:  0.33332978 +/-        nan (nan%) (init = 1)
-    BoA:     63.8264237 +/-        nan (nan%) (init = 200)
+    kmaxLC:  0.35158034 +/-        nan (nan%) (init = 1)
+    Eta:     64.7713110 +/-        nan (nan%) (init = 200)
