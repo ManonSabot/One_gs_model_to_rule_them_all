@@ -89,8 +89,10 @@ def chunks(a, N):
 base_dir = get_main_dir()
 
 # path to input data
+Pmin = 1
 fname = os.path.join(os.path.join(os.path.join(os.path.join(base_dir, 'input'),
-                     'simulations'), 'idealised'), 'sensitivity_mtx.csv')
+                     'simulations'), 'idealised'), 'sensitivity_mtx_%sMPa.csv'
+                     % (str(Pmin)))
 
 # create the pbm for the Sobol sensitivity analysis
 fname1 = os.path.join(os.path.join(os.path.join(os.path.join(base_dir,
@@ -103,7 +105,7 @@ PPFD = [50., 2500.]  # umol m-2 s-1
 Tair = [2., 40.]  # degC
 VPD = [0.1, 10.]  # kPa
 CO2 = [250. * 101.325 / 1000., 900. * 101.325 / 1000.]  # Pa, 250 - 900 ppm
-Ps = [-3., df1['Psie'].iloc[0]]
+Ps = [-Pmin, df1['Psie'].iloc[0]]
 bounds = [PPFD, Tair, VPD, CO2, Ps]
 
 # define the sensitivity problem
@@ -165,36 +167,39 @@ if not os.path.isfile(fname):  # generate the sensitivity inputs
 else:
     df2, __ = read_csv(fname)  # load sensitivity input data
 
+ofdir = os.path.join(os.path.join(os.path.join(os.path.join(base_dir,
+                     'output'), 'simulations'), 'idealised'), 'sensitivities')
+
+if not os.path.isdir(ofdir):
+    os.makedirs(ofdir)
+
 """
-# run this in 36 different chunks to 'speed' things up
-dfs = chunks(df2, 36)
+# run this in 10 different chunks to 'speed' things up
+dfs = chunks(df2, 5)
 
 for i in range(len(dfs)):
 
-    i = 36
+    i = 1
 
-    fname = os.path.join(os.path.join(os.path.join(base_dir, 'output'),
-                         'Sensitivities'),
-                         'model_sensitivities_%d.csv' % (i + 1))
+    fname = os.path.join(ofdir, 'model_sensitivities_%sMPa_%d.csv' %
+                         (str(Pmin), i + 1))
 
     if not os.path.isfile(fname):  # generate the sensitivity outputs
 
+        # run the models
         df3 = hrun(fname, dfs[i], len(dfs[i]), 'Farquhar',
-                   models=['Medlyn', 'Tuzet', 'SOX12', 'WUE', 'CGain',
-                           'ProfitMax', 'CMax', 'LeastCost', 'CAP', 'MES'],
-                   inf_gb=True)  # run the models
-        #df3.columns = df3.columns.droplevel(level=1)  # drop the units
+                   models=['Medlyn', 'Tuzet', 'SOX12', 'WUE', 'CMax',
+                           'ProfitMax', 'ProfitMax2', 'CGain', 'LeastCost',
+                           'CAP', 'MES'], inf_gb=True, temporal=False)
+        df3.columns = df3.columns.droplevel(level=1)  # drop the units
 
     exit(1)
 """
 
-fname = os.path.join(os.path.join(os.path.join(os.path.join(base_dir, 'output'),
-                     'simulations'), 'idealised'), 'model_sensitivity_mtx.csv')
+fname = os.path.join(ofdir, 'model_sensitivities_%sMPa.csv' % (str(Pmin)))
 df3, __ = read_csv(fname)  # load outputs
 
-fname = os.path.join(os.path.join(os.path.join(os.path.join(base_dir, 'output'),
-                     'simulations'), 'idealised'),
-                     'overview_of_sensitivities.csv')
+fname = os.path.join(ofdir, 'overview_of_sensitivities_%sMPa.csv' % (str(Pmin)))
 
 if not os.path.isfile(fname):
 
@@ -202,15 +207,6 @@ if not os.path.isfile(fname):
     df3 = df3[df3.filter(like='gs(').columns.to_list() +
               df3.filter(like='Ci(').columns.to_list() +
               df3.filter(like='Pleaf(').columns.to_list()]
-
-    # adjust the limits for each individual model
-    df3.loc[df2.index[df2['Ps'] <= -1.5], df3.filter(like='std1').columns] = 0.
-    df3.loc[df2.index[df2['Ps'] <= df2['PrefT']],
-            df3.filter(like='tuz').columns] = 0.
-    df3.loc[df2.index[df2['Ps'] <= df2['PcritC']],
-            df3.filter(like='cap').columns] = 0.
-    df3.loc[df2.index[df2['Ps'] <= df2['PcritM']],
-            df3.filter(like='mes').columns] = 0.
 
     # where 9999., the output is effectively 0.
     df3.replace(9999., 0., inplace=True)  # all NaNs to zero

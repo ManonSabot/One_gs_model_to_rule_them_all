@@ -1,0 +1,162 @@
+# -*- coding: utf-8 -*-
+
+"""
+The profit maximisation algorithm (between carbon gain and hydraulic
+cost), adapted from Sperry et al. (2017)'s hydraulic-limited stomatal
+optimization model.
+
+This file is part of the TractLSM model.
+
+Copyright (c) 2019 Manon E. B. Sabot
+
+Please refer to the terms of the MIT License, which you should have
+received along with the TractLSM.
+
+References:
+----------
+* Sperry et al. (2017). Predicting stomatal responses to the environment
+  from the optimization of photosynthetic gain and hydraulic cost.
+  Plant, cell & environment, 40(6), 816-830.
+
+"""
+
+__title__ = "Profit maximisation algorithm"
+__author__ = "Manon E. B. Sabot"
+__version__ = "2.0 (29.11.2017)"
+__email__ = "m.e.b.sabot@gmail.com"
+
+
+# ======================================================================
+
+# general modules
+import sys  # check for version on the system
+import numpy as np  # array manipulations, math operators
+import bottleneck as bn  # faster C-compiled np for all nan operations
+
+# own modules
+from TractLSM import conv, cst  # unit converter & general constants
+from TractLSM.SPAC import hydraulics, hydraulic_cost
+from TractLSM.SPAC import leaf_energy_balance, leaf_temperature
+from TractLSM.SPAC import calc_photosynthesis, rubisco_limit
+from TractLSM.CH2OCoupler import Ci_sup_dem, A_trans
+
+
+# ======================================================================
+
+def profit_E(p, photo='Farquhar', res='low', inf_gb=False):
+
+    """
+    Finds the instateneous profit maximization, following the
+    optmization criterion for which, at each instant in time, the
+    stomata regulate canopy gas exchange and pressure to achieve the
+    maximum profit, which is the maximum difference between the
+    normalized photosynthetic gain (gain) and the hydraulic cost
+    function (cost). That is when d(gain)/dP = d(cost)/dP.
+
+    Arguments:
+    ----------
+    p: recarray object or pandas series or class containing the data
+        time step's met data & params
+
+    photo: string
+        either the Farquhar model for photosynthesis, or the Collatz
+        model
+
+    res: string
+        either 'low' (default), 'med', or 'high' to run the optimising
+        solver
+
+    onopt: boolean
+        if True, the optimisation is performed. If Fall, fall back on
+        previously performed optimisation for the value of the maximum
+        profit.
+
+    inf_gb: bool
+        if True, gb is prescrived and very large
+
+    Returns:
+    --------
+    E_can: float
+        transpiration [mmol m-2 s-1] at maximum profit across leaves
+
+    gs_can: float
+        stomatal conductance [mol m-2 s-1] at maximum profit across
+        leaves
+
+    An_can: float
+        net photosynthetic assimilation rate [umol m-2 s-1] at maximum
+        profit across leaves
+
+    Ci_can: float
+        intercellular CO2 concentration [Pa] at maximum profit across
+        leaves
+
+    rublim_can: string
+        'True' if the C assimilation is rubisco limited, 'False'
+        otherwise
+
+    """
+
+    # hydraulics
+    P, trans = hydraulics(p, res=res, kmax=p.kmax2)
+
+    # expression of optimization
+    Ci, mask = Ci_sup_dem(p, trans, photo=photo, res=res, inf_gb=inf_gb)
+    expr =  np.abs(np.gradient(A_trans(p, trans[mask], Ci, inf_gb=inf_gb),
+                               trans[mask]) * (trans[-1] - trans[mask]) -
+                   A_trans(p, trans[mask], Ci, inf_gb=inf_gb))
+
+    # deal with edge cases by rebounding the solution
+    gc, gs, gb, __ = leaf_energy_balance(p, trans[mask], inf_gb=inf_gb)
+
+    try:
+        if inf_gb:  # check on valid range
+            check = expr[gc > cst.zero]
+
+            # erratic model behaviour at low VPD and low-ish PAR
+            if (p.VPD < 1.) or (p.PPFD < 500.):
+                check = check[:np.minimum(np.argmax(np.diff(check) > 0.) +
+                                          int(len(P) / 20), len(check) - 1)]
+
+        else:  # further constrain the realm of possible gs
+            check = expr[np.logical_and(gc > cst.zero, gs < 1.5 * gb)]
+
+        # expr can have several "zeros" passed the actual optimal pt
+        check = check[check > 1.e-9]
+
+        idx = np.isclose(expr, min(check))
+        idx = [list(idx).index(e) for e in idx if e]
+
+        if inf_gb:  # check for algo. "overshooting" due to inf. gb
+            while Ci[idx[0]] < 2. * p.gamstar25:
+                idx[0] -= 1
+
+                if idx[0] < 3:
+                    break
+
+        # optimized where Ci for both photo models are close
+        Ci = Ci[idx[0]]
+        trans = trans[mask][idx[0]]  # mol.m-2.s-1
+        gs = gs[idx[0]]
+        Pleaf = P[mask][idx[0]]
+
+        # rubisco- or electron transport-limitation?
+        An, Aj, Ac = calc_photosynthesis(p, trans, Ci, photo, inf_gb=inf_gb)
+        rublim = rubisco_limit(Aj, Ac)
+
+        # leaf temperature?
+        Tleaf, __ = leaf_temperature(p, trans, inf_gb=inf_gb)
+
+        if (np.isclose(trans, cst.zero, rtol=cst.zero, atol=cst.zero) and
+            (An > 0.)) or (idx[0] == len(P) - 1) or any(np.isnan([An, Ci, trans,
+            gs, Tleaf, Pleaf])):
+            An, Ci, trans, gs, gb, Tleaf, Pleaf = (9999.,) * 7
+
+        elif not np.isclose(trans, cst.zero, rtol=cst.zero, atol=cst.zero):
+            trans *= conv.MILI  # mmol.m-2.s-1
+
+        return An, Ci, rublim, trans, gs, gb, Tleaf, Pleaf
+
+    except ValueError:  # no opt
+
+        return (9999.,) * 8

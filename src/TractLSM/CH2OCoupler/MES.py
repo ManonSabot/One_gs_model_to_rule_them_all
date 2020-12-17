@@ -82,8 +82,8 @@ def MES(p, photo='Farquhar', res='low', inf_gb=False):
     """
 
     # hydraulics
-    P = hydraulics(p, res=res, Kirchhoff=False)
-    ksr = p.ksrmaxM * (p.Psie / p.Ps) ** (2. + 3. / p.bch)
+    P = hydraulics(p, res=res, Kirchhoff=False, Pcrit=p.PcritC)
+    ksr = p.ksrmaxM * (p.Psie / np.maximum(p.Ps, -1.2)) ** (2. + 3. / p.bch)
     ksl = 1. / (1. / ksr + 1. / p.krlM)  # soil-leaf hydraulic conductance
     trans = ksl * (p.Ps - P) * conv.FROM_MILI  # mol.s-1.m-2
 
@@ -115,13 +115,13 @@ def MES(p, photo='Farquhar', res='low', inf_gb=False):
                     break
 
         # optimized where Cis/Ccs for both photo models are close
-        Cic = Cic[idx[0]]
+        Ci = Cic[idx[0]]  # here Cc is analogous to Ci
         trans = trans[mask][idx[0]]  # mol.m-2.s-1
         gs = gs[idx[0]]
         Pleaf = P[mask][idx[0]]
 
         # rubisco limitation or electron transport-limitation
-        An, Aj, Ac = calc_photosynthesis(p, trans, Cic, photo=photo,
+        An, Aj, Ac = calc_photosynthesis(p, trans, Ci, photo=photo,
                                          inf_gb=inf_gb)
         rublim = rubisco_limit(Aj, Ac)
 
@@ -129,14 +129,14 @@ def MES(p, photo='Farquhar', res='low', inf_gb=False):
         Tleaf, __ = leaf_temperature(p, trans, inf_gb=inf_gb)
 
         if (np.isclose(trans, cst.zero, rtol=cst.zero, atol=cst.zero) and
-            (An > 0.)) or (idx[0] == len(P) - 1) or any(np.isnan([An, Cic,
+            (An > 0.)) or (idx[0] == len(P) - 1) or any(np.isnan([An, Ci,
             trans, gs, Tleaf, Pleaf])):
-            An, Cic, trans, gs, gb, Tleaf, Pleaf = (9999.,) * 7
+            An, Ci, trans, gs, gb, Tleaf, Pleaf = (9999.,) * 7
 
         elif not np.isclose(trans, cst.zero, rtol=cst.zero, atol=cst.zero):
             trans *= conv.MILI  # mmol.m-2.s-1
 
-        return An, Cic, rublim, trans, gs, gb, Tleaf, Pleaf
+        return An, Ci, rublim, trans, gs, gb, Tleaf, Pleaf
 
     except ValueError:  # no opt
 

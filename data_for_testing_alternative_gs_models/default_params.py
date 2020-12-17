@@ -52,13 +52,13 @@ class default_params(object):  # default inputs needed to run model
         self.tmax = 25.  # degC
         self.rain_day = 0.  # mm d-1
         self.RH = 30.  # relative humidity, %
-        self.sw_rad_day = 1080. * 10.  # W m-2, for 10 daylight hours
+        self.sw_rad_day = 1080. * 10.  # W m-2, alternative 12 daylight hours
         self.Patm = 101.325  # kPa
         self.u = 2.  # m s-1
 
         # location of the former Duke FACE
-        self.lat = 36.
-        self.lon = -79.
+        self.lat = 36.  # alternative 38.569120
+        self.lon = -79.  # alternative -80.018519
 
         # gas concentrations
         self.CO2 = 41.55  # Pa, ~410 ppm as of early 2020
@@ -119,6 +119,7 @@ class default_params(object):  # default inputs needed to run model
         self.P50 = 3.13  # xylem pressure at P50 (-MPa) - P. tadea
         self.P88 = 4.9  # same at P88 (-MPa) (Choat et al., 2012)
         self.kmax = 1.  # max plant hydr cond / LAI (mmol m-2 s-1 MPa-1)
+        self.kmax2 = 1.  # max plant hydr cond / LAI in ProfitMax2
         self.kmaxWUE = self.kmax  # max plant hydr cond / LAI in WUE-LWP
         self.kmaxCN = self.kmax  # max plant hydr cond / LAI in CNetGain
         self.kmaxCM = self.kmax  # max plant hydr cond / LAI in CMax
@@ -132,8 +133,8 @@ class default_params(object):  # default inputs needed to run model
         self.ratiocrit = 0.05  # degree stom control? kcrit = N%(kmax)
 
         # soil-root maximum hydraulic conductances
-        self.ksrmaxC = 1.e5  # as in CAP (mmol m-2 s-1 MPa-1)
-        self.ksrmaxM = 1.e5  # as in MES (mmol m-2 s-1 MPa-1)
+        self.ksrmaxC = 1.e7  # 'infinite' (mmol m-2 s-1 MPa-1)
+        self.ksrmaxM = 1.e7  # 'infinite' (mmol m-2 s-1 MPa-1)
 
         # empirical moisture stress functions
         self.sref = 2.  # sensitivity of the stomates to LWP (MPa-1)

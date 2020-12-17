@@ -74,10 +74,19 @@ def calc_trans(p, Tleaf, gs, inf_gb=False):
     # get conductances, mol m-2 s-1
     gw, __, gb, __ = conductances(p, Tleaf=Tleaf, gs=gs, inf_gb=inf_gb)
 
-    # saturation vapour pressure of water at Tair
-    esat_a = vpsat(p.Tair)  # kPa
-    esat_l = vpsat(Tleaf)  # vpsat at new Tleaf, kPa
-    Dleaf = np.maximum(0.05, (esat_l - (esat_a - p.VPD)))
+    try:
+        if np.isclose(Tleaf, p.Tleaf):
+            Dleaf = p.VPD
+
+        else:
+            esat_l = vpsat(Tleaf)  # saturation vapour pressure of water, kPa
+            esat_a = vpsat(p.Tair)  # kPa
+            Dleaf = (esat_l - (esat_a - p.VPD))  # leaf-air vpd, kPa
+
+    except (IndexError, AttributeError, ValueError):  # calc. Dleaf
+        esat_l = vpsat(Tleaf)  # saturation vapour pressure of water, kPa
+        esat_a = vpsat(p.Tair)  # kPa
+        Dleaf = (esat_l - (esat_a - p.VPD))  # leaf-air vpd, kPa
 
     if np.isclose(gs, 0., rtol=cst.zero, atol=cst.zero):
         trans = cst.zero
@@ -134,6 +143,12 @@ def A_trans(p, trans, Ci, Tleaf=None, inf_gb=False):
     Ci(P) and over an array of Gc(P) values.
 
     """
+
+    try:  # is Tleaf one of the input fields?
+        Tleaf = p.Tleaf
+
+    except (IndexError, AttributeError, ValueError):  # calc. Tleaf
+        pass
 
     if Tleaf is not None:  # get CO2 diffusive conduct.
         gc, __, __, __ = leaf_energy_balance(p, trans, Tleaf=Tleaf,
@@ -205,7 +220,7 @@ def mtx_minimise(p, trans, all_Cis, photo, Vmax25=None, all_Ccs=None,
         demand, __, __ = calc_photosynthesis(p, np.expand_dims(trans, axis=1),
                                              all_Cis, photo, inf_gb=inf_gb)
 
-    supply = A_trans(p, np.expand_dims(trans, axis=1), all_Cis)
+    supply = A_trans(p, np.expand_dims(trans, axis=1), all_Cis, inf_gb=inf_gb)
 
     # find the meeting point between demand and supply
     demand[supply < 0.] = np.nan
@@ -253,14 +268,23 @@ def Ci_sup_dem(p, trans, photo='Farquhar', res='low', Vmax25=None, phi=None,
 
     if (Vmax25 is None) and (phi is not None):  # account for gm
         Tref = p.Tref + conv.C_2_K  # degk, Tref set to 25 degC
-        Tleaf, __ = leaf_temperature(p, trans, inf_gb=inf_gb)
+
+        try:  # is Tleaf one of the input fields?
+            Tleaf = p.Tleaf
+
+        except (IndexError, AttributeError, ValueError):  # calc. Tleaf
+            Tleaf, __ = leaf_temperature(p, trans, inf_gb=inf_gb)
 
         # CO2 compensation point
         gamstar = arrhen(p.gamstar25, p.Egamstar, Tref, Tleaf)
 
-        # now getting the Cc
-        Ccs = np.asarray([phi[e] * (Cis[e] - gamstar[e]) + gamstar[e] for e in
-                         range(len(trans))])
+        try: # now getting the Cc
+            Ccs = np.asarray([phi[e] * (Cis[e] - gamstar[e]) + gamstar[e]
+                             for e in range(len(trans))])
+
+        except IndexError:  # only one Tleaf
+            Ccs = np.asarray([phi[e] * (Cis[e] - gamstar) + gamstar
+                             for e in range(len(trans))])
 
     if phi is None:
         Ccs = None

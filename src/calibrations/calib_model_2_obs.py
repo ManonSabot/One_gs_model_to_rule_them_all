@@ -47,10 +47,10 @@ warnings.filterwarnings("ignore", category=RuntimeWarning)
 import os  # check for files, paths
 import sys  # check for files, paths
 import shutil  # move files
+from itertools import groupby
 import random  # pick a random day for the forcings to be generated
 import numpy as np  # array manipulations, math operators
 import pandas as pd  # read/write dataframes, csv files
-from itertools import groupby
 
 # change the system path to load modules from TractLSM
 script_dir = os.path.dirname(os.path.realpath(sys.argv[0]))
@@ -94,23 +94,21 @@ to_fit = True
 odf = pd.DataFrame(columns=['Model', 'training', 'solver', 'BIC', 'Rank', 'p1',
                             'v1', 'p2', 'v2'])
 
-# where should the fitting solvers' outputs be stored?
 base_dir = get_main_dir()  # working paths
+
+# fitting files
+ipath = os.path.join(os.path.join(os.path.join(base_dir, 'input'),
+                     'calibrations'), 'obs_driven')
+opath = os.path.join(os.path.join(os.path.join(base_dir, 'output'),
+                     'calibrations'), 'obs_driven')
+
+xfiles = sorted([e for e in os.listdir(ipath) if e.endswith('_x.csv')])
+yfiles = sorted([e for e in os.listdir(ipath) if e.endswith('_y.csv')])
 
 if to_fit:
 
-    ipath = os.path.join(os.path.join(os.path.join(base_dir, 'input'),
-                         'calibrations'), 'obs_driven')
-    opath = os.path.join(os.path.join(os.path.join(base_dir, 'output'),
-                         'calibrations'), 'obs_driven')
-    xfiles = sorted([e for e in os.listdir(ipath) if e.endswith('_x.csv')])
-    yfiles = sorted([e for e in os.listdir(ipath) if e.endswith('_y.csv')])
-
-    xfiles = xfiles[13:14]
-    yfiles = yfiles[13:14]
-
-    #print(xfiles)
-    #exit(1)
+    xfiles = xfiles[9:10]  #, xfiles[-1]]
+    yfiles = yfiles[9:10]  #, yfiles[-1]]
 
     for ifile, ofile in zip(xfiles, yfiles):  # loop over the files
 
@@ -124,25 +122,29 @@ if to_fit:
             os.makedirs(out)
 
         # use a non-linear least square minimiser to train the models
-        for test in ['differential_evolution', 'powell', 'dual_annealing']:
+        for test in ['dual_annealing']:  #  'differential_evolution', 'powell',
 
             XX = X.copy()
             nlmfit = NLMFIT(method=test, store=out, inf_gb=False)
 
-            __ = nlmfit.run(XX, Y, 'Medlyn-LWP', g1=True)
+            #__ = nlmfit.run(XX, Y, 'Medlyn-LWP', g1=True)
+            __ = nlmfit.run(XX, Y, 'Tuzet')
+
+            """
             __ = nlmfit.run(XX, Y, 'Eller')
             __ = nlmfit.run(XX, Y, 'SOX-OPT')
             __ = nlmfit.run(XX, Y, 'CAP')
             __ = nlmfit.run(XX, Y, 'MES')
             __ = nlmfit.run(XX, Y, 'LeastCost')
-            fkmax = nlmfit.run(XX, Y, 'ProfitMax')
+            __ = nlmfit.run(XX, Y, 'ProfitMax2')
 
-            # these models come after ProfitMax as they use its kmax
+            # use ProfitMax's kmax
+            fkmax = nlmfit.run(XX, Y, 'ProfitMax')
             XX['kmax'] = fkmax['kmax']
-            __ = nlmfit.run(XX, Y, 'Tuzet')
             __ = nlmfit.run(XX, Y, 'WUE-LWP')
-            __ = nlmfit.run(XX, Y, 'CGain')
             __ = nlmfit.run(XX, Y, 'CMax')
+            __ = nlmfit.run(XX, Y, 'CGain')
+            """
 
     exit(1)
 
@@ -159,7 +161,7 @@ else:  # read over the calibration files and analyse these outputs
 
             for file in os.listdir(os.path.join(opath, training)):
 
-                if file.endswith('.txt') and not file.endswith('2.txt'):
+                if file.endswith('.txt') and not file.endswith('zet2.txt'):
                     f = open(os.path.join(os.path.join(opath, training), file),
                              'r')
                     model = file.split('.txt')[0]
@@ -173,15 +175,17 @@ else:  # read over the calibration files and analyse these outputs
                     k5 = '%) '  # calibrated parameters
                     k6 = '(init'  # calibrated parameters
                     k7 = '+/-'  # calibrated parameters
-                    k8 = '=='  # calibrated parameters
+                    k8 = '(fixed'  # calibrated parameters
+                    k9 = '=='  # calibrated parameters
                     info = [e.split('=') if (k1 in e) else
                             [e.split('=')[1]] if ((k2 in e) or (k3 in e) or
                             (k4 in e)) else
                             e.split(k5)[0].split(k7)[0].split(':')
-                            if (k5 in e)
-                            else e.split(k6)[0].split(k7)[0].split(':')
+                            if (k5 in e) else
+                            e.split(k6)[0].split(k7)[0].split(':')
                             if (k6 in e) else
                             e.split(k8)[0].split(':') if (k8 in e) else
+                            e.split(k9)[0].split(':') if (k9 in e) else
                             [''] for e in lines]
                     info = [e.strip('\n') for sub in info for e in sub
                             if e != '']
@@ -217,6 +221,9 @@ else:  # read over the calibration files and analyse these outputs
             odf['Rank'] = (odf.groupby(['Model', 'training'])['BIC'].rank()
                               .astype(int))
 
+        # change param name for ProfitMax2 to allow differentiation
+        odf['p1'].loc[odf['Model'] == 'ProfitMax2'] = 'kmax2'
+
         # column order
         columns = ['Model', 'training', 'solver', 'Rank', 'BIC', 'Ntotal', 'p1',
                    'v1', 'p2', 'v2']
@@ -232,7 +239,57 @@ else:  # read over the calibration files and analyse these outputs
 
     if not os.path.isfile(fname):  # pick best param
 
-        # where are there several equal best ranks within a group?
+        # check whether the calibrated parameters are stuck at boundary
+        stuck = []
+        nlmfit = NLMFIT()
+
+        for ifile in xfiles:
+
+            df, __ = read_csv(os.path.join(ipath, ifile))  # ref params
+            sub = odf[odf['training'] == ifile.split('_x.csv')[0]]
+
+            for e in np.append(sub['p1'].unique(), sub['p2'].dropna().unique()):
+
+                sub1 = sub[sub['p1'] == e]
+                sub2 = sub[sub['p2'] == e]
+                min, max = nlmfit.param_space(e, P88=df.loc[0, 'P88'])
+                min += 0.05 * min  # above min is not stuck at bound
+                max -= 0.05 * max  # below max is not stuck at bound
+
+                if len(sub1) > 0:
+                    lims = np.logical_or(sub1['v1'] < min, sub1['v1'] > max)
+
+                    if any(lims):
+                        stuck += sub1['v1'][lims].index.to_list()
+
+                if len(sub2) > 0:
+                    lims = np.logical_or(sub2['v2'] < min, sub2['v2'] > max)
+
+                    if any(lims):
+                        stuck += sub2['v2'][lims].index.to_list()
+        # boundary params
+        if len(stuck) > 0:
+            sub = odf[odf.index.isin(stuck)]
+            eq = sub.groupby(['Model', 'training']).size().le(2)
+            eq_models = eq[eq == True].index.get_level_values(0)
+            eq_trainings = eq[eq == True].index.get_level_values(1)
+
+            for i in range(len(eq_models)):
+
+                where = np.logical_and(odf['Model'] == eq_models[i],
+                                       odf['training'] == eq_trainings[i])
+                sub = odf[where]
+
+                # which of these values are at the boundary?
+                if not all(sub[sub.index.isin(stuck)]['Rank'].values >
+                           sub[~sub.index.isin(stuck)]['Rank'].values):
+                    odf.loc[sub[sub.index.isin(stuck)].index, 'Rank'] = 3
+
+                    while all(sub.loc[~sub.index.isin(stuck), 'Rank'] > 1):
+                        odf.loc[sub[~sub.index.isin(stuck)].index, 'Rank'] -= 1
+                        sub.loc[~sub.index.isin(stuck), 'Rank'] -= 1
+
+        # are there still several equal best ranks within a group?
         eq = odf.groupby(['Model', 'training'])['Rank'].nunique().le(2)
         eq_models = eq[eq == True].index.get_level_values(0)
         eq_trainings = eq[eq == True].index.get_level_values(1)
@@ -247,12 +304,10 @@ else:  # read over the calibration files and analyse these outputs
             if len(sub[sub['Rank'] == sub['Rank'].min()]) > 1:
                 odf['Rank'][where] = 3  # deal with duplicated Rank = 1
                 idx = sub[sub['v1'] == sub['v1'].median()].index
-                print(sub, idx)
 
                 if len(idx) > 1:  # if params are equal, pick fastest
                     sub = sub.loc[idx]
                     idx = sub[sub['Ntotal'] == sub['Ntotal'].min()].index
-                    print(sub, idx)
 
                 odf.loc[idx, 'Rank'] = 1
 

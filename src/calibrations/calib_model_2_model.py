@@ -109,6 +109,10 @@ def soil_water(df, profile):
         rate = -5. / len(df) * (np.log(sw[0]) - np.log(df['fc'][0]))
         sw_min = (df['fc'][0] + df['pwp'][0]) / 2.
 
+        # alternative
+        #start = sw[0]
+        #rate = -8. / len(df) * (np.log(sw[0]) - np.log(df['fc'][0]))
+
     for i in range(len(df)):
 
         if i == 0:
@@ -292,6 +296,7 @@ if to_fit:
 
         X, Y = prep_training_N_target(swater, sub=sample)
 
+        # where should the calibration output be stored?
         opath = os.path.join(os.path.join(os.path.join(base_dir, 'output'),
                              'calibrations'), 'idealised')
 
@@ -325,8 +330,8 @@ if to_fit:
             XX['kmax'] = fkmax['kmax']
             __ = nlmfit.run(XX, Y, 'Tuzet')
             __ = nlmfit.run(XX, Y, 'WUE-LWP')
-            __ = nlmfit.run(XX, Y, 'CGain')
             __ = nlmfit.run(XX, Y, 'CMax')
+            __ = nlmfit.run(XX, Y, 'CGain')
 
         exit(1)
 
@@ -356,7 +361,7 @@ else:  # read over the calibration files and analyse these outputs
 
                 for file in os.listdir(opath):
 
-                    if file.endswith('.txt') and not file.endswith('2.txt'):
+                    if file.endswith('.txt') and not file.endswith('zet2.txt'):
                         f = open(os.path.join(opath, file), 'r')
                         model = file.split('.txt')[0]
                         lines = f.readlines()
@@ -424,6 +429,9 @@ else:  # read over the calibration files and analyse these outputs
             odf['Rank'] = (odf.sort_values(['BIC', 'med1', 'med2', 'Ntotal'])
                               .groupby(by)['BIC'].rank(method='first')
                               .astype(int))
+
+        # change param name for ProfitMax2 to allow differentiation
+        odf['p1'].loc[odf['Model'] == 'ProfitMax2'] = 'kmax2'
 
         # column order
         columns = ['Model', 'training', 'sub-sample', 'solver', 'Rank', 'BIC',

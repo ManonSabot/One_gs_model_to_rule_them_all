@@ -51,8 +51,8 @@ from TractLSM.CH2OCoupler import calc_trans
 
 # ======================================================================
 
-def solve_std(p, sw, photo='Farquhar', res='low', case=1, threshold_conv=0.1,
-              iter_max=40, inf_gb=False):
+def solve_std(p, sw, photo='Farquhar', res='low', case=1, iter_max=40,
+              threshold_conv=0.1, inf_gb=False):
 
     """
     Checks the energy balance by looking for convergence of the new leaf
@@ -133,8 +133,6 @@ def solve_std(p, sw, photo='Farquhar', res='low', case=1, threshold_conv=0.1,
                                              gs_over_A=gsoA)
 
         # stomatal conductance, with moisture stress effect
-        Cs_umol_mol = Cs * conv.MILI / p.Patm
-        gsoA = g0 + (1. + g1 / (Dleaf ** 0.5)) / Cs_umol_mol
         gs = np.maximum(cst.zero, conv.GwvGc * gsoA * An)
 
         # calculate new trans, gw, gb, mol.m-2.s-1
@@ -146,6 +144,7 @@ def solve_std(p, sw, photo='Farquhar', res='low', case=1, threshold_conv=0.1,
         boundary_CO2 = p.Patm * conv.FROM_MILI * An / (gb * conv.GbcvGb +
                                                        gs * conv.GcvGw)
         Cs = np.maximum(cst.zero, np.minimum(p.CO2, p.CO2 - boundary_CO2))
+        Cs_umol_mol = Cs * conv.MILI / p.Patm
 
         # new leaf-air vpd, kPa
         if (np.isclose(trans, cst.zero, rtol=cst.zero, atol=cst.zero) or
@@ -153,12 +152,15 @@ def solve_std(p, sw, photo='Farquhar', res='low', case=1, threshold_conv=0.1,
             np.isclose(gs, cst.zero, rtol=cst.zero, atol=cst.zero)):
             Dleaf = np.maximum(0.05, p.VPD)  # kPa
 
+        # update gs over A
+        gsoA = g0 + (1. + g1 / (Dleaf ** 0.5)) / Cs_umol_mol
+
         # force stop when atm. conditions yield E < 0. (non-physical)
         if (iter < 1) and (not real_zero):
             real_zero = None
 
         # check for convergence
-        if ((real_zero is None) or (iter > iter_max) or ((iter > 1) and
+        if ((real_zero is None) or (iter >= iter_max) or ((iter >= 1) and
             real_zero and (abs(Tleaf - new_Tleaf) <= threshold_conv) and not
             np.isclose(gs, cst.zero, rtol=cst.zero, atol=cst.zero))):
             break

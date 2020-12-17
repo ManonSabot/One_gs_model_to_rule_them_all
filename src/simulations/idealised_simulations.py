@@ -86,23 +86,38 @@ def soil_water(df, profile):
     track = 1
 
     if profile == 'wet':
+        start = sw[0]
         rate = -1.5 / len(df) * (np.log(sw[0]) - np.log(df['fc'][0]))
         sw_min = (sw[0] + df['fc'][0]) / 2.25
 
     if profile == 'inter':
-        rate = -8. / len(df) * (np.log(sw[0]) - np.log(df['fc'][0]))
+        start = 0.9 * sw[0]
+        rate = -5. / len(df) * (np.log(sw[0]) - np.log(df['fc'][0]))
         sw_min = (df['fc'][0] + df['pwp'][0]) / 2.
 
+        # alternative
+        #start = sw[0]
+        #rate = -8. / len(df) * (np.log(sw[0]) - np.log(df['fc'][0]))
+
     if profile == 'dry':
-        rate = -16. / len(df) * (np.log(sw[0]) - np.log(df['fc'][0]))
+        start = 0.8 * sw[0]
+        rate = -12. / len(df) * (np.log(sw[0]) - np.log(df['fc'][0]))
         sw_min = df['pwp'][0] / 2.
+
+        # alternative
+        #start = sw[0]
+        #rate = -16. / len(df) * (np.log(sw[0]) - np.log(df['fc'][0]))
 
     for i in range(len(df)):
 
-        sw[i] = sw[i-1]
+        if i == 0:
+            sw[i] = start
+
+        else:
+            sw[i] = sw[i-1]
 
         if df['PPFD'].iloc[i] > 50.:
-            sw[i] = np.maximum(sw[0] / (1. - rate * track), sw_min)
+            sw[i] = np.maximum(start / (1. - rate * track), sw_min)
             track += 1
 
     # now get the soil water potentials matching the soil moisture profile
@@ -219,7 +234,7 @@ for combi in combis:  # loop over all the possibilities
         df1['VPD'] *= 2.
 
     elif combi[2] == 'highCa':
-        df1['CO2'] *= 2.
+        df1['CO2'] *= 1.5
 
     # soil moisture profile
     df1['sw'] = df1['theta_sat']
@@ -227,8 +242,8 @@ for combi in combis:  # loop over all the possibilities
     df1['sw'], df1['Ps'] = soil_water(df1, combi[1])
 
     # run the models
-    models = ['Medlyn12', 'Tuzet', 'SOX12', 'ProfitMax', 'CGain', 'WUE', 'CMax',
-              'LeastCost', 'CAP', 'MES']
+    models = ['Medlyn12', 'Tuzet', 'SOX12', 'ProfitMax', 'ProfitMax2', 'CGain',
+              'WUE', 'CMax', 'LeastCost', 'CAP', 'MES']
 
     fname = os.path.join(ofdir, '%s.csv' % (xpe))
 

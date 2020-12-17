@@ -39,7 +39,11 @@ from TractLSM.CH2OCoupler import Ci_sup_dem
 
 def dEoAdXi(p, trans, Ci, inf_gb=False):
 
-    Tleaf, __ = leaf_temperature(p, trans, inf_gb=inf_gb)
+    try:  # is Tleaf one of the input fields?
+        Tleaf = p.Tleaf
+
+    except (IndexError, AttributeError, ValueError):  # calc. Tleaf
+        Tleaf, __ = leaf_temperature(p, trans, inf_gb=inf_gb)
 
     # saturation vapour pressure of water at T
     esat_l = vpsat(Tleaf)  # kPa
@@ -55,7 +59,11 @@ def dEoAdXi(p, trans, Ci, inf_gb=False):
 
 def dVmaxoAdXi(p, trans, Ci, inf_gb=False):
 
-    Tleaf, __ = leaf_temperature(p, trans, inf_gb=inf_gb)
+    try:  # is Tleaf one of the input fields?
+        Tleaf = p.Tleaf
+
+    except (IndexError, AttributeError, ValueError):  # calc. Tleaf
+        Tleaf, __ = leaf_temperature(p, trans, inf_gb=inf_gb)
 
     # gamstar, Vmax, Kc and Ko are known at Tref, get their T dependency
     Tref = p.Tref + conv.C_2_K  # degk, Tref set to 25 degC

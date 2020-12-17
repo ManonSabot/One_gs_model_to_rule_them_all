@@ -36,7 +36,7 @@ from TractLSM.CH2OCoupler import calc_trans
 
 # ======================================================================
 
-def Tuzet(p, photo='Farquhar', res='low', threshold_conv=0.1, iter_max=40,
+def Tuzet(p, photo='Farquhar', res='low', iter_max=40, threshold_conv=0.1,
           inf_gb=False):
 
     """
@@ -96,10 +96,8 @@ def Tuzet(p, photo='Farquhar', res='low', threshold_conv=0.1, iter_max=40,
     # hydraulics
     P, E = hydraulics(p, res=res, kmax=p.kmaxT)
 
-    # get the soil moisture stress function
-    fw = fLWP(p, p.Psie)
-
     # initialise gs over A
+    fw = p.fLWP_ini  # init. stress factor
     g0 = 1.e-9  # g0 ~ 0, removing it entirely introduces errors
     Cs_umol_mol = Cs * conv.MILI / p.Patm  # umol mol-1
     gsoA = g0 + p.g1T * fw / Cs_umol_mol
@@ -109,16 +107,10 @@ def Tuzet(p, photo='Farquhar', res='low', threshold_conv=0.1, iter_max=40,
 
     while True:
 
-        if iter > 0:
-            Pleaf = P[bn.nanargmin(np.abs(trans - E))]
-            fw = fLWP(p, Pleaf)
-
         An, Aj, Ac, Ci = calc_photosynthesis(p, 0., Cs, photo, Tleaf=Tleaf,
                                              gs_over_A=gsoA)
 
         # stomatal conductance, with fwsoil effect
-        Cs_umol_mol = Cs * conv.MILI / p.Patm
-        gsoA = g0 + p.g1T * fw / Cs_umol_mol
         gs = np.maximum(cst.zero, conv.GwvGc * gsoA * An)
 
         # calculate new trans, gw, gb, mol.m-2.s-1
@@ -129,18 +121,27 @@ def Tuzet(p, photo='Farquhar', res='low', threshold_conv=0.1, iter_max=40,
         boundary_CO2 = p.Patm * conv.FROM_MILI * An / (gb * conv.GbcvGb +
                                                        gs * conv.GcvGw)
         Cs = np.maximum(cst.zero, np.minimum(p.CO2, p.CO2 - boundary_CO2))
+        Cs_umol_mol = Cs * conv.MILI / p.Patm
+
+        # update stress functions
+        Pleaf = P[bn.nanargmin(np.abs(E - trans))]
+
+        if np.abs(fw - fLWP(p, Pleaf)) < 0.25:  # is fw stable?
+            fw = fLWP(p, Pleaf)  # update
+
+        gsoA = g0 + p.g1T * fw / Cs_umol_mol
 
         # force stop when atm. conditions yield E < 0. (non-physical)
         if (iter < 1) and (not real_zero):
             real_zero = None
 
         # check for convergence
-        if ((real_zero is None) or (iter > iter_max) or ((iter > 1) and
+        if ((real_zero is None) or (iter >= iter_max) or ((iter >= 2) and
             real_zero and (abs(Tleaf - new_Tleaf) <= threshold_conv) and not
             np.isclose(gs, cst.zero, rtol=cst.zero, atol=cst.zero))):
             break
 
-        # no convergence, iterate on leaf temperature (and unstable Ci)
+        # no convergence, iterate on leaf temperature
         Tleaf = new_Tleaf
         iter += 1
 
@@ -156,4 +157,4 @@ def Tuzet(p, photo='Farquhar', res='low', threshold_conv=0.1, iter_max=40,
     elif not np.isclose(trans, cst.zero, rtol=cst.zero, atol=cst.zero):
         trans *= conv.MILI  # mmol.m-2.s-1
 
-    return An, Ci, rublim, trans, gs, gb, new_Tleaf, Pleaf
+    return An, Ci, rublim, trans, gs, gb, new_Tleaf, Pleaf, fw

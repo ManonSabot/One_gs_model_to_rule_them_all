@@ -62,8 +62,8 @@ def Ci_stream(p, Cs, Tleaf, res):
     return np.linspace(gamstar, Cs, NCis, endpoint=False)
 
 
-def supply_max(p, photo='Farquhar', case=1, res='low', threshold_conv=0.1,
-               iter_max=40, inf_gb=False):
+def supply_max(p, photo='Farquhar', case=1, res='low', iter_max=40,
+               threshold_conv=0.1, inf_gb=False):
 
     """
     Finds the instateneous profit maximization, following the
@@ -133,7 +133,7 @@ def supply_max(p, photo='Farquhar', case=1, res='low', threshold_conv=0.1,
 
     while True:
 
-        if case ==1:  # assuming colimitation
+        if case == 1:  # assuming colimitation
             Cicol = calc_colim_Ci(p, Cs, Tleaf, photo)
             dCi = Cs - Cicol  # Pa
 
@@ -144,7 +144,7 @@ def supply_max(p, photo='Farquhar', case=1, res='low', threshold_conv=0.1,
                                                gsc=0.)
             dA = As - Acol  # ambient - colimitation
 
-            # dAdCi (in mol H2O) is needed to calculate gs, mmol-1 m-2 s-1
+            # dAdCi (in mol H2O) is needed to calculate gs, mmol m-2 s-1
             dAdCi = dA * conv.GwvGc * p.Patm / dCi
 
             # kcost, unitless
@@ -154,7 +154,6 @@ def supply_max(p, photo='Farquhar', case=1, res='low', threshold_conv=0.1,
 
             # dkcostdP is needed to calculate gs
             dP = 0.5 * (Pleaf_pd + p.P50)  # MPa, /!\ sign of P50
-            dkcostdP = dkcost / dP * 1. / cost_pd  # MPa-1
 
             # xi, the loss of xylem cost of stomatal opening, mmol m-2 s-1
             dq = Dleaf / p.Patm  # unitless, equivalent to D / Patm
@@ -223,7 +222,7 @@ def supply_max(p, photo='Farquhar', case=1, res='low', threshold_conv=0.1,
             real_zero = None
 
         # check for convergence
-        if ((real_zero is None) or (iter >= iter_max) or ((iter > 1) and
+        if ((real_zero is None) or (iter >= iter_max) or ((iter >= 1) and
             real_zero and (abs(Tleaf - new_Tleaf) <= threshold_conv) and not
             np.isclose(gs, cst.zero, rtol=cst.zero, atol=cst.zero))):
             break

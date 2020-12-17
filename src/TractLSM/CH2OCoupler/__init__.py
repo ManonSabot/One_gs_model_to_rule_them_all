@@ -7,6 +7,7 @@ try:
     from SOX import supply_max
     from WUE_LWP import WUE_gs
     from ProfitMax import profit_psi
+    from ProfitMax2 import profit_E
     from CGain import Cgain_plc
     from CMax import Cmax_gs
     from LeastCost import least_cost
@@ -22,6 +23,7 @@ except (ImportError, ModuleNotFoundError):
     from TractLSM.CH2OCoupler.SOX import supply_max
     from TractLSM.CH2OCoupler.WUE_LWP import WUE_gs
     from TractLSM.CH2OCoupler.ProfitMax import profit_psi
+    from TractLSM.CH2OCoupler.ProfitMax2 import profit_E
     from TractLSM.CH2OCoupler.CGain import Cgain_plc
     from TractLSM.CH2OCoupler.CMax import Cmax_gs
     from TractLSM.CH2OCoupler.LeastCost import least_cost

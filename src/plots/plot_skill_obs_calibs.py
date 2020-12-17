@@ -9,7 +9,7 @@ from scipy import stats
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import colorcet as cc
-from matplotlib.colors import LinearSegmentedColormap, PowerNorm, LogNorm
+from matplotlib.colors import LinearSegmentedColormap
 
 # change the system path to load modules from TractLSM
 script_dir = os.path.dirname(os.path.realpath(sys.argv[0]))
@@ -26,8 +26,7 @@ class plt_setup(object):
         # saving the figure
         plt.rcParams['savefig.dpi'] = 1200.  # resolution
         plt.rcParams['savefig.bbox'] = 'tight'  # no excess side padding
-        plt.rcParams['savefig.pad_inches'] = 0.05  # padding to use
-        plt.rcParams['savefig.jpeg_quality'] = 100
+        plt.rcParams['savefig.pad_inches'] = 0.01  # padding to use
 
         # figure spacing
         plt.rcParams['figure.subplot.wspace'] = 0.025
@@ -110,23 +109,26 @@ def which_model(short):
     elif short == 'sox1':
         lab = 'Eller'
 
-    elif short == 'sox2':
-        lab = 'SOX$_\mathrm{\mathsf{opt}}$'
-
     elif short == 'wue':
         lab = r'WUE-$f_{\varPsi_l}$'
-
-    elif short == 'cgn':
-        lab = 'CGain'
-
-    elif short == 'pmax':
-        lab = 'ProfitMax'
 
     elif short == 'cmax':
         lab = 'CMax'
 
+    elif short == 'pmax':
+        lab = 'ProfitMax'
+
+    elif short == 'pmax2':
+        lab = 'ProfitMax2'
+
+    elif short == 'cgn':
+        lab = 'CGain'
+
     elif short == 'lcst':
         lab = 'LeastCost'
+
+    elif short == 'sox2':
+        lab = 'SOX$_\mathrm{\mathsf{opt}}$'
 
     elif short == 'cap':
         lab = 'CAP'
@@ -140,23 +142,9 @@ def which_model(short):
     return lab
 
 
-def model_perf(df, variable, what):
+def cmap_specs(df, what):
 
-    if what == 'NSE':
-        order = (df[df['variable'] == variable].drop('variable', axis=1)
-                   .median(axis=1).sort_values())
-
-    else:
-        order = (df[df['variable'] == variable].drop('variable', axis=1)
-                   .mean(axis=1).sort_values())
-
-    return order
-
-
-def cmap_specs(df):
-
-    cmap = cc.cm.dimgray_r
-    norm = None
+    cmap = cc.cm.CET_D1A
 
     # extra info
     min = np.nanmin(df.drop('variable', axis=1))
@@ -164,22 +152,19 @@ def cmap_specs(df):
     mean = np.nanmean(df.drop('variable', axis=1))
     med = np.nanmedian(df.drop('variable', axis=1))
 
-    if min < 0.:
+    if (what == 'MASE') or  (what == 'NMSE'):  # on one
+        loc_white = np.abs(min - 1.) / (max - min)
+
+    elif what == 'rBIC':  # on 0.5
+            loc_white = np.abs(min - 0.5) / (max - min)
+
+    else:  # on zero
         cmap = cc.cm.CET_D1A_r
-        loc_zero = np.abs(min) / (max + np.abs(min))
-        cmap = shift_cmap(cmap, locpoint=loc_zero)
+        loc_white = np.abs(min) / (max + np.abs(min))
 
-    else:
-        thresh = mean / med
+    cmap = shift_cmap(cmap, locpoint=loc_white)
 
-        if (thresh < 0.8) or (thresh > 1.2):
-            if (thresh < 0.1) or (thresh > 10.):
-                norm = LogNorm()
-
-            else:
-                norm = PowerNorm(gamma=0.4)
-
-    return cmap, norm, min, max
+    return cmap, min, max
 
 
 def cbar_specs(what, df):
@@ -189,45 +174,31 @@ def cbar_specs(what, df):
     max = np.nanmax(df.drop('variable', axis=1))
     start = 0.  # start for smooth
 
-    if what == 'NSE':
-        N1 = 50
-        N2 = 150
-        cticks = np.array([min, -2.5, -1., 0., 0.1, 0.2, 0.4, 0.6, max])
+    if (what == 'NSE') or (what == 'KGE'):
+        N1 = 200
+        N2 = 600
+        cticks = np.array([min, -2, 0, 0.2, 0.4, 0.6, max])
 
-    elif what == 'log':
-        N1 = 100
-        N2 = 100
-        cticks = np.sort(np.append([min, max],
-                         np.log(np.array([0.1, 0.2, 0.5, 1., 2., 5.]))))
+        if what == 'KGE':
+            cticks = np.array([min, -0.5, 0, 0.2, 0.4, 0.6, 0.8, max])
 
-    elif what == 'MASE':
-        N2 = 20
+    elif (what == 'MASE') or (what == 'NMSE'):
+        N1 = 600
+        N2 = 200
+        start = 1.
+        cticks = np.array([min, 0.2, 0.4, 0.6, 0.8, 1., 1.4, 1.8, max])
+
+    elif what == 'rBIC':
+        N1 = 600
+        N2 = 200
         start = 0.5
-        cticks = np.array([min, start, 0.75, 1., 1.4, 2., max])
+        cticks = np.array([min, 0.1, 0.2, 0.3, 0.4, 0.5, 0.7, 0.9, max])
 
-    elif what == 'MAPE':
-        N2 = 200
-        start = 0.25
-        cticks = np.array([min, start, 0.5, 0.75, 1., 2., 4., max])
-
-    elif what == 'SMAPE':
-        N2 = 200
-        start = 0.1
-        cticks = np.array([min, start, 0.25, 0.5, 0.75, max])
-
-    if what == 'RMSE':
-        N2 = 200
-        start = 0.1
-        cticks = np.array([min, start, 0.25, 0.5, 1., 2., 4., 6., max])
-
-    smooth = list(np.linspace(start, cticks[-2], N2))
-
-    if min < 0.:
-        smooth = list(np.linspace(cticks[1], 0., N1)) + smooth
-
+    smooth = (list(np.linspace(cticks[1], start, N1)) +
+              list(np.linspace(start, cticks[-2], N2)))
     bounds = [cticks[0]] + smooth + [cticks[-1]]
 
-    return cticks[1:], bounds
+    return cticks, bounds
 
 
 def MAP_arrow(ax):
@@ -238,7 +209,7 @@ def MAP_arrow(ax):
 
     # plot arrow
     ax.text(0., 0., 'Xeric', va='center', ha='center', transform=ax.transAxes)
-    ax.annotate('Mesic', xy=(0., 0.025), xytext=(0., 1.),
+    ax.annotate('Wet', xy=(0., 0.025), xytext=(0., 1.),
                 xycoords='axes fraction', va='center', ha='center',
                 arrowprops=dict(arrowstyle='<->', lw=1.))
 
@@ -251,10 +222,25 @@ def heatmap(df, fname, to_plot, what='NSE'):
                                                               'E' in to_plot,
                                                               'A' in to_plot])]
 
+    if what == 'All':
+        metrics = ['KGE', 'NSE', 'MASE', 'NMSE', 'rBIC']
+        hms = []
+
+    else:
+        metrics = ['']
+
     # setup the plots
     if len(to_plot) > 1:
-        fig, axes = plt.subplots(1, len(to_plot),
-                                 figsize=(4.5 * len(to_plot), 5.), sharey=True)
+        if what == 'All':
+            fig, axes = plt.subplots(len(to_plot), len(metrics),
+                                     figsize=(12., 10.), sharey=True)
+            plt.subplots_adjust(hspace=0.2, wspace=0.1)
+            axes = axes.flat
+
+        else:
+            fig, axes = plt.subplots(1, len(to_plot),
+                                     figsize=(4.5 * len(to_plot), 5.),
+                                     sharey=True)
 
     else:
         fig, ax = plt.subplots(figsize=(5., 5.))
@@ -266,36 +252,61 @@ def heatmap(df, fname, to_plot, what='NSE'):
 
     for i in range(len(to_plot)):
 
-        if len(to_plot) > 1:
-            sub = df.copy()[df['variable'] == to_plot[i]]
+        if what == 'All':
+
+            for metric in metrics:
+
+                mask = np.logical_and(df['variable'] == to_plot[i],
+                                      df['metric'] == metric)
+
+                if metric == 'rBIC':
+                    orders += [df[mask]['mean'].sort_values()]
+
+                else:
+                    orders += [df[mask]['median'].sort_values()]
+
+        elif what == 'rBIC':
+            orders += [df[df['variable'] == to_plot[i]]['mean'].sort_values()]
 
         else:
-            sub = df.copy()
+            orders += [df[df['variable'] == to_plot[i]]['median'].sort_values()]
 
-        orders += [model_perf(sub, to_plot[i], what)]
+    if what == 'All':
+        df.drop(['mean', 'median'], axis=1, inplace=True)
+
+    elif what == 'rBIC':
+        df.drop('mean', axis=1, inplace=True)
+
+    else:
+        df.drop('median', axis=1, inplace=True)
 
     # info needed by shared colormap, limit extremes
-    if what == 'NSE':
+    if what == 'All':
+
+        for metric in metrics[:-1]:
+
+            csel =  df.columns.difference(['variable', 'metric'])
+
+            if (metric == 'KGE') or (metric == 'NSE'):
+                df.loc[:, csel] = df.loc[:, csel].where(df.loc[:, csel] > -2.,
+                                                        -2.)
+
+            else:
+                df.loc[:, csel] = df.loc[:, csel].where(df.loc[:, csel] < 2.,
+                                                        2.)
+
+    if (what == 'KGE') or (what == 'NSE'):
         df.loc[:, df.columns != 'variable'] = \
             (df.loc[:, df.columns != 'variable']
-               .where(df.loc[:, df.columns != 'variable'] > -5., -5.))
+               .where(df.loc[:, df.columns != 'variable'] > -2., -2.))
 
-    elif what == 'MAPE':
-        df.loc[:, df.columns != 'variable'] = \
-            (df.loc[:, df.columns != 'variable']
-               .where(df.loc[:, df.columns != 'variable'] < 500., 500.))
-
-    elif what == 'MASE':
-        df.loc[:, df.columns != 'variable'] = \
-            (df.loc[:, df.columns != 'variable']
-               .where(df.loc[:, df.columns != 'variable'] < 5., 5.))
-
-    elif what == 'RMSE':
+    elif (what == 'MASE') or (what == 'NMSE'):
         df.loc[:, df.columns != 'variable'] = \
             (df.loc[:, df.columns != 'variable']
                .where(df.loc[:, df.columns != 'variable'] < 2., 2.))
 
-    cmap, norm, vmin, vmax = cmap_specs(df)
+    if what != 'All':
+        cmap, vmin, vmax = cmap_specs(df, what)
 
     for i in range(len(to_plot)):
 
@@ -307,79 +318,108 @@ def heatmap(df, fname, to_plot, what='NSE'):
             sub = df.copy()
 
         sub = sub.drop('variable', axis=1)
-        sub = sub.reindex(index=orders[i].index.to_list())
 
-        # into the right formats
-        models = [which_model(e) for e in sub.index.to_list()]
-        spps = [e.split('_') for e in sub.columns.to_list()]
-        spps = ['$%s$. $%s$ (%s)' % (e[-2][0], e[-1], ' '.join(e[:-2])[0])
-                if 'Quercus' in e else '$%s$. $%s$' % (e[-2][0], e[-1])
-                for e in spps]
-        data = sub.to_numpy()
-        data = data.T
+        for j, metric in enumerate(metrics):
 
-        # plot the data
-        hm = axes[i].imshow(data, alpha=0.8, cmap=cmap, norm=norm, vmin=vmin,
-                            vmax=vmax)
+            if what == 'All':
+                cmap, vmin, vmax = cmap_specs(df[df['metric'] == metric]
+                                                .drop('metric', axis=1), metric)
+                sub2 = sub.copy()[sub['metric'] == metric]
+                sub2 = sub2.drop('metric', axis=1)
+                sub2 = sub2.reindex(index=orders[i * len(metrics) + j]
+                                                .index.to_list())
 
-        #  format the axes and labels
-        axes[i].set_xticks(np.arange(len(models)) - 0.25)
-        axes[i].set_xticklabels(models, rotation=45, ha='left')
-        axes[i].xaxis.tick_top()
-        axes[i].set_yticks(np.arange(len(spps)))
-        axes[i].set_yticklabels(spps, ha='right')
+            else:
+                sub2 = sub.reindex(index=orders[i].index.to_list())
 
-        if len(axes) > 1:  # add title below axis
-            axes[i].set_title(r'%s for %s' % (what, variables[i]), y=-0.1,
-                              fontsize=10.)
+            # into the right formats
+            models = [which_model(e) for e in sub2.index.to_list()]
+            spps = [e.split('_') for e in sub2.columns.to_list()]
+            spps = [r'\textit{%s. %s} (%s)' % (e[-2][0], e[-1],
+                                               ' '.join(e[:-2])[0])
+                    if 'Quercus' in e else r'\textit{%s. %s}' % (e[-2][0],
+                                                                 e[-1])
+                    for e in spps]
+            data = sub2.to_numpy()
+            data = data.T
 
-    # add colorbar and arrow
-    cticks, bounds = cbar_specs(what, df)
+            # plot the data
+            if what == 'All':
+                hm = axes[i * len(metrics) + j].imshow(data, alpha=0.8,
+                                                       cmap=cmap, vmin=vmin,
+                                                       vmax=vmax)
+                hms += [hm]
 
-    if len(axes) > 1:
-        cax = fig.add_axes([1. / len(axes), -0.025,
-                            int(len(axes) / 2) / len(axes) +
-                            plt.rcParams['figure.subplot.wspace'], 0.04])
+                #  format the axes and labels
+                axes[i * len(metrics) + j].set_xticks(np.arange(len(models))
+                                                      - 0.25)
+                axes[i * len(metrics) + j].set_xticklabels(models, rotation=45,
+                                                           ha='left')
+                axes[i * len(metrics) + j].xaxis.tick_top()
+                axes[i * len(metrics) + j].set_yticks(np.arange(len(spps)))
+                axes[i * len(metrics) + j].set_yticklabels(spps, ha='right')
+
+                if i == 0:
+                    axes[j].set_title(metric)
+
+            else:
+                hm = axes[i].imshow(data, alpha=0.8, cmap=cmap, vmin=vmin,
+                                    vmax=vmax)
+
+        if what != 'All':  #  format the axes and labels
+            axes[i].set_xticks(np.arange(len(models)) - 0.25)
+            axes[i].set_xticklabels(models, rotation=45, ha='left')
+            axes[i].xaxis.tick_top()
+            axes[i].set_yticks(np.arange(len(spps)))
+            axes[i].set_yticklabels(spps, ha='right')
+
+            if len(axes) > 1:  # add title below axis
+                axes[i].set_title(r'%s for %s' % (what, variables[i]), y=-0.1,
+                                  fontsize=10.)
+
+    if what == 'All':  # add axes labels to know what is what
+
+        for j, metric in enumerate(metrics):
+
+            cax = fig.add_axes([j * 0.1575 + 0.136, 0.08, 0.125, 0.02])
+            cticks, bounds = cbar_specs(metric, df[df['metric'] == metric]
+                                                  .drop('metric', axis=1))
+            cbar = plt.colorbar(hms[j], cax=cax, ticks=cticks, format='%.1f',
+                                boundaries=bounds, drawedges=False,
+                                extend='both', orientation='horizontal')
+            cbar.outline.set_edgecolor('w')
 
     else:
-        cax = fig.add_axes([0.25, 0.05, 0.52, 0.03])
+        if len(axes) > 1:  # add colorbar
+            cax = fig.add_axes([1. / len(axes), -0.025,
+                                int(len(axes) / 2) / len(axes) +
+                                plt.rcParams['figure.subplot.wspace'], 0.04])
 
-    if vmin < 0.:
-        cbar = plt.colorbar(hm, cax=cax, ticks=cticks, boundaries=bounds,
-                            extend='both', orientation='horizontal')
+        else:
+            cax = fig.add_axes([0.22, 0.02, 0.585, 0.045])
 
-    else:
-        cbar = plt.colorbar(hm, cax=cax, ticks=cticks, boundaries=bounds,
-                            spacing='proportional', extend='both',
+        cticks, bounds = cbar_specs(what, df)
+        cbar = plt.colorbar(hm, cax=cax, ticks=cticks, format='%.1f',
+                            boundaries=bounds, drawedges=False, extend='both',
                             orientation='horizontal')
+        cbar.outline.set_edgecolor('w')
 
-    if what == 'SMAPE':
-        cbar.ax.set_xticklabels([int(e) if str(e).split('.')[1] == '0'
-                                 else round(e, 2) for e in cticks])
+        # add wet - xeric arrow
+        if len(axes) > 1:
+            ax = fig.add_axes([0.045, 0.148, 0.05, 0.688])
 
-    else:
-        cbar.ax.set_xticklabels([int(e) if str(e).split('.')[1] == '0'
-                                 else round(e, 1) for e in cticks])
+        else:
+            ax = fig.add_axes([0.88, 0.135, 0.05, 0.715])
 
-    if len(axes) == 1:
-        cbar.set_label(r'%s for %s' % (what, variables[0]))
+        MAP_arrow(ax)
 
-    # add mesic - xeric arrow
-    if len(axes) > 1:
-        ax = fig.add_axes([0.045, 0.148, 0.05, 0.688])
-
-    else:
-        ax = fig.add_axes([-0.025, 0.135, 0.05, 0.715])
-
-    MAP_arrow(ax)
-
-    fig.savefig(fname, dpi=300)
+    fig.savefig(fname)
 
     return
 
 
 # PLOT
-what = 'MASE'
+what = 'All'
 to_plot = ['gs', 'E', 'A']
 
 plt_setup()  # rendering
@@ -388,14 +428,29 @@ plt_setup()  # rendering
 base_dir = get_main_dir()  # dir paths
 ifdir = os.path.join(os.path.join(os.path.join(base_dir, 'output'),
                      'simulations'), 'obs_driven')
-ofdir = os.path.join(os.path.join(os.path.join(base_dir, 'output'),
-                     'plots'), 'obs_performance')
+ofdir = os.path.join(os.path.join(base_dir, 'output'), 'plots')
 
-df = pd.read_csv(os.path.join(ifdir, 'all_%ss.csv' % (what)))
+if what == 'All':
+
+    for metric in ['KGE', 'NSE', 'MASE', 'NMSE', 'rBIC']:
+
+        df = pd.read_csv(os.path.join(ifdir, 'all_%ss.csv' % (metric)))
+        df['metric'] = metric
+
+        if metric == 'KGE':
+            dfs = df.copy()
+
+        else:
+            dfs = pd.concat([dfs, df], ignore_index=True)
+
+    df = dfs
+
+else:
+    df = pd.read_csv(os.path.join(ifdir, 'all_%ss.csv' % (what)))
 
 # order by MAP: wet to dry
 df.set_index('model', inplace=True)
-order = ['San_Lorenzo_Carapa_guianensis',
+order = ['San_Lorenzo_Carapa_guianensis', 'San_Lorenzo_Tachigali_versicolor',
          'Parque_Natural_Metropolitano_Calycophyllum_candidissimum',
          'ManyPeaksRange_Alphitonia_excelsa',
          'ManyPeaksRange_Austromyrtus_bidwillii',
@@ -407,8 +462,18 @@ order = ['San_Lorenzo_Carapa_guianensis',
          'Sevilleta_Juniperus_monosperma', 'Sevilleta_Pinus_edulis']
 
 # make the figure
-if what == 'NSE':
-    ofdir = os.path.dirname(ofdir)
-
 fname = os.path.join(ofdir, '%s_skill_for_%s.png' % (what, '_'.join(to_plot)))
-heatmap(df[['variable'] + order], fname, to_plot, what=what)
+
+if not os.path.isfile(fname):
+    if what == 'All':
+        if len(to_plot) < 3:
+            to_plot = ['gs', 'E', 'A']
+
+        heatmap(df[['mean', 'median', 'metric', 'variable'] + order], fname,
+                to_plot, what=what)
+
+    elif what == 'rBIC':
+        heatmap(df[['mean', 'variable'] + order], fname, to_plot, what=what)
+
+    else:
+        heatmap(df[['median', 'variable'] + order], fname, to_plot, what=what)

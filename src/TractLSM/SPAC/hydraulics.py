@@ -225,7 +225,7 @@ def transpiration(P, kmax, b, c):
     return np.maximum(cst.zero, trans)
 
 
-def hydraulics(p, res='low', Kirchhoff=True, kmax=None):
+def hydraulics(p, res='low', Kirchhoff=True, kmax=None, Pcrit=None):
 
     """
     Calculates the hydraulics used to solve the leaf energy balance.
@@ -268,8 +268,11 @@ def hydraulics(p, res='low', Kirchhoff=True, kmax=None):
     # two Weibull parameters setting the shape of the vuln curves
     b, c = Weibull_params(p)  # MPa, unitless
 
-    # get the leaf water potentials P
-    Pcrit = - b * np.log(1. / p.ratiocrit) ** (1. / c)  # MPa
+    if Pcrit is None:  # get the leaf water potentials P
+        Pcrit = - b * np.log(1. / p.ratiocrit) ** (1. / c)  # MPa
+
+    else:
+        Pcrit = np.minimum(- b * np.log(1. / p.ratiocrit) ** (1. / c), Pcrit)
 
     if p.Ps <= Pcrit:  # plants cavitate, the optimisation cannot happen
         raise IndexError('critical cavitation, no optimisation possible')

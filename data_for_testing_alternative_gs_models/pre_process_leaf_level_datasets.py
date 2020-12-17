@@ -20,6 +20,8 @@ import difflib
 import re
 import numpy as np  # array manipulations, math operators
 import pandas as pd
+from scipy.ndimage import gaussian_filter
+from scipy.optimize import curve_fit  # fit the functional shapes
 
 from default_params import default_params
 
@@ -225,6 +227,19 @@ def unify_headers_units(df):
     if ('Tair' in missing) or ('Patm' in missing) or ('VPD' in missing):
         df = add_atm_forcing(df)
         match, __, missing, __ = compare_lists(ref, df.columns.to_list())
+
+        # correct high biases in both directions
+        if (df['Tair'] - df['Tleaf']).abs().mean() > 3.:
+            over = df['Tair'] - df['Tleaf'] > 0.
+            under = df['Tair'] - df['Tleaf'] < 0.
+            o_bias = (df['Tair'] - df['Tleaf'])[over].mean()
+            u_bias = (df['Tair'] - df['Tleaf'])[under].mean()
+
+            # making sure we're preserving the "direction" of differences
+            over = np.logical_and(over, df['Tair'] - o_bias >= df['Tleaf'])
+            under = np.logical_and(under, df['Tair'] - u_bias <= df['Tleaf'])
+            df['Tair'][over] = df['Tair'][over] - o_bias
+            df['Tair'][under] = df['Tair'][under] - u_bias
 
     # add using Tetens
     if ('Tair' in missing) or ('Patm' in missing) or ('VPD' in missing):
@@ -569,8 +584,9 @@ def check_VC_data(species):
     else:
         df5 = cleaned_up_Sack_data()
 
-    #df6 = (pd.read_csv(os.path.join(rname, 'Wu_2020_dataset.csv'),header=[0])
-    #         .dropna(axis=0, how='all').dropna(axis=1, how='all').squeeze())
+    df6 = (pd.read_csv(os.path.join(rname, 'Wu_Wolfe_2020_dataset.csv'),
+                       header=[0]).dropna(axis=0, how='all')
+             .dropna(axis=1, how='all').squeeze())
 
     df7 = (pd.read_csv(os.path.join(rname,
                                     'Meinzer_2008_Mendez_2012_datasets.csv'),
@@ -647,13 +663,13 @@ def check_VC_data(species):
     except KeyError:
         pass
 
-    #try:
-    #    df6.set_index('Species', drop=False, inplace=True)
-    #    traits += ['(P50: %s, P88: %s)' % (str(df6.loc[species, 'P50']),
-    #                                       str(df6.loc[species, 'P88']))]
+    try:
+        df6.set_index('Species', drop=False, inplace=True)
+        traits += ['(P50: %s, P88: %s)' % (str(df6.loc[species, 'P50']),
+                                           str(df6.loc[species, 'P88']))]
 
-    #except KeyError:
-    #    pass
+    except KeyError:
+        pass
 
     try:
         df7.set_index('Species', drop=False, inplace=True)
@@ -695,11 +711,11 @@ def add_vars_to_csv(df, site, species):
                'albedo_l', 'tau_l', 'chi_l', 'kn', 'Ev', 'Ej', 'Egamstar',
                'Ec', 'Eo', 'deltaSv', 'deltaSj', 'Hdv', 'Hdj', 'height', 'LAI',
                'max_leaf_width', 'g1', 'g1T', 'Kappa', 'Lambda', 'Eta', 'P50',
-               'P88', 'kmax', 'kmaxT', 'kmaxWUE', 'kmaxCN', 'kmaxCM', 'kmaxLC',
-               'kmaxS1', 'kmaxS2', 'ksc_prev', 'krlC', 'krlM', 'ratiocrit',
-               'ksrmaxC', 'ksrmaxM', 'sref', 'srefT', 'PrefT', 'PcritC',
-               'PcritM', 'Alpha', 'Beta', 'ground_area', 'Ztop', 'Zbottom',
-               'Psie', 'hyds', 'theta_sat', 'fc', 'pwp', 'bch']
+               'P88', 'kmax', 'kmax2', 'kmaxT', 'kmaxWUE', 'kmaxCN', 'kmaxCM',
+               'kmaxLC', 'kmaxS1', 'kmaxS2', 'ksc_prev', 'krlC', 'krlM',
+               'ratiocrit', 'ksrmaxC', 'ksrmaxM', 'sref', 'srefT', 'PrefT',
+               'PcritC', 'PcritM', 'Alpha', 'Beta', 'ground_area', 'Ztop',
+               'Zbottom', 'Psie', 'hyds', 'theta_sat', 'fc', 'pwp', 'bch']
     units = ['[kPa]', '[umol m-2 s-1]', '[Pa]', '[deg C]', '[-]',
              '[umol m-2 s-1]', '[deg C]', '[Pa]', '[Pa]',
              '[mol(photon) mol(e-)-1]', '[-]', '[-]', '[-]', '[-]', '[-]',
@@ -712,11 +728,11 @@ def add_vars_to_csv(df, site, species):
              '[mmol m-2 s-1 MPa-1]', '[mmol m-2 s-1 MPa-1]',
              '[mmol m-2 s-1 MPa-1]', '[mmol m-2 s-1 MPa-1]',
              '[mmol m-2 s-1 MPa-1]', '[mmol m-2 s-1 MPa-1]',
-             '[mmol m-2 s-1 MPa-1]', '[-]', '[mmol m-2 s-1 MPa-1]',
-             '[mmol m-2 s-1 MPa-1]', '[MPa-1]', '[MPa-1]', '[MPa]', '[MPa]',
-             '[MPa]', '[mol m-2 s-1 MPa-2]', '[mol m-2 s-1 MPa-1]', '[m2]',
-             '[m]', '[m]', '[MPa]', '[m s-1]', '[m3 m-3]', '[m3 m-3]',
-             '[m3 m-3]', '[-]']
+             '[mmol m-2 s-1 MPa-1]', '[mmol m-2 s-1 MPa-1]', '[-]',
+             '[mmol m-2 s-1 MPa-1]', '[mmol m-2 s-1 MPa-1]', '[MPa-1]',
+             '[MPa-1]', '[MPa]', '[MPa]', '[MPa]', '[mol m-2 s-1 MPa-2]',
+             '[mol m-2 s-1 MPa-1]', '[m2]', '[m]', '[m]', '[MPa]', '[m s-1]',
+             '[m3 m-3]', '[m3 m-3]', '[m3 m-3]', '[-]']
 
     d = default_params()
     df2 = pd.DataFrame([(d.O2, d.Vmax25, d.gamstar25, d.Tref, d.JV, d.Rlref,
@@ -725,13 +741,13 @@ def add_vars_to_csv(df, site, species):
                          d.Ev, d.Ej, d.Egamstar, d.Ec, d.Eo, d.deltaSv,
                          d.deltaSj, d.Hdv, d.Hdj, d.height, d.LAI,
                          d.max_leaf_width, d.g1, d.g1T, d.Kappa, d.Lambda,
-                         d.Eta, d.P50, d.P88, d.kmax, d.kmaxT, d.kmaxWUE,
-                         d.kmaxCN, d.kmaxCM, d.kmaxLC, d.kmaxS1, d.kmaxS2,
-                         d.ksc_prev, d.krlC, d.krlM, d.ratiocrit, d.ksrmaxC,
-                         d.ksrmaxM, d.sref, d.srefT, d.PrefT, d.PcritC,
-                         d.PcritM, d.Alpha, d.Beta, d.ground_area, d.Ztop,
-                         d.Zbottom, d.Psie, d.hyds, d.theta_sat, d.fc, d.pwp,
-                         d.bch)], columns=columns)
+                         d.Eta, d.P50, d.P88, d.kmax, d.kmax2, d.kmaxT,
+                         d.kmaxWUE, d.kmaxCN, d.kmaxCM, d.kmaxLC, d.kmaxS1,
+                         d.kmaxS2, d.ksc_prev, d.krlC, d.krlM, d.ratiocrit,
+                         d.ksrmaxC, d.ksrmaxM, d.sref, d.srefT, d.PrefT,
+                         d.PcritC, d.PcritM, d.Alpha, d.Beta, d.ground_area,
+                         d.Ztop, d.Zbottom, d.Psie, d.hyds, d.theta_sat, d.fc,
+                         d.pwp, d.bch)], columns=columns)
 
     df2.columns = pd.MultiIndex.from_tuples(list(zip(columns, units)))
     df = pd.concat([df, df2], axis=1)
@@ -739,9 +755,8 @@ def add_vars_to_csv(df, site, species):
     df.columns = df.columns.droplevel(level=1)
 
     # if params specified in site file or class object, overwrite df
-    df3 = (pd.read_csv(os.path.join(os.getcwd(), 'site_level_traits.csv'),
-                       header=[0, 1]).dropna(axis=0, how='all')
-             .dropna(axis=1, how='all').squeeze())
+    df3 = (pd.read_csv('site_level_traits.csv', header=[0, 1])
+             .dropna(axis=0, how='all').dropna(axis=1, how='all').squeeze())
     df3.columns = df3.columns.droplevel(level=1)
 
     # which site?
@@ -777,6 +792,74 @@ def add_vars_to_csv(df, site, species):
     return df
 
 
+def fLWP(Pleaf, srefT, PrefT):
+
+    return (1. + np.exp(srefT * PrefT)) / (1. + np.exp(srefT * (PrefT - Pleaf)))
+
+
+def envelope(x, y, reject=0):
+
+    """
+    Upper envelope peaks of y to x
+
+    """
+
+    # declare the first values
+    u_x = [x[0],]
+    u_y = [y[0],]
+    lastPeak = 0
+
+    # detect peaks and mark their location
+    for i in range(1, len(y) - 1):
+
+        if ((y[i] - y[i - 1]) > 0. and ((y[i] - y[i + 1]) > 0) and
+            ((i - lastPeak) > reject)):
+            u_x.append(x[i])
+            u_y.append(y[i])
+            lastPeak = i
+
+    # append the last values
+    u_x.append(x[-1])
+    u_y.append(y[-1])
+
+    return u_x, u_y
+
+
+def Tuzet_params(df):
+
+    # smooth out noise
+    df = df[df['Pleaf'] > -9999.]
+    df['gs'] /= df['gs'].max()
+
+    # smooth out noise within interquartile
+    smoothed = gaussian_filter(df['gs'], df['gs'].std())
+
+    # point where the signal goes above the background noise
+    base = 0.3  # background noise is +/- 15% of max gs
+    supp = (df['gs'][df['Pleaf'] < -df['Pleaf'].std()] - base).std()
+    m = smoothed < (base - df['gs'].std() * supp)
+
+    # searchable space
+    x0 = np.maximum(df['Pleaf'][m].max(), df['Pleaf'][np.isclose(df['gs'], 1.)])
+    x1 = df['Pleaf'][m].min()
+
+    # sort by LWP
+    print('gets here')
+    df1 = df.sort_values(by=['Pleaf'], ascending=False)
+    LWP, gs = envelope(df1['Pleaf'].to_numpy(), df1['gs'].to_numpy())
+
+    # fitted params
+    obs_popt, __ = curve_fit(fsig_tuzet, LWP, gs, p0=[2., (x0 + x1) / 2.],
+                             bounds=([0.01, df['Pleaf'].min()],
+                                     [10, df['Pleaf'].max()]))
+    print(obs_popt)
+    #obs_popt, __ = curve_fit(fLWP, df['Pleaf'], df['gs'],
+    #                         p0=[2., (x0 + x1) / 2.],
+    #                         bounds=([0.01, x1], [10, x0]))
+
+    return obs_popt[0], obs_popt[1]
+
+
 def format_x_y_files(df, loc):
 
     df['Date'] = pd.to_datetime(df['Date'], infer_datetime_format=True)
@@ -789,16 +872,16 @@ def format_x_y_files(df, loc):
                        'LWP': 'Pleaf'}, inplace=True)
 
     # forcing data
-    columns1 = ['year', 'doy', 'hod', 'Ps', 'PPFD', 'Tair', 'VPD', 'Patm', 'u',
-                'CO2', 'gb']
+    columns1 = ['year', 'doy', 'hod', 'Ps', 'PPFD', 'Tair', 'Tleaf', 'VPD',
+                'Patm', 'u', 'CO2', 'gb']
     units1 = ['[-]', '[-]', '[h]', '[MPa]', '[umol m-2 s-1]', '[deg C]',
-              '[kPa]', '[kPa]', '[m s-1]', '[Pa]', '[mol m-2 s-1]']
+              '[deg C]', '[kPa]', '[kPa]', '[m s-1]', '[Pa]', '[mol m-2 s-1]']
 
     # leaf level output variables
     columns2 = ['year', 'doy', 'hod', 'A', 'E', 'Ci', 'gs', 'gb', 'Pleaf',
                 'Tleaf']
     units2 = ['[-]', '[-]', '[h]', '[umol m-2 s-1]', '[mmol m-2 s-1]', '[Pa]',
-              '[mol m-2 s-1]', '[mol m-2 s-1]', '[MPa]', '[degC]']
+              '[mol m-2 s-1]', '[mol m-2 s-1]', '[MPa]', '[deg C]']
 
     # make sure the absolutely necessary forcings and output are valid
     try:
@@ -810,7 +893,12 @@ def format_x_y_files(df, loc):
             df1 = df[columns1 + ['gs']].copy()
 
         except KeyError:
-            df['gb'] = 5.  # default LICOR setting
+            if 'Sevilleta' in df['Location'].unique()[0]:
+                df['gb'] = 5.  # default LICOR for conifers
+
+            else:
+                df['gb'] = 2.84  # common broadleaf setting
+
             df1 = df[columns1 + ['gs']].copy()
 
     df1.dropna(axis=0, how='any', inplace=True)
@@ -820,7 +908,7 @@ def format_x_y_files(df, loc):
     df.sort_values(['year', 'doy', 'hod'], inplace=True)
     df.reset_index(drop=True, inplace=True)
 
-    if len(df) < 30:  # then the spp at this location can't be used
+    if len(df) <= 30:  # then the spp at this location can't be used
         raise Exception
 
     # put the site and species info appart
@@ -833,6 +921,16 @@ def format_x_y_files(df, loc):
 
     # add the parameters
     df1 = add_vars_to_csv(df1, site, spp)
+
+    # add the Tuzet Pref a priori based on the data
+    try:
+        srefT, PrefT = Tuzet_params(df.copy())
+        df1.loc[0, 'srefT'] = srefT
+        df1.loc[0, 'PrefT'] = PrefT
+
+    except Exception:
+        pass
+
     df1.to_csv('%s_%s_x.csv' % (loc, spp.replace(' ', '_')), index=False,
                 encoding='utf-8')
 
@@ -920,7 +1018,8 @@ def clean_up_data():
                     pass
 
                 try:
-                    df = df[df['Ci'] < df['CO2S']]
+                    df = df[np.logical_and(df['Ci'] > 0.,
+                                           df['Ci'] < df['CO2S'])]
 
                 except KeyError:
                     pass
@@ -930,7 +1029,7 @@ def clean_up_data():
                          .reset_index().rename(columns={0:'Count'}))
 
                 # only keep subsets of more than 30 data points
-                df2 = df2[df2['Count'] >= 30]
+                df2 = df2[df2['Count'] > 30]
 
                 if df2.empty:
                     info.write('\nNot included: not enough spp data / site\n')
@@ -942,7 +1041,7 @@ def clean_up_data():
                     Nspecies = df2['Count'].to_list()
                     Nspecies = ['%s (%d)' % (species[i], Nspecies[i])
                                 for i in range(len(Nspecies))
-                                if Nspecies[i] >= 30]
+                                if Nspecies[i] > 30]
 
                     info.write('\n%d species (size=N) at %d site.s:\n%s\n'
                                % (len(np.unique(species)), len(Nlocs),
@@ -996,7 +1095,7 @@ def clean_up_data():
                                 if len(Nlocs) == 1:
                                     df3 = df[df['Species'] == spp]
 
-                                    if len(df3) >= 30:
+                                    if len(df3) > 30:
                                         loc = file.split('.csv')[0]
 
                                         try:
@@ -1009,7 +1108,7 @@ def clean_up_data():
                                     df3 = df[np.logical_and(df['Species'] ==
                                              spp, df['Location'] == loc)]
 
-                                    if len(df3) >= 30:
+                                    if len(df3) > 30:
                                         loc = loc.replace(' ', '_')
 
                                         try:

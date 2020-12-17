@@ -543,44 +543,63 @@ def est_one_point_vcmax(F, Photo, Ci, Tleaf, Pressure=None, Rd=None):
 
 if __name__ == "__main__":
 
-    species = 'Eucalyptus_capillosa'
-    df1, __ = read_csv('/mnt/c/Users/le_le/Work/One_gs_model_to_rule_them_all/input/calibrations/obs_driven/Corrigin_%s_x.csv' % species)
-    df2, __ = read_csv('/mnt/c/Users/le_le/Work/One_gs_model_to_rule_them_all/input/calibrations/obs_driven/Corrigin_%s_y.csv' % species)
+    site_spp = ['ManyPeaksRange_Alphitonia_excelsa',
+                'ManyPeaksRange_Austromyrtus_bidwillii',
+                'ManyPeaksRange_Brachychiton_australis',
+                'ManyPeaksRange_Cochlospermum_gillivraei']
 
-    deg2kelvin = 273.15
+    for spp in site_spp:
 
-    idx = 0
+        df1, __ = read_csv('/mnt/c/Users/le_le/Work/One_gs_model_to_rule_them_all/input/calibrations/obs_driven/%s_x.csv' % (spp))
+        df2, __ = read_csv('/mnt/c/Users/le_le/Work/One_gs_model_to_rule_them_all/input/calibrations/obs_driven/%s_y.csv' % (spp))
 
-    """
-    amb_photo = df["amb_photo"][idx]
-    amb_ci = df["amb_ci"][idx]
-    #Rd = df["Rd"][idx]
-    Rd = None # assume 1.5% of Vcmax
-    tk = df["Tav"][idx] + deg2kelvin
-    press = df["press"][idx]
-    """
+        deg2kelvin = 273.15
+        Rd = None
 
-    amb_ci = 375.
-    Rd = None
+        print(len(df1))
 
-    df2 = df2[df1['PPFD'] > 1000.]
-    df1 = df1[df1['PPFD'] > 1000.]
-    df2.reset_index(inplace=True)
-    df1.reset_index(inplace=True)
+        df2 = df2[df1['PPFD'] > 500.]
+        df1 = df1[df1['PPFD'] > 500.]
+        df2.reset_index(inplace=True)
+        df1.reset_index(inplace=True)
 
-    Vcmax = []
+        try:
+            amb_ci = df2['Ci'] * df1['Patm'] / 10.
+            df1 = df1[amb_ci > amb_ci.quantile(0.25)]
+            df2 = df2[amb_ci > amb_ci.quantile(0.25)]
+            amb_ci = amb_ci[amb_ci > amb_ci.quantile(0.25)]
+            df1.reset_index(inplace=True)
+            df2.reset_index(inplace=True)
+            amc_ci.reset_index(inplace=True)
 
-    for i in range(len(df2)):
+        except Exception:
+            amb_ci = (df1['CO2'] * df1['Patm']).mean() / 10.
 
-        press = df1.loc[i, 'Patm']
-        amb_photo = df2.loc[i, 'A']
-        tk = df2.loc[i, 'Tleaf'] + deg2kelvin
+        Vcmax = []
 
-        F = FarquharC3(peaked_Jmax=True, peaked_Vcmax=True, model_Q10=True)
-        Vcmax_1pt = est_one_point_vcmax(F, amb_photo, amb_ci, tk,
-                                        Pressure=press, Rd=Rd)
-        Vcmax += [Vcmax_1pt]
+        for i in range(len(df2)):
 
-    Vmax = np.array(Vcmax)
+            press = df1.loc[i, 'Patm']
+            amb_photo = df2.loc[i, 'A']
+            tk = df2.loc[i, 'Tleaf'] + deg2kelvin
 
-    print(np.mean(Vcmax), np.amax(Vcmax))
+            F = FarquharC3(peaked_Jmax=True, peaked_Vcmax=True, model_Q10=True)
+
+            try:
+                Vcmax_1pt = est_one_point_vcmax(F, amb_photo, amb_ci[i], tk,
+                                                Pressure=press, Rd=Rd)
+
+            except Exception:
+                Vcmax_1pt = est_one_point_vcmax(F, amb_photo, amb_ci, tk,
+                                                Pressure=press, Rd=Rd)
+
+            Vcmax += [Vcmax_1pt]
+
+        df2['Vcmax'] = Vcmax
+        df2['distri'] = pd.cut(df2['A'] / df2['E'], bins=10)
+
+        print(spp, len(df1))
+        print(df2.groupby(['distri'])['Vcmax'].mean().mean())
+
+        #df2['distri'] = pd.cut(df2['doy'], bins=len(df2['doy'].unique()))
+        #print(df2.groupby(['distri'])['Vcmax'].mean().mean())

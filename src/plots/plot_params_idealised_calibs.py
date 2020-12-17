@@ -60,11 +60,6 @@ def main(fname1, fname2, fname3, calibs='both', orientation='both',
     df3 = (pd.read_csv(os.path.join(dirname, fname3), header=[0])
              .dropna(axis=0, how='all').dropna(axis=1, how='all').squeeze())
 
-    # modify the legend options to include subtitles
-    for handler in Legend.get_default_handler_map().values():
-
-        handler.legend_artist = subtitles_in_legend(handler.legend_artist)
-
     if orientation == 'both':
 
         for orientation in ['landscape', 'portrait']:
@@ -83,20 +78,6 @@ def main(fname1, fname2, fname3, calibs='both', orientation='both',
     return
 
 
-def subtitles_in_legend(handler):
-
-    @functools.wraps(handler)
-
-    def wrapper(legend, orig_handle, fontsize, handlebox):
-
-        handle_marker = handler(legend, orig_handle, fontsize, handlebox)
-
-        if handle_marker.get_alpha() == 0:
-            handlebox.set_visible(False)
-
-    return wrapper
-
-
 class plt_setup(object):
 
     def __init__(self, calibs, orientation, colours=None):
@@ -104,15 +85,14 @@ class plt_setup(object):
         # saving the figure
         plt.rcParams['savefig.dpi'] = 1200.  # resolution
         plt.rcParams['savefig.bbox'] = 'tight'  # no excess side padding
-        plt.rcParams['savefig.pad_inches'] = 0.05  # padding to use
-        plt.rcParams['savefig.jpeg_quality'] = 100
+        plt.rcParams['savefig.pad_inches'] = 0.01  # padding to use
         plt.rcParams['savefig.orientation'] = orientation
 
         # colors
         if colours is None:  # use the default colours
             if calibs == 'both':
-                colours = ['#2e7d9b', '#fc8635', '#2e7d9b', '#fc8635',
-                           '#ffff99']
+                colours = ['#53e3d4', '#e2694e', '#53e3d4', '#e2694e',
+                           '#ecec3a']
 
             else:
                 colours = ['#001a33', '#fffafa']
@@ -134,25 +114,23 @@ class plt_setup(object):
             plt.rcParams['xtick.labelsize'] = 7.
             plt.rcParams['ytick.labelsize'] = 6.
 
-        # lines
+        # lines, markers
         plt.rcParams['lines.linewidth'] = 2.
-
-        # markers
         plt.rcParams['lines.markersize'] = 8.
         plt.rcParams['lines.markeredgewidth'] = 0.5
 
         # patches (e.g. the shapes in the legend)
-        plt.rcParams['patch.linewidth'] = 0.5
         plt.rcParams['patch.edgecolor'] = 'k'
         plt.rcParams['patch.force_edgecolor'] = True  # ensure it's used
 
         # legend
         plt.rcParams['legend.fontsize'] = 7.
+        plt.rcParams['legend.framealpha'] = 0.75
         plt.rcParams['legend.edgecolor'] = 'w'
         plt.rcParams['legend.borderpad'] = 1.
 
         if orientation == 'portrait':
-            plt.rcParams['legend.borderpad'] = 0.
+            plt.rcParams['legend.borderpad'] = 0.15
 
         # grid
         plt.rcParams['grid.color'] = '#bdbdbd'
@@ -234,7 +212,7 @@ def solver_info_plot(df):
 
     # plot the average ranks
     ax.plot(pd.unique(df['sv']), df.groupby('sv')['waRank'].mean(), c='k',
-            lw=1.5, label='Avg.')
+            lw=1.5)
 
     # format the axes
     ax.set_xticks(np.arange(len(df['solver'].unique())) + 0.5)
@@ -249,7 +227,6 @@ def solver_info_plot(df):
     ax.annotate('High\nskill', xy=(-0.125, 0.9), xytext=(-0.125, 0.05),
                 xycoords='axes fraction', va='center', ha='center',
                 arrowprops=dict(arrowstyle='<-', lw=0.75))
-    ax.legend(loc=2, frameon=False)
 
     for spine in ax.spines.values():  # thinner spines
 
@@ -261,7 +238,6 @@ def solver_info_plot(df):
 
     fig.tight_layout()
     plt.savefig(os.path.join(opath, 'solver_performance.png'))
-    plt.savefig(os.path.join(opath, 'solver_performance.pdf'))
 
     return
 
@@ -278,8 +254,8 @@ def normalise_params_by_group(df, by):
 def automate_model_order(df):
 
     df0 = normalise_params_by_group(df, ['Model', 'training', 'sub-sample'])
-    df0['div'] = np.nanmean(np.array([np.abs(df0['norm_v1'] - 1.),
-                                      np.abs(df0['norm_v2'] - 1.)]), axis=0 )
+    df0['div'] = np.nanmax(np.array([np.abs(1. / df0['norm_v1'] - 1.),
+                                     np.abs(1. / df0['norm_v2'] - 1.)]), axis=0)
     df0 = (df0.groupby('Model')['div'].sum().sort_values()
               .drop(index='Medlyn-LWP'))
     df0.rename(index={'SOX': 'Eller', 'CGainNet': 'CGain'}, inplace=True)
@@ -366,10 +342,11 @@ def scaled_data(data, sc=0.5):
 def parameter_names(df):
 
     pdf = df.copy().replace({'p1': {'kmax': r'$k_{max}$', 'g1T': r'$g_{1,Tuz}$',
+                                    'kmax2': r'$k_{max}$',
                                     'kmaxS1': r'$k_{max}$',
-                                    'Lambda': r'$\lambda$', 'Alpha': '$a$',
-                                    'kmaxLC': r'$k_{max}$',
                                     'kmaxS2': r'$k_{max}$',
+                                    'kmaxLC': r'$k_{max}$',
+                                    'Lambda': r'$\lambda$', 'Alpha': '$a$',
                                     'krlC': r'$k_{rl}$', 'krlM': r'$k_{rl}$'}})
     params = [[pdf.loc[i, 'p1'], pdf.loc[i, 'p2']] for i in range(len(pdf))]
     params = [str(e) for ee in params for e in ee
@@ -377,9 +354,9 @@ def parameter_names(df):
 
     # deal with special characters and font case
     params[params.index('PrefT')] = r'$\varPsi_{ref}$'
-    params[params.index('Beta')] = '$b$'  # I should be able to put those in laterss
-    params[params.index('beta')] = r'$\varpi$'
-    params[params.index('BoA')] = r'$\eta$'
+    params[params.index('Beta')] = '$b$'
+    params[params.index('Kappa')] = r'$\varpi$'
+    params[params.index('Eta')] = r'$\eta$'
     params[params.index('ksc_prev')] = r'$k_{\varPsi_l(t_0)}$'
     params[params.index('PcritC')] = r'$\varPsi_{\varphi,lim}$'
     params[params.index('PcritM')] = r'$\varPsi_{\varphi,lim}$'
@@ -387,7 +364,7 @@ def parameter_names(df):
     return params
 
 
-def slice_vplot(vplot, side, ec=None, alpha=0.7):
+def slice_vplot(vplot, side, ec=None):
 
     for vp in vplot['bodies']:
 
@@ -420,7 +397,6 @@ def slice_vplot(vplot, side, ec=None, alpha=0.7):
         else:
             vp.set_edgecolor(plt.rcParams['patch.edgecolor'])
 
-        vp.set_alpha(alpha)
         vp.set_linewidth(plt.rcParams['patch.linewidth'])
 
 
@@ -452,15 +428,15 @@ def custom_grid(mlines, plines, ax, orientation):
             ax.vlines(l, bottom, top, color=c, lw=lw, zorder=-10)
 
 
-def custom_legend(calibs, orientation):
+def custom_legend(calibs, orientation, ec=None):
 
     c = plt.rcParams['axes.prop_cycle'].by_key()['color']
 
     if calibs == 'both':
-        leg = [Patch(facecolor=c[0], alpha=0.7, label='Wet'),
-               Patch(facecolor=c[1], alpha=0.7, label='Inter.'),
-               Line2D([], [], linestyle='', marker='*', mfc=c[-1], mec='k',
-                      label='Best')]
+        leg = [Line2D([], [], linestyle='', marker='*', ms=7., mfc=c[-1],
+                      mec='k', label='Best'),
+               Patch(facecolor=c[0], edgecolor=ec, alpha=0.7, label='Wet'),
+               Patch(facecolor=c[1], edgecolor=ec, alpha=0.7, label='Inter.')]
 
     else:
         leg = [Line2D([], [], linestyle='', marker='*', mfc=c[-1], mec='k',
@@ -544,7 +520,7 @@ def calib_info_plot(df1, df2, df3, calibs='wet', orientation='landscape'):
 
     # all solver data
     Npoints = 500  # smooth violins
-    bw = 0.3
+    bw = 0.4
 
     if calibs != 'inter':
         vp1 = ax.violinplot(wet1, showextrema=False, points=Npoints,
@@ -570,10 +546,10 @@ def calib_info_plot(df1, df2, df3, calibs='wet', orientation='landscape'):
     # top 3 solver data, if no improvement, then no plot
     bw *= 2.
     plt_wet = np.array([(np.amax(wet2[i]) - np.amin(wet2[i])) <
-                         0.85 * (np.amax(wet1[i]) - np.amin(wet1[i]))
+                        0.9 * (np.amax(wet1[i]) - np.amin(wet1[i]))
                         for i in range(len(wet1))])
     plt_inter = np.array([(np.amax(wet2[i]) - np.amin(wet2[i])) <
-                          0.85 * (np.amax(wet1[i]) - np.amin(wet1[i]))
+                          0.9 * (np.amax(wet1[i]) - np.amin(wet1[i]))
                          for i in range(len(wet1))])
     wet2 = [wet2[i] for i in range(len(wet2)) if plt_wet[i]]
     inter2 = [inter2[i] for i in range(len(inter2)) if plt_inter[i]]
@@ -586,6 +562,7 @@ def calib_info_plot(df1, df2, df3, calibs='wet', orientation='landscape'):
         for vp in vp3['bodies']:
 
             vp.set_alpha(0.7)
+            vp.set_hatch('/' * 6)
 
 
     if calibs != 'wet':
@@ -596,6 +573,7 @@ def calib_info_plot(df1, df2, df3, calibs='wet', orientation='landscape'):
         for vp in vp4['bodies']:
 
             vp.set_alpha(0.7)
+            vp.set_hatch('/' * 6)
 
     if calibs == 'both':
         slice_vplot(vp3, s1, ec=c)
@@ -629,16 +607,22 @@ def calib_info_plot(df1, df2, df3, calibs='wet', orientation='landscape'):
     ax.plot(x, y, lw=0, marker='*', mec='k', zorder=9)
 
     # add custom legend
-    if orientation == 'landscape':
-        ax.legend(handles=custom_legend(calibs, orientation), loc=2,
-                  bbox_to_anchor=[-0.025, 1.05])
+    if calibs == 'both':  # add custom legend
+        handles = custom_legend(calibs, orientation, ec='gray')
 
     else:
-        ax.legend(handles=custom_legend(calibs, orientation), loc=1,
-                  bbox_to_anchor=[1., 1.01])
+        handles = custom_legend(calibs, orientation)
+
+    if orientation == 'landscape':
+        ax.legend(handles=handles, loc=2, bbox_to_anchor=[-0.025, 1.015])
+
+    else:
+        ax.legend(handles=handles, ncol=3, columnspacing=1., handlelength=1.,
+                  handletextpad=0.4, frameon=False, loc=2,
+                  bbox_to_anchor=[0., 1.03])
 
     # add grid and format the axes
-    lpos = np.asarray([0.25, 0.5, 0.9, 1., 1.1, 2., 4.])
+    lpos = np.asarray([0.1, 0.5, 0.9, 1., 1.1, 2., 10.])
     mpos = np.copy(pos)
     mpos[isec - 1] += (mpos[isec] - mpos[isec - 1] ) / 2.
     mpos = np.delete(mpos, isec)
@@ -649,34 +633,28 @@ def calib_info_plot(df1, df2, df3, calibs='wet', orientation='landscape'):
 
     if orientation == 'landscape':
         ax.set_yticks(-(vscale ** lpos))
-        ax.set_ylim(bottom=-(vscale ** 0.15))  # crops the data but looks nicer
-        ax.set_ylim(top=-(vscale ** 4.5))  # crops the data but looks nicer
 
         if calibs == 'both':
             ax.set_xlim([np.amin(pos) - 0.5, np.amax(pos) + 0.5])
 
         else:
-            ax.set_ylim(top=-(vscale ** 4.5))  # crops the data but looks nicer
             ax.set_xlim([np.amin(pos) - 0.55, np.amax(pos) + 0.6])
 
         ax.set_xticks(mpos)
 
     else:
         ax.set_xticks(-(vscale ** lpos))
-        ax.set_xlim(left=-(vscale ** 0.15))  # crops the data but looks nicer
-        ax.set_xlim(right=-(vscale ** 4.5))  # crops the data but looks nicer
 
         if calibs == 'both':
             ax.set_ylim([np.amin(pos) - 0.5, np.amax(pos) + 0.5])
 
         else:
-            ax.set_xlim(right=-(vscale ** 4.5))  # crops the data but looks nicer
             ax.set_ylim([np.amin(pos) - 0.6, np.amax(pos) + 0.55])
 
         ax.set_yticks(mpos + 0.15)
 
     # nicer display of the model names and normalised param values
-    pvals = ['0.25', '0.5', '0.9', '', '1.1', '2', '4']
+    pvals = ['0.1', '0.5', '0.9', '', '1.1', '2', '10']
     models[models.index('WUE-LWP')] = r'WUE-$f_{\varPsi_l}$'
     models[models.index('SOX-OPT')] = r'SOX$_\mathrm{\mathsf{opt}}$'
 
@@ -688,7 +666,8 @@ def calib_info_plot(df1, df2, df3, calibs='wet', orientation='landscape'):
 
             t = ax.text(pos[i], -(vscale ** 0.2), params[i], va='top',
                         ha='center')
-            t.set_bbox(dict(boxstyle='round', fc='w', ec='none', alpha=0.8))
+            t.set_bbox(dict(boxstyle='round,pad=0.1', fc='w', ec='none',
+                            alpha=0.8))
 
         # move the y labels to the right side
         ax.yaxis.set_label_position('right')
@@ -701,19 +680,30 @@ def calib_info_plot(df1, df2, df3, calibs='wet', orientation='landscape'):
 
         for i in range(len(params)):  # add param names
 
-            if i != len(params) - 1:
-                t = ax.text(-(vscale ** 3.6), pos[i] - 0.175, params[i],
-                            ha='right', va='top')
+            if i == len(params) - 10:
+                yy = pos[i] - 0.075
+
+            elif (i == len(params) - 3) or (i == len(params) - 5):
+                yy = pos[i] - 0.225
+
+            elif i == len(params) - 1:
+                yy = pos[i] - 0.125
 
             else:
-                t = ax.text(-(vscale ** 1.6), pos[i] - 0.175, params[i],
-                            ha='right', va='top')
+                yy = pos[i] + 0.125
 
-        ax.tick_params(axis='y', direction='in', pad=-8.)
+            if i > len(params) - 3:
+                t = ax.text(-(vscale ** 2.4), yy, params[i], ha='right',
+                            va='top')
+
+            else:
+                t = ax.text(-(vscale ** 4.4), yy, params[i], ha='right',
+                            va='top')
+
+
+        ax.tick_params(axis='y', direction='in', pad=-5.)
         plt.setp(ax.get_yticklabels(), bbox=dict(boxstyle='round', fc='w',
                                                  ec='none'))
-
-        # add param names
         ax.set_xlabel('Normalised parameter values')
 
     # remove the ticks themselves
@@ -726,8 +716,6 @@ def calib_info_plot(df1, df2, df3, calibs='wet', orientation='landscape'):
     fig.tight_layout()
     plt.savefig(os.path.join(opath,
                 'model_calibs_%s_%s.png' % (calibs, orientation)))
-    plt.savefig(os.path.join(opath,
-                'model_calibs_%s_%s.pdf' % (calibs, orientation)))
 
 
 #=======================================================================
@@ -739,6 +727,6 @@ if __name__ == "__main__":
     fname2 = 'top_3_fits.csv'  # 3 best solvers
     fname3 = 'best_fit.csv'  # best solvers
     calibs = 'both'  # or wet or inter
-    orientation = 'both'  # or landscape or portrait
+    orientation = 'portrait'  # or landscape or portrait
 
     main(fname1, fname2, fname3, calibs=calibs, orientation=orientation)

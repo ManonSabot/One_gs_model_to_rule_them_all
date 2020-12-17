@@ -82,8 +82,9 @@ def CAP(p, photo='Farquhar', res='low', inf_gb=False):
     """
 
     # hydraulics
-    P = hydraulics(p, res=res, Kirchhoff=False)
-    ksr = p.ksrmaxC * (p.Psie / p.Ps) ** (2. + 3. / p.bch)
+    P = hydraulics(p, res=res, Kirchhoff=False, Pcrit=p.PcritC)
+    ksr = np.maximum(p.ksrmaxC * (p.Psie / p.Ps) ** (2. + 3. / p.bch),
+                     p.krlC / 100.)  # criteria to limit crazy low results
     ksl = 1. / (1. / ksr + 1. / p.krlC)  # soil-leaf hydraulic conductance
     trans = ksl * (p.Ps - P) * conv.FROM_MILI  # mol.s-1.m-2
 

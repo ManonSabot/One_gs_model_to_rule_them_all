@@ -119,6 +119,13 @@ def conductances(p, Tleaf=None, gs=None, inf_gb=False):
     gHa = (0.664 * cmolar * cst.DH * (reynolds ** 0.5) * (prandtl ** (1. / 3.))
            / d)
 
+    if Tleaf is None:
+        try:  # is Tleaf one of the input fields?
+            Tleaf = p.Tleaf
+
+        except (IndexError, AttributeError, ValueError):  # 1 deg difference
+            grashof = ((cst.g0 * (1. / TairK) * (d ** 3.)) / (nu ** 2.))
+
     if Tleaf is not None:
         grashof = ((cst.g0 * (1. / TairK) * abs(Tleaf - p.Tair) * (d ** 3.)) /
                    (nu ** 2.))  # unitless
@@ -138,7 +145,7 @@ def conductances(p, Tleaf=None, gs=None, inf_gb=False):
     else:
         try:  # is gb one of the input fields?
             gb = p.gb
-            gHa = gb * conv.GbhGbv  # corresponding gHa
+            gHa = gb * conv.GbhvGb  # corresponding gHa
 
         except (IndexError, AttributeError, ValueError):  # calc. gb
             gb = np.maximum(cst.zero, gHa * conv.GbvGbh)  # mol m-2 s-1
@@ -213,7 +220,7 @@ def leaf_temperature(p, trans, Tleaf=None, inf_gb=False):
     # slope of saturation vapour pressure of water
     slp = slope_vpsat(p)  # kPa degK-1
 
-    # canopy/leaf sensible heat flux
+    # canopy / leaf sensible heat flux
     H = p.Rnet - Lambda * trans  # W m-2
 
     # simplified Tleaf (gb for gw), eq 14.6 of Campbell & Norman, 1998
@@ -268,15 +275,29 @@ def leaf_energy_balance(p, trans, Tleaf=None, inf_gb=False):
     """
 
     if Tleaf is None:
-        Tleaf, gb = leaf_temperature(p, trans, inf_gb=inf_gb)
+        try:  # is Tleaf one of the input fields?
+            Tleaf = p.Tleaf
+            __, gb = leaf_temperature(p, trans, Tleaf=Tleaf, inf_gb=inf_gb)
+
+        except (IndexError, AttributeError, ValueError):  # calc. Tleaf
+            Tleaf, gb = leaf_temperature(p, trans, inf_gb=inf_gb)
 
     else:
         __, gb = leaf_temperature(p, trans, Tleaf=Tleaf, inf_gb=inf_gb)
 
-    # saturation vapour pressure of water at T
-    esat_l = vpsat(Tleaf)  # kPa
-    esat_a = vpsat(p.Tair)  # kPa
-    Dleaf = (esat_l - (esat_a - p.VPD))  # leaf-air vpd, kPa
+    try:
+        if np.isclose(Tleaf, p.Tleaf):
+            Dleaf = p.VPD
+
+        else:
+            esat_l = vpsat(Tleaf)  # saturation vapour pressure of water, kPa
+            esat_a = vpsat(p.Tair)  # kPa
+            Dleaf = (esat_l - (esat_a - p.VPD))  # leaf-air vpd, kPa
+
+    except (IndexError, AttributeError, ValueError):  # calc. Dleaf
+        esat_l = vpsat(Tleaf)  # saturation vapour pressure of water, kPa
+        esat_a = vpsat(p.Tair)  # kPa
+        Dleaf = (esat_l - (esat_a - p.VPD))  # leaf-air vpd, kPa
 
     # leaf-air H2O vap diff (Slatyer, 1967), moles(H2O) mole-1(air)
     ww = Dleaf / p.Patm
@@ -456,7 +477,7 @@ def quad_solve_Ci(p, Cs, gs_over_A, Rleaf, gamstar, v1, v2):
     gammastar = gamstar * conv.MILI / p.Patm
     V2 = v2 * conv.MILI / p.Patm
 
-    g0 = 1.e-9  # removing g0 introduces a solving error
+    g0 = 1.e-9 # removing g0 introduces a solving error
 
     a = g0 + gs_over_A * (v1 - Rleaf)
     b = ((1. - Csi * gs_over_A) * (v1 - Rleaf) + g0 * (V2 - Csi) - gs_over_A *
@@ -583,7 +604,11 @@ def calc_photosynthesis(p, trans, Ci_s, photo, smooth=True, Tleaf=None,
             given_gs = True  # for the empirical SOX model
 
     if Tleaf is None:
-        Tleaf, __ = leaf_temperature(p, trans, inf_gb=inf_gb)
+        try:  # is Tleaf one of the input fields?
+            Tleaf = p.Tleaf
+
+        except (IndexError, AttributeError, ValueError):  # calc. Tleaf
+            Tleaf, __ = leaf_temperature(p, trans, inf_gb=inf_gb)
 
     # gamstar, Vmax, Kc and Ko are known at Tref, get their T dependency
     Tref = p.Tref + conv.C_2_K  # degk, Tref set to 25 degC

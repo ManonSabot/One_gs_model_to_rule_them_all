@@ -61,10 +61,9 @@ class plt_setup(object):
         plt.rcParams['figure.subplot.hspace'] = 0.4
 
         # colors
-        plt.rcParams['axes.facecolor'] = 'w'
         plt.rcParams['axes.edgecolor'] = '#aaaaaa'
-        plt.rcParams['axes.prop_cycle'] = cycler(color=['#eec903', '#8d64d6',
-                                                        '#2bb189'])
+        plt.rcParams['axes.prop_cycle'] = cycler(color=['#e2694e', '#415381',
+                                                        '#53e3d4'])
 
         # labels, text, annotations
         plt.rcParams['text.usetex'] = True  # use LaTeX
@@ -97,10 +96,9 @@ def dominant_features(df):
 
     df.reset_index(drop=True, inplace=True)
 
-    # criteria 1: to be considered in the total, index must be > 0.05
+    # criteria 1: to be considered, index must be > 0.05
     df[['S1', 'S1_conf']] = df[['S1', 'S1_conf']].where(df['S1'] > 0.05)
     df[['ST', 'ST_conf']] = df[['ST', 'ST_conf']].where(df['ST'] > 0.05)
-    df[['S2', 'S2_conf']] = df[['S2', 'S2_conf']].where(df['S2'] > 0.05)
     df.fillna(0., inplace=True)  # fill NaNs will zeros
 
     # criteria 2: the total effect index must be > S1 + 10%
@@ -110,13 +108,12 @@ def dominant_features(df):
 
     # criteria 3: first order effects cannot be << ST
     df[['S1', 'S1_conf']] = \
-        df[['S1', 'S1_conf']].where(df['S1'] > 0.9 * df['ST'])
+        df[['S1', 'S1_conf']].where(df['S1'] > 0.7 * df['ST'])
     df.fillna(0., inplace=True)  # fill NaNs will zeros
 
     # criteria: confidence on at least one index
-    #df = df[np.logical_or(np.logical_or(df['S1'] > 2. * df['S1_conf'],
-    #                      df['ST'] > 2. * df['ST_conf']),
-    #                      df['S2'] > 2. * df['S2_conf'])]
+    df = df[np.logical_or(df['S1'] > 2. * df['S1_conf'],
+                          df['ST'] > 2. * df['ST_conf'])]
 
     # sum indices across variables
     for driver in df['driver'].unique():
@@ -124,34 +121,19 @@ def dominant_features(df):
         tot = df[df['driver'] == driver].sum(axis=0)
         total = pd.DataFrame({'output': 'total', 'driver': driver,
                               'S1': tot['S1'], 'S1_conf': 0., 'ST': tot['ST'],
-                              'ST_conf': 0., 'S2': tot['S2'], 'S2_conf': 0.},
-                             index=[0])
+                              'ST_conf': 0.}, index=[0])
         df = df.append(total, ignore_index=True)
 
     # now select the 5 most dominant features
     total = df[df['output'] == 'total']
-    dominant = (total[['driver', 'S1', 'ST', 'S2']]
-                     .nlargest(5, ['S1', 'ST', 'S2']))
-
-    # reapply criteria 2: the total effect index must be > S1 + 10%
-    dominant['ST'] = \
-        dominant['ST'].where(dominant['ST'] > 1.1 * dominant['S1'])
-    dominant.fillna(0., inplace=True)  # fill NaNs will zeros
-
-    # reapply criteria 3: first order effects cannot be << ST
-    dominant['S1'] = \
-        dominant['S1'].where(dominant['S1'] > 0.9 * dominant['ST'])
-    dominant.fillna(0., inplace=True)  # fill NaNs will zeros
+    dominant = total[['driver', 'S1', 'ST']].nlargest(5, ['S1', 'ST'])
 
     # sort by order of dominant effect
     dominant['total'] = dominant.sum(axis=1)
     dominant = (dominant.sort_values('total', ascending=False)
                         .drop('total', axis=1))
-    dominant['idxs'] = 'S1'
-    dominant['idxs'][dominant['ST'] > 0.] = 'ST'
-    dominant['idxs'][dominant['S2'] > 0.] = 'S2'
 
-    return list(dominant['driver']), list(dominant['idxs'])
+    return list(dominant['driver']), ['ST',] * len(dominant)
 
 
 def update_var_names(array):
@@ -176,23 +158,26 @@ def which_model(short):
     if short == 'sox1':
         lab = 'Eller'
 
-    if short == 'sox2':
-        lab = 'SOX$_\mathrm{\mathsf{opt}}$'
-
     if short == 'wue':
         lab = r'WUE-$f_{\varPsi_l}$'
-
-    if short == 'cgn':
-        lab = 'CGain'
-
-    if short == 'pmax':
-        lab = 'ProfitMax'
 
     if short == 'cmax':
         lab = 'CMax'
 
+    if short == 'pmax':
+        lab = 'ProfitMax'
+
+    if short == 'pmax2':
+        lab = 'ProfitMax2'
+
+    if short == 'cgn':
+        lab = 'CGain'
+
     if short == 'lcst':
         lab = 'LeastCost'
+
+    if short == 'sox2':
+        lab = 'SOX$_\mathrm{\mathsf{opt}}$'
 
     if short == 'cap':
         lab = 'CAP'
@@ -208,15 +193,13 @@ def plot_sensitivities(df, figname):
     plt_setup()  # rendering
     fig = plt.figure(figsize=(7., 5.5))  # declaring the figure
 
-    iter = 2
+    iter = 1
 
     drivers, idxs = dominant_features(df.copy())
-    drivers.remove('CO2')
-    drivers += ['CO2']
 
     # calculate the sensitivities
-    for mod in ['std1', 'tuz', 'sox1', 'wue', 'cmax', 'pmax', 'cgn', 'lcst',
-                'sox2', 'cap', 'mes']:
+    for mod in ['std1', 'tuz', 'sox1', 'wue', 'cmax', 'pmax', 'pmax2', 'cgn',
+                'lcst', 'sox2', 'cap', 'mes']:
 
         # initialise the axis for the plot
         ax = plt.subplot(3, 4, iter, polar=True)
@@ -257,7 +240,7 @@ def plot_sensitivities(df, figname):
                 # draw lines angles and labels
                 ax.set_rgrids([0., 0.25, 0.5, 0.75, 1], [])
                 ax.set_ylim(0., 1.)
-                ax.set_thetagrids(np.degrees(angles), xlabels)
+                ax.set_thetagrids(np.degrees(angles[:-1]), xlabels)
 
                 # adjust label alignment based on where it is in the circle
                 for label, angle in zip(ax.get_xticklabels(), angles):
@@ -315,23 +298,23 @@ def plot_sensitivities(df, figname):
 
         # format params
         ax.tick_params(axis='x', which='major', pad=-9.)
-
-        if iter == 2:
-            ax.legend(loc=1, bbox_to_anchor=(-0.8, 0.55))
-
         iter += 1
 
-    ax = fig.add_axes([0.17, 0.8, 0.065, 0.065], projection='polar')
+    # add the legend
+    #ax.legend(loc=1, ncol=3, bbox_to_anchor=(-0.35, -0.425))
+    #ax = fig.add_axes([0.42, 0.01, 0.065, 0.065], projection='polar')
+
+    ax.legend(loc=1, ncol=3, bbox_to_anchor=(-1.65, -0.425))
+    ax = fig.add_axes([0.25, 0.01, 0.065, 0.065], projection='polar')
     ax.set_zorder(-1)
 
     # setup ticks and labels
-    ax.set_rlabel_position(45)
     ax.set_rgrids([0., 0.25, 0.5, 0.75, 1], ['0', '', '', '', '1'])
     ax.set_rmax(1.)
 
     # draw lines angles
     ax.set_thetagrids(np.degrees([0, -45]), [])
-    plt.title('Reading Key:', fontsize=6., pad=2.)
+    ax.set_title('Reading Key:', fontsize=7., x=-1.4, y=0.05)
 
     fig.savefig(figname)
     plt.close()
@@ -343,12 +326,12 @@ def plot_sensitivities(df, figname):
 
 base_dir = get_main_dir()
 figname = os.path.join(os.path.join(os.path.join(base_dir, 'output'),
-                       'plots'), 'model_sensitivities_total.png')
+                       'plots'), 'model_sensitivities_total_1.5.png')
 
 #if not os.path.isfile(figname):
-fname = os.path.join(os.path.join(os.path.join(os.path.join(base_dir,
-                         'output'), 'simulations'), 'idealised'),
-                         'overview_of_sensitivities.csv')
+fname = os.path.join(os.path.join(os.path.join(os.path.join(os.path.join(
+                     base_dir, 'output'), 'simulations'), 'idealised'),
+                     'sensitivities'), 'overview_of_sensitivities_1.5MPa.csv')
 df = (pd.read_csv(fname, header=[0]).dropna(axis=0, how='all')
             .dropna(axis=1, how='all').squeeze())
 plot_sensitivities(df, figname)
