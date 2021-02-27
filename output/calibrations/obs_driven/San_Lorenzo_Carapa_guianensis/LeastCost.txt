@@ -1,42 +1,41 @@
 
 [[Fit Statistics]]
     # fitting method   = differential_evolution
-    # function evals   = 624
-    # data points      = 37
+    # function evals   = 453
+    # data points      = 36
     # variables        = 2
-    chi-square         = 34681.9427
-    reduced chi-square = 990.912647
-    Akaike info crit   = 257.193092
-    Bayesian info crit = 260.414928
+    chi-square         = 31689.7752
+    reduced chi-square = 932.052211
+    Akaike info crit   = 248.088295
+    Bayesian info crit = 251.255333
+##  Warning: uncertainties could not be estimated:
 [[Variables]]
-    kmaxLC:  1.13881581 +/- 0.09271899 (8.14%) (init = 1)
-    BoA:     113.280418 +/- 35.3837372 (31.24%) (init = 200)
+    kmaxLC:  1.01799545 (init = 1)
+    Eta:     2.35029001 (init = 5)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 120
-    # data points      = 37
+    # function evals   = 44
+    # data points      = 36
     # variables        = 2
-    chi-square         = 34589.9516
-    reduced chi-square = 988.284332
-    Akaike info crit   = 257.094822
-    Bayesian info crit = 260.316658
+    chi-square         = 31791.9456
+    reduced chi-square = 935.057224
+    Akaike info crit   = 248.204175
+    Bayesian info crit = 251.371213
 [[Variables]]
-    kmaxLC:  1.12411652 +/- 0.08825345 (7.85%) (init = 1)
-    BoA:     114.456186 +/- 32.6366645 (28.51%) (init = 200)
-[[Correlations]] (unreported correlations are < 0.100)
-    C(kmaxLC, BoA) =  0.206
+    kmaxLC:  1.00013927 +/- 0.07384679 (7.38%) (init = 1)
+    Eta:     4.28089703 +/- 5.51829109 (128.91%) (init = 5)
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing
-    # function evals   = 5384
-    # data points      = 37
+    # function evals   = 5711
+    # data points      = 36
     # variables        = 2
-    chi-square         = 34588.8564
-    reduced chi-square = 988.253039
-    Akaike info crit   = 257.093650
-    Bayesian info crit = 260.315486
+    chi-square         = 31709.6473
+    reduced chi-square = 932.636687
+    Akaike info crit   = 248.110863
+    Bayesian info crit = 251.277901
 ##  Warning: uncertainties could not be estimated:
 [[Variables]]
-    kmaxLC:  1.12399172 (init = 1)
-    BoA:     113.287061 (init = 200)
+    kmaxLC:  1.02140905 (init = 1)
+    Eta:     0.30143181 (init = 5)

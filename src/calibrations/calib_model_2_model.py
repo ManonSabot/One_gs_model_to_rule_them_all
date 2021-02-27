@@ -263,11 +263,6 @@ def prep_training_N_target(profile, sub=None):
     X['Rnet'] = net_radiation(X)
     X['scale2can'] = 1.
 
-    # drop where Rnet < 0. and reindex
-    Y = Y[X['Rnet'] > 0.]
-    X = X[X['Rnet'] > 0.]
-    X.reset_index(inplace=True, drop=True)
-
     if sub is not None:  # randomly subsample one week out of the data
         X, Y = subsample(X, Y, sub)
 
@@ -276,8 +271,8 @@ def prep_training_N_target(profile, sub=None):
 
 #==============================================================================
 
-to_fit = True
-sample = 3 # None, 1, 2, or 3
+to_fit = False
+sample = None # None, 1, 2, or 3
 
 swaters = ['wet', 'inter']  # two different soil moisture profiles
 
@@ -324,6 +319,7 @@ if to_fit:
             __ = nlmfit.run(XX, Y, 'CAP')
             __ = nlmfit.run(XX, Y, 'MES')
             __ = nlmfit.run(XX, Y, 'LeastCost')
+            __ = nlmfit.run(XX, Y, 'ProfitMax2')
             fkmax = nlmfit.run(XX, Y, 'ProfitMax')
 
             # these models come after ProfitMax as they use its kmax
@@ -361,7 +357,7 @@ else:  # read over the calibration files and analyse these outputs
 
                 for file in os.listdir(opath):
 
-                    if file.endswith('.txt') and not file.endswith('zet2.txt'):
+                    if file.endswith('.txt'):
                         f = open(os.path.join(opath, file), 'r')
                         model = file.split('.txt')[0]
                         lines = f.readlines()
@@ -424,10 +420,11 @@ else:  # read over the calibration files and analyse these outputs
                            - 1.).abs()
             odf['med2'] = (odf['v2'] / odf.groupby(by)['v2'].transform('median')
                            - 1.).abs()
+            odf['med'] = odf[['med1', 'med2']].mean(axis=1)
 
             # rank the solvers (absolute rankings)
-            odf['Rank'] = (odf.sort_values(['BIC', 'med1', 'med2', 'Ntotal'])
-                              .groupby(by)['BIC'].rank(method='first')
+            odf['Rank'] = (odf.sort_values(['BIC', 'med', 'Ntotal'])
+                              .groupby(by)[['BIC', 'med']].rank(method='first')
                               .astype(int))
 
         # change param name for ProfitMax2 to allow differentiation

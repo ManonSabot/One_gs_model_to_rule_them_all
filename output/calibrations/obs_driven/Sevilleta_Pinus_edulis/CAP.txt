@@ -1,42 +1,42 @@
 
 [[Fit Statistics]]
     # fitting method   = differential_evolution
-    # function evals   = 126
+    # function evals   = 1404
     # data points      = 53
     # variables        = 2
-    chi-square         = 48707.4318
-    reduced chi-square = 955.047682
-    Akaike info crit   = 365.634634
-    Bayesian info crit = 369.575218
+    chi-square         = 6077.37476
+    reduced chi-square = 119.164211
+    Akaike info crit   = 255.327918
+    Bayesian info crit = 259.268502
 ##  Warning: uncertainties could not be estimated:
 [[Variables]]
-    krlC:    76.9488180 +/- 4225.24356 (5490.98%) (init = 1)
-    PcritC: -4.20119796 +/-        nan (nan%) (init = -4.03)
+    krlC:    3.01514653 +/- 0.23806801 (7.90%) (init = 1)
+    PcritC: -2.56403129 +/-        nan (nan%) (init = -4.36)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 152
+    # function evals   = 164
     # data points      = 53
     # variables        = 2
-    chi-square         = 48716.7268
-    reduced chi-square = 955.229938
-    Akaike info crit   = 365.644748
-    Bayesian info crit = 369.585331
-##  Warning: uncertainties could not be estimated:
+    chi-square         = 9785.87508
+    reduced chi-square = 191.879904
+    Akaike info crit   = 280.575380
+    Bayesian info crit = 284.515964
 [[Variables]]
-    krlC:    1.51758962 +/- 20.6073774 (1357.90%) (init = 1)
-    PcritC: -4.03931378 +/-        nan (nan%) (init = -4.03)
+    krlC:    0.88641315 +/- 0.10136150 (11.44%) (init = 1)
+    PcritC: -4.14890084 +/- 0.05061313 (1.22%) (init = -4.36)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(krlC, PcritC) =  0.172
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing
-    # function evals   = 4661
+    # function evals   = 5567
     # data points      = 53
     # variables        = 2
-    chi-square         = 48575.9067
-    reduced chi-square = 952.468758
-    Akaike info crit   = 365.491324
-    Bayesian info crit = 369.431908
-##  Warning: uncertainties could not be estimated:
+    chi-square         = 6191.57309
+    reduced chi-square = 121.403394
+    Akaike info crit   = 256.314585
+    Bayesian info crit = 260.255169
 [[Variables]]
-    krlC:    9.25316848 +/- 55.0818603 (595.28%) (init = 1)
-    PcritC: -4.21843106 +/-        nan (nan%) (init = -4.03)
+    krlC:    2.73271685 +/- 0.23724954 (8.68%) (init = 1)
+    PcritC: -2.56847489 +/- 3.6069e-07 (0.00%) (init = -4.36)

@@ -35,7 +35,7 @@ from TractLSM.CH2OCoupler import Ci_sup_dem, A_trans
 
 ### Functions are defined here
 
-def Cgain_plc(p, photo='Farquhar', res='low', inf_gb=False):
+def Cgain_plc(p, photo='Farquhar', res='low', inf_gb=False, deriv=False):
 
     """
     Finds the instantaneous optimal C gain for a given C cost.
@@ -80,12 +80,15 @@ def Cgain_plc(p, photo='Farquhar', res='low', inf_gb=False):
     P, trans = hydraulics(p, res=res, kmax=p.kmaxCN)
 
     # expression of optimization
-    cost = fPLC(p, P)
     Ci, mask = Ci_sup_dem(p, trans, photo=photo, res=res, inf_gb=inf_gb)
-    expr = A_trans(p, trans[mask], Ci, inf_gb=inf_gb) - p.Kappa * cost[mask]
+    expr = (A_trans(p, trans[mask], Ci, inf_gb=inf_gb) -
+            p.Kappa * fPLC(p, P)[mask])
 
     # deal with edge cases by rebounding the solution
     gc, gs, gb, __ = leaf_energy_balance(p, trans[mask], inf_gb=inf_gb)
+
+    if deriv:
+        expr = np.abs(np.gradient(expr, gs))
 
     try:
         if inf_gb:  # check on valid range
@@ -95,6 +98,10 @@ def Cgain_plc(p, photo='Farquhar', res='low', inf_gb=False):
             check = expr[np.logical_and(gc > cst.zero, gs < 1.5 * gb)]
 
         idx = np.isclose(expr, max(check))
+
+        if deriv:
+            idx = np.isclose(expr, min(check))
+
         idx = [list(idx).index(e) for e in idx if e]
 
         if inf_gb:  # check for algo. "overshooting" due to inf. gb

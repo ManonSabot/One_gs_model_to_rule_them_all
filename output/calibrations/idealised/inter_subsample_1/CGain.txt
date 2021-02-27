@@ -16,40 +16,40 @@
     # function evals   = 303
     # data points      = 179
     # variables        = 1
-    chi-square         = 12395.9369
-    reduced chi-square = 69.6400949
-    Akaike info crit   = 760.555142
-    Bayesian info crit = 763.742527
+    chi-square         = 12190.1819
+    reduced chi-square = 68.4841681
+    Akaike info crit   = 757.559061
+    Bayesian info crit = 760.746447
 [[Variables]]
-    Kappa:  6.51188351 +/- 0.20894774 (3.21%) (init = 5)
+    Kappa:  6.63005967 +/- 0.21312006 (3.21%) (init = 5)
     
 [[Fit Statistics]]
     # fitting method   = Nelder-Mead
-    # function evals   = 32
+    # function evals   = 28
     # data points      = 179
     # variables        = 1
-    chi-square         = 12877.4223
-    reduced chi-square = 72.3450692
-    Akaike info crit   = 767.376263
-    Bayesian info crit = 770.563648
+    chi-square         = 11347.2745
+    reduced chi-square = 63.7487331
+    Akaike info crit   = 744.733123
+    Bayesian info crit = 747.920509
 [[Variables]]
-    Kappa:  7.34065288 +/- 0.26024935 (3.55%) (init = 5)
+    Kappa:  7.37926197 +/- 0.17276799 (2.34%) (init = 5)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 34
+    # function evals   = 80
     # data points      = 179
     # variables        = 1
-    chi-square         = 11273.0499
-    reduced chi-square = 63.3317408
-    Akaike info crit   = 743.558405
-    Bayesian info crit = 746.745790
+    chi-square         = 11600.4850
+    reduced chi-square = 65.1712640
+    Akaike info crit   = 748.683532
+    Bayesian info crit = 751.870918
 [[Variables]]
-    Kappa:  6.64801158 +/- 0.15565782 (2.34%) (init = 5)
+    Kappa:  6.46488981 +/- 0.23729282 (3.67%) (init = 5)
 
 [[Fit Statistics]]
     # fitting method   = COBYLA
-    # function evals   = 20
+    # function evals   = 22
     # data points      = 179
     # variables        = 1
     chi-square         = 11199.3378
@@ -57,7 +57,7 @@
     Akaike info crit   = 742.384118
     Bayesian info crit = 745.571504
 [[Variables]]
-    Kappa:  5.43688394 +/- 0.12853342 (2.36%) (init = 5)
+    Kappa:  5.46754909 +/- 0.13348782 (2.44%) (init = 5)
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing

@@ -1,41 +1,45 @@
 
 [[Fit Statistics]]
     # fitting method   = differential_evolution
-    # function evals   = 615
+    # function evals   = 1176
     # data points      = 90
     # variables        = 2
-    chi-square         = 6133582.72
-    reduced chi-square = 69699.8037
-    Akaike info crit   = 1005.65319
-    Bayesian info crit = 1010.65281
+    chi-square         = 938849.173
+    reduced chi-square = 10668.7406
+    Akaike info crit   = 836.734041
+    Bayesian info crit = 841.733660
 [[Variables]]
-    g1T:    8.06706719 +/- 1.08230037 (13.42%) (init = 3.5)
-    PrefT: -8.12999802 +/- 0.00159381 (0.02%) (init = -5.27)
+    g1T:    4.50939982 +/- 0.44120521 (9.78%) (init = 3.5)
+    kmaxT:  4.11799696 +/- 2.42534932 (58.90%) (init = 1)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(g1T, kmaxT) =  0.964
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 156
+    # function evals   = 216
     # data points      = 90
     # variables        = 2
-    chi-square         = 6132057.96
-    reduced chi-square = 69682.4769
-    Akaike info crit   = 1005.63082
-    Bayesian info crit = 1010.63044
+    chi-square         = 1088577.66
+    reduced chi-square = 12370.2007
+    Akaike info crit   = 850.051555
+    Bayesian info crit = 855.051175
 [[Variables]]
-    g1T:    8.04918061 +/- 0.90006035 (11.18%) (init = 3.5)
-    PrefT: -8.12993852 +/- 1.3283e-11 (0.00%) (init = -5.27)
+    g1T:    3.95372528 +/- 0.13919116 (3.52%) (init = 3.5)
+    kmaxT:  5.71161626 +/- 0.70428662 (12.33%) (init = 1)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(g1T, kmaxT) = -0.364
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing
-    # function evals   = 5618
+    # function evals   = 6836
     # data points      = 90
     # variables        = 2
-    chi-square         = 5883889.52
-    reduced chi-square = 66862.3809
-    Akaike info crit   = 1001.91270
-    Bayesian info crit = 1006.91232
-##  Warning: uncertainties could not be estimated:
-    PrefT:  at boundary
+    chi-square         = 938792.928
+    reduced chi-square = 10668.1015
+    Akaike info crit   = 836.728649
+    Bayesian info crit = 841.728268
 [[Variables]]
-    g1T:    13.6326745 +/- 0.09120381 (0.67%) (init = 3.5)
-    PrefT: -8.13000000 +/-        nan (nan%) (init = -5.27)
+    g1T:    4.50041733 +/- 0.03419227 (0.76%) (init = 3.5)
+    kmaxT:  4.14494603 +/- 0.02112911 (0.51%) (init = 1)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(g1T, kmaxT) =  0.371

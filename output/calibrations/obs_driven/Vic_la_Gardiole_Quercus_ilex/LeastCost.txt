@@ -1,39 +1,42 @@
 
 [[Fit Statistics]]
     # fitting method   = differential_evolution
-    # function evals   = 759
+    # function evals   = 780
     # data points      = 45
     # variables        = 2
-    chi-square         = 36790.6826
-    reduced chi-square = 855.597271
-    Akaike info crit   = 305.785184
-    Bayesian info crit = 309.398509
+    chi-square         = 42740.9071
+    reduced chi-square = 993.974583
+    Akaike info crit   = 312.531217
+    Bayesian info crit = 316.144542
 [[Variables]]
-    kmaxLC:  0.46605325 +/- 0.04662160 (10.00%) (init = 1)
-    BoA:     10.1179404 +/- 1.39176285 (13.76%) (init = 200)
+    kmaxLC:  0.23180131 +/- 0.01771782 (7.64%) (init = 1)
+    Eta:     42.1342189 +/- 11.0851181 (26.31%) (init = 5)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(kmaxLC, Eta) =  0.304
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 204
+    # function evals   = 98
     # data points      = 45
     # variables        = 2
-    chi-square         = 36785.8420
-    reduced chi-square = 855.484699
-    Akaike info crit   = 305.779263
-    Bayesian info crit = 309.392587
+    chi-square         = 43335.6972
+    reduced chi-square = 1007.80691
+    Akaike info crit   = 313.153127
+    Bayesian info crit = 316.766452
 [[Variables]]
-    kmaxLC:  0.45276960 +/- 0.04249168 (9.38%) (init = 1)
-    BoA:     10.7694843 +/- 1.46582732 (13.61%) (init = 200)
+    kmaxLC:  0.24887001 +/- 0.02183502 (8.77%) (init = 1)
+    Eta:     42.0656038 +/- 6.61136760 (15.72%) (init = 5)
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing
-    # function evals   = 5675
+    # function evals   = 6062
     # data points      = 45
     # variables        = 2
-    chi-square         = 36684.5631
-    reduced chi-square = 853.129374
-    Akaike info crit   = 305.655197
-    Bayesian info crit = 309.268522
+    chi-square         = 42065.4494
+    reduced chi-square = 978.266264
+    Akaike info crit   = 311.814378
+    Bayesian info crit = 315.427703
+##  Warning: uncertainties could not be estimated:
 [[Variables]]
-    kmaxLC:  0.45855915 +/- 0.04227785 (9.22%) (init = 1)
-    BoA:     10.3892695 +/- 1.34413628 (12.94%) (init = 200)
+    kmaxLC:  0.25181582 +/-        nan (nan%) (init = 1)
+    Eta:     42.6071337 +/-        nan (nan%) (init = 5)

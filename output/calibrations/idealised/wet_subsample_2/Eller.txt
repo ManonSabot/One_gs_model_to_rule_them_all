@@ -34,7 +34,7 @@
     Bayesian info crit = 834.127642
 [[Variables]]
     kmaxS1:  0.31268953 +/- 0.00655042 (2.09%) (init = 0.4)
-
+    
 [[Fit Statistics]]
     # fitting method   = Powell
     # function evals   = 31

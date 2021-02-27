@@ -32,7 +32,7 @@ from TractLSM.CH2OCoupler import Tuzet
 from TractLSM.CH2OCoupler import supply_max  # SOX (Eller) and SOX opt
 from TractLSM.CH2OCoupler import WUE_gs  # WUE-hydraulics (Wolf)
 from TractLSM.CH2OCoupler import profit_psi  # Profit max (Sperry)
-from TractLSM.CH2OCoupler import profit_E  # Profit max (Wang)
+from TractLSM.CH2OCoupler import profit_AE  # Profit max (Wang)
 from TractLSM.CH2OCoupler import Cgain_plc  # Carbon gain net (Lu)
 from TractLSM.CH2OCoupler import Cmax_gs  # Carbon max (Wolf)
 from TractLSM.CH2OCoupler import least_cost  # Least cost (Prentice)
@@ -48,7 +48,8 @@ except (ImportError, ModuleNotFoundError):
 
 # ======================================================================
 
-def over_time(idata, step, Nsteps, dic, photo, resolution, inf_gb, temporal):
+def over_time(idata, step, Nsteps, dic, photo, resolution, inf_gb, temporal,
+              deriv):
 
     """
     Optimization wrapper at each time step that updates the soil
@@ -160,11 +161,12 @@ def over_time(idata, step, Nsteps, dic, photo, resolution, inf_gb, temporal):
             try:
                 dic['tuz']['A'], dic['tuz']['Ci'], dic['tuz']['Rublim'], \
                     dic['tuz']['E'], dic['tuz']['gs'], dic['tuz']['gb'], \
-                    dic['tuz']['Tleaf'], dic['tuz']['Pleaf'], fLWP_ini = \
+                    dic['tuz']['Tleaf'], dic['tuz']['Pleaf'] = \
                         Tuzet(p, photo=photo, res=resolution, inf_gb=inf_gb)
 
-                if temporal and (idata[step + 1].doy == idata[step].doy):
-                    idata[step + 1].fLWP_ini = fLWP_ini
+                if temporal and step < Nsteps - 1:
+                    if idata[step + 1].doy == idata[step].doy:
+                        idata[step + 1].LWP_ini = dic['tuz']['Pleaf']
 
             except (IndexError, ValueError):  # no solve
                 dic['tuz']['A'], dic['tuz']['Ci'], dic['tuz']['Rublim'], \
@@ -191,7 +193,8 @@ def over_time(idata, step, Nsteps, dic, photo, resolution, inf_gb, temporal):
                             dic[SOX]['E'], dic[SOX]['gs'], dic[SOX]['gb'], \
                             dic[SOX]['Tleaf'], dic[SOX]['Pleaf'], ksc_prev = \
                                 supply_max(p, photo=photo, res=resolution,
-                                           case=this_case, inf_gb=inf_gb)
+                                           case=this_case, inf_gb=inf_gb,
+                                           deriv=deriv)
 
                         if temporal:
                             idata[step + 1:].ksc_prev = ksc_prev
@@ -206,49 +209,13 @@ def over_time(idata, step, Nsteps, dic, photo, resolution, inf_gb, temporal):
                 dic['wue']['A'], dic['wue']['Ci'], dic['wue']['Rublim'], \
                     dic['wue']['E'], dic['wue']['gs'], dic['wue']['gb'], \
                     dic['wue']['Tleaf'], dic['wue']['Pleaf'] = \
-                        WUE_gs(p, photo=photo, res=resolution, inf_gb=inf_gb)
+                        WUE_gs(p, photo=photo, res=resolution, inf_gb=inf_gb,
+                               deriv=deriv)
 
             except (IndexError, ValueError):  # no solve
                 dic['wue']['A'], dic['wue']['Ci'], dic['wue']['Rublim'], \
                     dic['wue']['E'], dic['wue']['gs'], dic['wue']['gb'], \
                     dic['wue']['Tleaf'], dic['wue']['Pleaf'] = (9999.,) * 8
-
-        if 'cgn' in dic.keys():  # CGain
-            try:
-                dic['cgn']['A'], dic['cgn']['Ci'], dic['cgn']['Rublim'], \
-                    dic['cgn']['E'], dic['cgn']['gs'], dic['cgn']['gb'], \
-                    dic['cgn']['Tleaf'], dic['cgn']['Pleaf'] = \
-                        Cgain_plc(p, photo=photo, res=resolution, inf_gb=inf_gb)
-
-            except (IndexError, ValueError):  # no solve
-                dic['cgn']['A'], dic['cgn']['Ci'], dic['cgn']['Rublim'], \
-                    dic['cgn']['E'], dic['cgn']['gs'], dic['cgn']['gb'], \
-                    dic['cgn']['Tleaf'], dic['cgn']['Pleaf'] = (9999.,) * 8
-
-        if 'pmax' in dic.keys():  # ProfitMax
-            try:
-                dic['pmax']['A'], dic['pmax']['Ci'], dic['pmax']['Rublim'], \
-                    dic['pmax']['E'], dic['pmax']['gs'], dic['pmax']['gb'], \
-                    dic['pmax']['Tleaf'], dic['pmax']['Pleaf'] = \
-                        profit_psi(p, photo=photo, res=resolution,
-                                   inf_gb=inf_gb)
-
-            except (IndexError, ValueError):  # no solve
-                dic['pmax']['A'], dic['pmax']['Ci'], dic['pmax']['Rublim'], \
-                    dic['pmax']['E'], dic['pmax']['gs'], dic['pmax']['gb'], \
-                    dic['pmax']['Tleaf'], dic['pmax']['Pleaf'] = (9999.,) * 8
-
-        if 'pmax2' in dic.keys():  # ProfitMax2
-            try:
-                dic['pmax2']['A'], dic['pmax2']['Ci'], dic['pmax2']['Rublim'], \
-                    dic['pmax2']['E'], dic['pmax2']['gs'], dic['pmax2']['gb'], \
-                    dic['pmax2']['Tleaf'], dic['pmax2']['Pleaf'] = \
-                        profit_E(p, photo=photo, res=resolution, inf_gb=inf_gb)
-
-            except (IndexError, ValueError):  # no solve
-                dic['pmax2']['A'], dic['pmax2']['Ci'], dic['pmax2']['Rublim'], \
-                    dic['pmax2']['E'], dic['pmax2']['gs'], dic['pmax2']['gb'], \
-                    dic['pmax2']['Tleaf'], dic['pmax2']['Pleaf'] = (9999.,) * 8
 
         if 'cmax' in dic.keys():
             try:
@@ -262,13 +229,52 @@ def over_time(idata, step, Nsteps, dic, photo, resolution, inf_gb, temporal):
                     dic['cmax']['E'], dic['cmax']['gs'], dic['cmax']['gb'], \
                     dic['cmax']['Tleaf'], dic['cmax']['Pleaf'] = (9999.,) * 8
 
+        if 'pmax' in dic.keys():  # ProfitMax
+            try:
+                dic['pmax']['A'], dic['pmax']['Ci'], dic['pmax']['Rublim'], \
+                    dic['pmax']['E'], dic['pmax']['gs'], dic['pmax']['gb'], \
+                    dic['pmax']['Tleaf'], dic['pmax']['Pleaf'] = \
+                        profit_psi(p, photo=photo, res=resolution,
+                                   inf_gb=inf_gb, deriv=deriv)
+
+            except (IndexError, ValueError):  # no solve
+                dic['pmax']['A'], dic['pmax']['Ci'], dic['pmax']['Rublim'], \
+                    dic['pmax']['E'], dic['pmax']['gs'], dic['pmax']['gb'], \
+                    dic['pmax']['Tleaf'], dic['pmax']['Pleaf'] = (9999.,) * 8
+
+        if 'cgn' in dic.keys():  # CGain
+            try:
+                dic['cgn']['A'], dic['cgn']['Ci'], dic['cgn']['Rublim'], \
+                    dic['cgn']['E'], dic['cgn']['gs'], dic['cgn']['gb'], \
+                    dic['cgn']['Tleaf'], dic['cgn']['Pleaf'] = \
+                        Cgain_plc(p, photo=photo, res=resolution, inf_gb=inf_gb,
+                                  deriv=deriv)
+
+            except (IndexError, ValueError):  # no solve
+                dic['cgn']['A'], dic['cgn']['Ci'], dic['cgn']['Rublim'], \
+                    dic['cgn']['E'], dic['cgn']['gs'], dic['cgn']['gb'], \
+                    dic['cgn']['Tleaf'], dic['cgn']['Pleaf'] = (9999.,) * 8
+
+        if 'pmax2' in dic.keys():  # ProfitMax2
+            try:
+                dic['pmax2']['A'], dic['pmax2']['Ci'], dic['pmax2']['Rublim'], \
+                    dic['pmax2']['E'], dic['pmax2']['gs'], dic['pmax2']['gb'], \
+                    dic['pmax2']['Tleaf'], dic['pmax2']['Pleaf'] = \
+                        profit_AE(p, photo=photo, res=resolution, inf_gb=inf_gb,
+                                  deriv=deriv)
+
+            except (IndexError, ValueError):  # no solve
+                dic['pmax2']['A'], dic['pmax2']['Ci'], dic['pmax2']['Rublim'], \
+                    dic['pmax2']['E'], dic['pmax2']['gs'], dic['pmax2']['gb'], \
+                    dic['pmax2']['Tleaf'], dic['pmax2']['Pleaf'] = (9999.,) * 8
+
         if 'lcst' in dic.keys():  # LeastCost
             try:
                 dic['lcst']['A'], dic['lcst']['Ci'], dic['lcst']['Rublim'], \
                     dic['lcst']['E'], dic['lcst']['gs'], dic['lcst']['gb'], \
                     dic['lcst']['Tleaf'], dic['lcst']['Pleaf'] = \
                         least_cost(p, photo=photo, res=resolution,
-                                   inf_gb=inf_gb)
+                                   inf_gb=inf_gb, deriv=deriv)
 
             except (IndexError, ValueError):  # no solve
                 dic['lcst']['A'], dic['lcst']['Ci'], dic['lcst']['Rublim'], \
@@ -280,7 +286,8 @@ def over_time(idata, step, Nsteps, dic, photo, resolution, inf_gb, temporal):
                 dic['cap']['A'], dic['cap']['Ci'], dic['cap']['Rublim'], \
                     dic['cap']['E'], dic['cap']['gs'], dic['cap']['gb'], \
                     dic['cap']['Tleaf'], dic['cap']['Pleaf'] = \
-                        CAP(p, photo=photo, res=resolution, inf_gb=inf_gb)
+                        CAP(p, photo=photo, res=resolution, inf_gb=inf_gb,
+                            deriv=deriv)
 
             except (IndexError, ValueError):  # no solve
                 dic['cap']['A'], dic['cap']['Ci'], dic['cap']['Rublim'], \
@@ -292,7 +299,8 @@ def over_time(idata, step, Nsteps, dic, photo, resolution, inf_gb, temporal):
                 dic['mes']['A'], dic['mes']['Ci'], dic['mes']['Rublim'], \
                     dic['mes']['E'], dic['mes']['gs'], dic['mes']['gb'], \
                     dic['mes']['Tleaf'], dic['mes']['Pleaf'] = \
-                        MES(p, photo=photo, res=resolution, inf_gb=inf_gb)
+                        MES(p, photo=photo, res=resolution, inf_gb=inf_gb,
+                            deriv=deriv)
 
             except (IndexError, ValueError):  # no solve
                 dic['mes']['A'], dic['mes']['Ci'], dic['mes']['Rublim'], \
@@ -310,7 +318,7 @@ def over_time(idata, step, Nsteps, dic, photo, resolution, inf_gb, temporal):
 
 
 def run(fname, df, Nsteps, photo, models=['Medlyn', 'ProfitMax'],
-        resolution=None, inf_gb=False, temporal=True):
+        resolution=None, inf_gb=False, temporal=True, deriv=False):
 
     """
     Runs the profit maximisation algorithm within a simplified LSM,
@@ -416,15 +424,15 @@ def run(fname, df, Nsteps, photo, models=['Medlyn', 'ProfitMax'],
         dic['pmax'] = subdic.copy()
         output_dic['pmax'] = subdic2.copy()
 
-    # 'New' ProfitMax model
-    if ('ProfitMax2' in models) or ('ProfitMax2'.lower() in models):
-        dic['pmax2'] = subdic.copy()
-        output_dic['pmax2'] = subdic2.copy()
-
     # CGain model
     if ('CGain' in models) or ('CGain'.lower() in models):
         dic['cgn'] = subdic.copy()
         output_dic['cgn'] = subdic2.copy()
+
+    # 'New' ProfitMax model
+    if ('ProfitMax2' in models) or ('ProfitMax2'.lower() in models):
+        dic['pmax2'] = subdic.copy()
+        output_dic['pmax2'] = subdic2.copy()
 
     # LeastCost model
     if ('LeastCost' in models) or ('LeastCost'.lower() in models):
@@ -454,9 +462,8 @@ def run(fname, df, Nsteps, photo, models=['Medlyn', 'ProfitMax'],
     df['Rnet'] = np.nan  # empty Rnet data column
 
     if 'Tuzet' in models:
-        df['fLWP_ini'] = fLWP(df.iloc[0], df['Ps_pd'] -
-                              df.iloc[0, df.columns.get_loc('height')] *
-                              cst.rho * cst.g0 * conv.MEGA)
+        df['LWP_ini'] = (df['Ps_pd'] - df.iloc[0, df.columns.get_loc('height')]
+                         * cst.rho * cst.g0 * conv.MEGA)
 
     # non time-sensitive: last valid value propagated until next valid
     df.fillna(method='ffill', inplace=True)
@@ -466,7 +473,7 @@ def run(fname, df, Nsteps, photo, models=['Medlyn', 'ProfitMax'],
 
     # run the model(s) over the range of timesteps / the timeseries
     tpl_out = list(zip(*[over_time(force, step, Nsteps, dic, photo, resolution,
-                                   inf_gb, temporal)
+                                   inf_gb, temporal, deriv)
                          for step in range(Nsteps)]))
 
     # unpack the output tuple 7 by 7 (A, E, Ci, Rublim, gs, Pleaf, Ps)

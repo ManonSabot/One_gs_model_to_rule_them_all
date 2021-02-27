@@ -27,38 +27,12 @@ import numpy as np  # array manipulations, math operators
 from TractLSM import conv, cst  # unit converter
 from TractLSM.SPAC import hydraulics, leaf_energy_balance, leaf_temperature
 from TractLSM.SPAC import calc_photosynthesis, rubisco_limit
-from TractLSM.CH2OCoupler import Ci_sup_dem, dAdgs
+from TractLSM.CH2OCoupler import Ci_sup_dem, A_trans
 
 
 #==============================================================================
 
-### Functions are defined here
-
-def dEdgs(gs, gb, ww):
-
-    """
-    Calculates the XXXX water loss, from the energy balance with the diffusive supply
-    of CO2 model.
-    Arguments:
-    ----------
-    gs: array
-        stomatal conductance [mol.m-2.s-1] to water vapour, an array of
-        values depending on the leaf water potentials P / transpirations E
-    gb: float
-        wind speed-dependent leaf boundary layer conductance to water vapour
-        [mol.m-2.s-1]
-    ww: array
-        plant-air saturated H2O content differential [moles(H2O).mole-1(air)]
-
-    Returns:
-    --------
-    The XXXX given by the diffusive supply of CO2.
-    """
-
-    return conv.MILI * ww * (gb ** 2.) / ((gs + gb) ** 2.)
-
-
-def WUE_gs(p, photo='Farquhar', res='low', inf_gb=False):
+def WUE_gs(p, photo='Farquhar', res='low', inf_gb=False, deriv=False):
 
     """
     Finds the instantaneous optimal C gain for a given C cost.
@@ -104,8 +78,14 @@ def WUE_gs(p, photo='Farquhar', res='low', inf_gb=False):
 
     # expression of optimization
     Ci, mask = Ci_sup_dem(p, trans, photo=photo, res=res, inf_gb=inf_gb)
-    gc, gs, gb, ww = leaf_energy_balance(p, trans[mask], inf_gb=inf_gb)
-    expr = np.abs(dAdgs(p, gs, gb, Ci) - p.Lambda * dEdgs(gs, gb, ww))
+    expr = (A_trans(p, trans[mask], Ci, inf_gb=inf_gb) -
+            p.Lambda * conv.MILI * trans[mask])
+
+    # deal with edge cases by rebounding the solution
+    gc, gs, gb, __ = leaf_energy_balance(p, trans[mask], inf_gb=inf_gb)
+
+    if deriv:
+        expr = np.abs(np.gradient(expr, gs))
 
     try:
         if inf_gb:  # check on valid range
@@ -114,7 +94,11 @@ def WUE_gs(p, photo='Farquhar', res='low', inf_gb=False):
         else:  # further constrain the realm of possible gs
             check = expr[np.logical_and(gc > cst.zero, gs < 1.5 * gb)]
 
-        idx = np.isclose(expr, min(check))
+        idx = np.isclose(expr, max(check))
+
+        if deriv:
+            idx = np.isclose(expr, min(check))
+
         idx = [list(idx).index(e) for e in idx if e]
 
         if inf_gb:  # check for algo. "overshooting" due to inf. gb

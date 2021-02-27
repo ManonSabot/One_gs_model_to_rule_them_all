@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from cycler import cycler
 from scipy.ndimage import gaussian_filter
 from scipy.optimize import curve_fit  # fit the functional shapes
+from scipy.integrate import quad  # integrate on a range
 import string   # automate subplot lettering
 
 # change the system path to load modules from TractLSM
@@ -20,6 +21,7 @@ sys.path.append(os.path.abspath(os.path.join(script_dir, '..')))
 from TractLSM import conv, cst
 from TractLSM.Utils import get_main_dir  # get the project's directory
 from TractLSM.Utils import read_csv  # read in files
+from TractLSM.SPAC import f, Weibull_params
 
 
 class plt_setup(object):
@@ -33,9 +35,9 @@ class plt_setup(object):
 
         # colors
         if colours is None:  # use the default colours
-            colours = ['#1a1a1a', '#6f32c7', '#a182bf', '#1087e8', '#9be2fd',
-                       '#086527', '#33b15d', '#a6d96a', '#a2a203', '#ecec3a',
-                       '#a42565', '#f9aab7']
+            colours = ['#1a1a1a', '#6f32c7', '#a182bf', '#197aff', '#9be2fd',
+                       '#009231', '#a6d96a', '#6b3b07', '#ff8e12', '#ffe020',
+                       '#f10c80', '#ffc2cd']
 
         plt.rcParams['axes.prop_cycle'] = cycler(color=colours)
 
@@ -91,7 +93,7 @@ def render_ylabels(ax, name, unit, fs=7.):
 def plot_obs(ax, x, y, which='gs'):
 
     if which == 'gs':
-        ax.scatter(x, y, marker='s', s=25., edgecolor='none', alpha=0.5)
+        ax.scatter(x, y, marker='+', s=25., edgecolor='none', alpha=0.5)
 
     else:
         vp = ax.violinplot(y, showextrema=False, positions=[x], widths=0.8)
@@ -193,21 +195,24 @@ def get_calib_kmax(df):
     params = []
     models = []
 
-    for what in df['training'].unique():
+    for what in df['training'].unique().dropna():
 
         sub = df.copy()[df['training'] == what]
-        keep = np.logical_or(sub['p1'].str.contains('kmax'),
-                             sub['p1'].str.contains('krl'))
+        sub['v3'] = sub['v1']
+        sub[sub['Model'] == 'Tuzet']['v3'] = sub['v2']
+        keep = np.logical_or(sub['p2'].str.contains('kmaxT').fillna(False),
+                             np.logical_or(sub['p1'].str.contains('kmax'),
+                                           sub['p1'].str.contains('krl')))
 
         # set model order
-        sub['order'] = sub['Model'].replace({'Eller': 0, 'ProfitMax': 1,
-                                             'ProfitMax2': 2,
-                                             'LeastCost': 3, 'SOX-OPT': 4,
-                                             'CAP': 5, 'MES': 6})
+        sub['order'] = sub['Model'].replace({'Tuzet': 0, 'Eller': 1,
+                                             'ProfitMax': 2, 'SOX-OPT': 3,
+                                             'ProfitMax2': 4, 'LeastCost': 5,
+                                             'CAP': 6, 'MES': 7})
 
         sub = sub[keep].sort_values(by=['solver', 'order'])
         sub.reset_index(inplace=True)
-        params += [np.log(sub['v1'].to_numpy())]
+        params += [np.log(sub['v3'].values)]
         models += [sub['Model'].values]
 
     return params, models
@@ -216,12 +221,15 @@ def get_calib_kmax(df):
 def obs_calibs(df1, df2, figname):
 
     fig = plt.figure(figsize=(6.5, 8.))
-    gs = fig.add_gridspec(nrows=80, ncols=16, hspace=0.3, wspace=0.2)
+    gs = fig.add_gridspec(nrows=96, ncols=16, hspace=0.3, wspace=0.2)
     ax2 = fig.add_subplot(gs[52:, 6:])  # conductance data
+
+    ipath = os.path.join(os.path.join(os.path.join(get_main_dir(),
+                         'input'), 'simulations'), 'obs_driven')
 
     labels = []
 
-    for i, what in enumerate(df1['site_spp'].unique()):
+    for i, what in enumerate(df1['site_spp'].unique().dropna()):
 
         if i < 13:
             nrow = int(i / 4) * 16
@@ -229,7 +237,8 @@ def obs_calibs(df1, df2, figname):
             ax1 = fig.add_subplot(gs[nrow:nrow + 16, ncol:ncol + 4])
 
         else:
-            ax1 = fig.add_subplot(gs[nrow + 16:, :4])
+            nrow += 16
+            ax1 = fig.add_subplot(gs[nrow:nrow + 16, :4])
 
         sub = df1.copy()[df1['site_spp'] == what]
         sub = sub.select_dtypes(exclude=['object', 'category'])
@@ -247,8 +256,17 @@ def obs_calibs(df1, df2, figname):
         ax1.vlines(x0, 0., 1., linestyle=':')
         ax1.vlines(x1, 0., 1., linestyle=':')
 
-        plot_obs(ax2, i, np.log(sub['E'] / (sub['Ps'] - sub['Pleaf'])),
-                 which='kmax')
+        # get the integrated VC given by the obs and site params
+        ref, __ = read_csv(os.path.join(ipath, '%s_calibrated.csv' % (what)))
+        b, c = Weibull_params(ref.iloc[0])
+        int_VC = np.zeros(len(sub))
+
+        for j in range(len(sub)):
+
+            int_VC[j], __ = quad(f, sub['Pleaf'].iloc[j], sub['Ps'].iloc[j],
+                                 args=(b, c))
+
+        plot_obs(ax2, i, np.log(sub['E'] / int_VC), which='kmax')
 
         # subplot titles (including labelling)
         what = what.split('_')
@@ -290,37 +308,38 @@ def obs_calibs(df1, df2, figname):
     params = np.asarray(params)
     locs = np.arange(len(df1['site_spp'].unique()))
 
-    # update colourr list
-    colours = (['#a182bf', '#086527', '#33b15d', '#a2a203', '#ecec3a',
-                '#a42565', '#f9aab7']) * len(params)
+    # update colour list
+    colours = (['#6023b7', '#af97c5', '#009231', '#6b3b07', '#ff8e12',
+                '#ffe020', '#f10c80', '#ffc2cd']) * len(params)
 
     for i in range(params.shape[1]):
 
-        if i < 7:
+        if i < 8:
             ax2.scatter(locs, params[:, i], s=50, linewidths=0.25, c=colours[i],
-                        alpha=0.7, label=models[0][i], zorder=4)
+                        alpha=0.9, label=models[0][i], zorder=4)
 
         else:
             ax2.scatter(locs, params[:, i], s=50, linewidths=0.25, c=colours[i],
-                        alpha=0.7, zorder=4)
+                        alpha=0.9, zorder=4)
 
     # tighten the subplot
     ax2.set_xlim(locs[0] - 0.8, locs[-1] + 0.8)
-    ax2.set_ylim(np.log(0.005) - 0.1, 5.)
+    ax2.set_ylim(np.log(0.025) - 0.1, np.log(80.))
 
     # ticks
     ax2.set_xticks(locs + 0.5)
     ax2.set_xticklabels(labels, ha='right', rotation=40)
     ax2.xaxis.set_tick_params(length=0.)
 
-    yticks = [0.005, 0.25, 1, 5, 25, 100]
+    yticks = [0.025, 0.25, 1, 5, 25, 75]
     ax2.set_yticks([np.log(e) for e in yticks])
     ax2.set_yticklabels(yticks)
-    render_ylabels(ax2, 'Max. conductance', 'mmol m$^{-2}$ s$^{-1}$ MPa$^{-1}$')
+    render_ylabels(ax2, r'k$_{max}$', 'mmol m$^{-2}$ s$^{-1}$ MPa$^{-1}$')
 
     handles, labels = ax2.get_legend_handles_labels()
-    labels[4] = 'SOX$_\mathrm{\mathsf{opt}}$'
-    ax2.legend(handles, labels, ncol=3, columnspacing=0.5, loc=3)
+    labels[3] = 'SOX$_\mathrm{\mathsf{opt}}$'
+    ax2.legend(handles, labels, ncol=3, labelspacing=1. / 3., columnspacing=0.5,
+               loc=3)
 
     # save
     fig.savefig(figname)
@@ -340,6 +359,7 @@ ifdir = ifdir.replace('simulations', 'calibrations')
 df2 = pd.read_csv(os.path.join(ifdir, 'overview_of_fits.csv'))
 
 site_spp = ['San_Lorenzo_Carapa_guianensis', 'San_Lorenzo_Tachigali_versicolor',
+            'San_Lorenzo_Tocoyena_pittieri',
             'Parque_Natural_Metropolitano_Calycophyllum_candidissimum',
             'ManyPeaksRange_Alphitonia_excelsa',
             'ManyPeaksRange_Austromyrtus_bidwillii',
@@ -349,6 +369,9 @@ site_spp = ['San_Lorenzo_Carapa_guianensis', 'San_Lorenzo_Tachigali_versicolor',
             'Richmond_Eucalyptus_cladocalyx', 'Puechabon_Quercus_ilex',
             'Vic_la_Gardiole_Quercus_ilex', 'Corrigin_Eucalyptus_capillosa',
             'Sevilleta_Juniperus_monosperma', 'Sevilleta_Pinus_edulis']
+
+# temporarily address the issue of many extra sites
+df1 = df1[df1['site_spp'].isin(site_spp)]
 
 # organise the dfs in order
 df1.site_spp = df1.site_spp.astype('category')

@@ -1,84 +1,84 @@
 
 [[Fit Statistics]]
     # fitting method   = differential_evolution
-    # function evals   = 470
+    # function evals   = 513
     # data points      = 706
     # variables        = 1
-    chi-square         = 855483.837
-    reduced chi-square = 1213.45225
-    Akaike info crit   = 5014.46391
-    Bayesian info crit = 5019.02353
+    chi-square         = 13326.4738
+    reduced chi-square = 18.9027997
+    Akaike info crit   = 2076.15218
+    Bayesian info crit = 2080.71180
 [[Variables]]
-    kmax:  0.80854226 +/- 0.01985283 (2.46%) (init = 1)
+    kmax:  1.99108238 +/- 0.00883199 (0.44%) (init = 1)
 
 [[Fit Statistics]]
     # fitting method   = basinhopping
-    # function evals   = 24192
+    # function evals   = 24161
     # data points      = 706
     # variables        = 1
-    chi-square         = 852922.247
-    reduced chi-square = 1209.81879
-    Akaike info crit   = 5012.34675
-    Bayesian info crit = 5016.90637
+    chi-square         = 13320.2745
+    reduced chi-square = 18.8940063
+    Akaike info crit   = 2075.82368
+    Bayesian info crit = 2080.38330
 [[Variables]]
-    kmax:  0.73468827 +/- 0.02068004 (2.81%) (init = 1)
+    kmax:  1.98812109 +/- 0.00863559 (0.43%) (init = 1)    
     
 [[Fit Statistics]]
     # fitting method   = Nelder-Mead
-    # function evals   = 98
+    # function evals   = 74
     # data points      = 706
     # variables        = 1
-    chi-square         = 876391.766
-    reduced chi-square = 1243.10889
-    Akaike info crit   = 5031.51100
-    Bayesian info crit = 5036.07061
+    chi-square         = 13824.2908
+    reduced chi-square = 19.6089231
+    Akaike info crit   = 2102.04450
+    Bayesian info crit = 2106.60412
 [[Variables]]
-    kmax:  0.69802660 +/- 0.02081523 (2.98%) (init = 1)
+    kmax:  1.99024904 +/- 0.00897292 (0.45%) (init = 1)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 142
+    # function evals   = 60
     # data points      = 706
     # variables        = 1
-    chi-square         = 861783.750
-    reduced chi-square = 1222.38830
-    Akaike info crit   = 5019.64395
-    Bayesian info crit = 5024.20357
+    chi-square         = 13551.1931
+    reduced chi-square = 19.2215505
+    Akaike info crit   = 2087.95793
+    Bayesian info crit = 2092.51755
 [[Variables]]
-    kmax:  0.85327396 +/- 0.01879628 (2.20%) (init = 1)
+    kmax:  1.98488814 +/- 0.00871950 (0.44%) (init = 1)
 
 [[Fit Statistics]]
     # fitting method   = COBYLA
-    # function evals   = 20
+    # function evals   = 21
     # data points      = 706
     # variables        = 1
-    chi-square         = 918721.531
-    reduced chi-square = 1303.15111
-    Akaike info crit   = 5064.81291
-    Bayesian info crit = 5069.37253
+    chi-square         = 14088.7117
+    reduced chi-square = 19.9839883
+    Akaike info crit   = 2115.42084
+    Bayesian info crit = 2119.98045
 [[Variables]]
-    kmax:  0.75419053 +/- 0.04667891 (6.19%) (init = 1)
+    kmax:  2.05608817 +/- 0.00812705 (0.40%) (init = 1)
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing
-    # function evals   = 2351
+    # function evals   = 2257
     # data points      = 706
     # variables        = 1
-    chi-square         = 821266.390
-    reduced chi-square = 1164.91687
-    Akaike info crit   = 4985.64522
-    Bayesian info crit = 4990.20484
+    chi-square         = 13324.2156
+    reduced chi-square = 18.8995967
+    Akaike info crit   = 2076.03254
+    Bayesian info crit = 2080.59216
 [[Variables]]
-    kmax:  0.89153398 +/- 0.02315285 (2.60%) (init = 1)
+    kmax:  2.01523459 +/- 0.00846633 (0.42%) (init = 1)
 
 [[Fit Statistics]]
     # fitting method   = ampgo, with L-BFGS-B as local solver
-    # function evals   = 5288
+    # function evals   = 7578
     # data points      = 706
     # variables        = 1
-    chi-square         = 1000354.74
-    reduced chi-square = 1418.94290
-    Akaike info crit   = 5124.91250
-    Bayesian info crit = 5129.47212
+    chi-square         = 17069.3050
+    reduced chi-square = 24.2117801
+    Akaike info crit   = 2250.90783
+    Bayesian info crit = 2255.46745
 [[Variables]]
-    kmax:  0.98170824 +/- 0.02163482 (2.20%) (init = 1)
+    kmax:  2.24016305 +/- 0.01022154 (0.46%) (init = 1)

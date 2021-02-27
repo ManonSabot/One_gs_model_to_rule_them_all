@@ -27,17 +27,15 @@ from TractLSM.SPAC import f, Weibull_params, hydraulics, leaf_energy_balance
 from TractLSM.SPAC import leaf_temperature, calc_colim_Ci, calc_photosynthesis
 from TractLSM.SPAC import fwLWPpd, fLWP, phiLWP, fPLC, hydraulic_cost, kcost
 from TractLSM.SPAC import dcost_dpsi
-from TractLSM.CH2OCoupler import calc_trans
-from TractLSM.CH2OCoupler import Ci_sup_dem, dAdgs, A_trans
+from TractLSM.CH2OCoupler import Ci_sup_dem, calc_trans, A_trans
 from TractLSM.CH2OCoupler.SOX import Ci_stream
 from TractLSM.CH2OCoupler.ProfitMax import photo_gain
-from TractLSM.CH2OCoupler.WUE_LWP import dEdgs
-from TractLSM.CH2OCoupler.LeastCost import dEoAdXi, dVmaxoAdXi
+from TractLSM.CH2OCoupler.LeastCost import dVmaxoAdXi
 
 
 #==============================================================================
 
-def floop(p, model, photo='Farquhar', threshold_conv=0.1, inf_gb=True):
+def floop(p, model, photo='Farquhar', inf_gb=True):
 
     # initialize the system
     Dleaf = p.VPD  # kPa
@@ -48,6 +46,9 @@ def floop(p, model, photo='Farquhar', threshold_conv=0.1, inf_gb=True):
 
     else:
         iter_min = 1
+
+    # hydraulics
+    P, trans = hydraulics(p, kmax=p.kmaxT)
 
     try:  # is Tleaf one of the input fields?
         Tleaf = p.Tleaf
@@ -68,8 +69,7 @@ def floop(p, model, photo='Farquhar', threshold_conv=0.1, inf_gb=True):
             fw = fwLWPpd(p, Pleaf_pd)  # moisture stress function
 
     else:  # Tuzet model
-        P, trans = hydraulics(p, kmax=p.kmaxT)  # hydraulics
-        fw = p.fLWP_ini  # init. stress factor
+        fw = fLWP(p, p.LWP_ini)  # stress factor
 
     if (model == 'Medlyn-LWP') or (model == 'Tuzet'): # init. gs over A
         g0 = 1.e-9  # g0 ~ 0, removing it entirely introduces errors
@@ -101,8 +101,8 @@ def floop(p, model, photo='Farquhar', threshold_conv=0.1, inf_gb=True):
             dAdCi = dA * conv.GwvGc * p.Patm / dCi
 
             # kcost, unitless
-            cost_pd, __ = kcost(p, Pleaf_pd, Pleaf_pd)
-            cost_mid, __ = kcost(p, -p.P50, Pleaf_pd)
+            cost_pd = kcost(p, Pleaf_pd, Pleaf_pd)
+            cost_mid = kcost(p, -p.P50, Pleaf_pd)
             dkcost = cost_pd - cost_mid
 
             # dP is needed to calculate gs
@@ -126,20 +126,25 @@ def floop(p, model, photo='Farquhar', threshold_conv=0.1, inf_gb=True):
         elif model == 'SOX-OPT': # retrieve all potential Ci values
             Cis = Ci_stream(p, Cs, Tleaf, 'low')
 
-            # gross rate of photosynthesis, μmol m-2 s-1
-            A, __, __ = calc_photosynthesis(p, 0., Cis, photo, Tleaf=Tleaf,
-                                            Rleaf=0.)
+            # rate of photosynthesis, μmol m-2 s-1
+            A, __, __ = calc_photosynthesis(p, 0., Cis, photo, Tleaf=Tleaf)
 
             # trans used for the hydraulic cost, mmol m-2 s-1
             E = A * conv.GwvGc * Dleaf / (p.CO2 - Cis)
 
             # cost, Pleaf
-            cost, __ = kcost(p, Pleaf_pd - E / p.ksc_prev, Pleaf_pd)
+            mask = np.logical_and(Pleaf_pd - E / p.ksc_prev <= Pleaf_pd,
+                                  Pleaf_pd - E / p.ksc_prev >= P[-1])
+            P = (Pleaf_pd - E / p.ksc_prev)[mask]
+            cost = kcost(p, P, Pleaf_pd)
 
-            # optimal point
-            A = A[:len(cost)] # shortening avoids multiple kcost = 0
-            iopt = np.argmax(cost * A)
-            Ci = Cis[iopt]
+            try:  # optimal point
+                iopt = np.argmax(cost * A[mask])
+                Ci = Cis[mask][iopt]
+
+            except Exception:
+
+                return 9999. * 1000., p.ksc_prev
 
             # get net rate of photosynthesis at optimum, μmol m-2 s-1
             An, __, __ = calc_photosynthesis(p, 0., Ci, photo, Tleaf=Tleaf)
@@ -169,12 +174,13 @@ def floop(p, model, photo='Farquhar', threshold_conv=0.1, inf_gb=True):
         Cs = np.maximum(cst.zero, np.minimum(p.CO2, p.CO2 - boundary_CO2))
         Cs_umol_mol = Cs * conv.MILI / p.Patm
 
-        if model == 'Tuzet':  # update stress function
-            Pleaf = P[np.nanargmin(np.abs(trans - E))]
+        if model == 'Tuzet':  # update Pleaf and fw
+            Pleaf = P[np.nanargmin(np.abs(trans - E))]  # Tuzet model
 
-            if np.abs(fw - fLWP(p, Pleaf)) < 0.25:  # is fw stable?
+            if np.abs(fw - fLWP(p, Pleaf)) < 0.5:  # is fw stable?
                 fw = fLWP(p, Pleaf)  # update
 
+            # update gsoA
             gsoA = g0 + p.g1T * fw / Cs_umol_mol
 
         else:  # update the leaf-to-air VPD
@@ -195,21 +201,21 @@ def floop(p, model, photo='Farquhar', threshold_conv=0.1, inf_gb=True):
 
         # check for convergence
         if ((real_zero is None) or (iter >= iter_max) or ((iter > iter_min) and
-            real_zero and (abs(Tleaf - new_Tleaf) <= threshold_conv) and not
+            real_zero and (abs(Tleaf - new_Tleaf) <= 0.1) and not
             np.isclose(gs, cst.zero, rtol=cst.zero, atol=cst.zero))):
             break
 
-        # no convergence, iterate on leaf temperature
+        # no convergence, iterate
         Tleaf = new_Tleaf
         iter += 1
 
-        if iter_max < 5:  # no iteration if Tleaf is prescribed
+        if iter_max < 5:  # no "real" iteration if Tleaf is prescribed
             Cs = p.CO2
             Tleaf = p.Tleaf
 
     if model == 'Tuzet':
 
-        return gs * 1000., fw
+        return gs * 1000., Pleaf
 
     elif model == 'SOX-OPT':
 
@@ -232,16 +238,18 @@ def fmtx(p, model, photo='Farquhar', inf_gb=True):
 
     if (model == 'CAP') or (model == 'MES'):
         if model == 'CAP':
-            P = hydraulics(p, Kirchhoff=False, Pcrit=p.PcritC)
-            ksr = p.ksrmaxC * (p.Psie / p.Ps) ** (2. + 3. / p.bch)
-            ksl = 1. / (1. / ksr + 1. / p.krlC)  # soil-leaf conductance
+            #P = hydraulics(p, Kirchhoff=False, Pcrit=p.PcritC)
+            #ksr = p.ksrmaxC * (p.Psie / p.Ps) ** (2. + 3. / p.bch)
+            #ksl = 1. / (1. / ksr + 1. / p.krlC)  # soil-leaf conductance
+            P, trans = hydraulics(p, kmax=p.krlC, Pcrit=p.PcritC)
 
         if model == 'MES':
-            P = hydraulics(p, Kirchhoff=False, Pcrit=p.PcritM)
-            ksr = p.ksrmaxM * (p.Psie / p.Ps) ** (2. + 3. / p.bch)
-            ksl = 1. / (1. / ksr + 1. / p.krlM)  # soil-leaf conductance
+            #P = hydraulics(p, Kirchhoff=False, Pcrit=p.PcritM)
+            #ksr = p.ksrmaxM * (p.Psie / p.Ps) ** (2. + 3. / p.bch)
+            #ksl = 1. / (1. / ksr + 1. / p.krlM)  # soil-leaf conductance
+            P, trans = hydraulics(p, kmax=p.krlM, Pcrit=p.PcritM)
 
-        trans = ksl * (p.Ps - P) * conv.FROM_MILI  # mol.s-1.m-2
+        #trans = ksl * (p.Ps - P) * conv.FROM_MILI  # mol.s-1.m-2
 
     # expressions of optimisation
     if model == 'ProfitMax': # look for the most net profit
@@ -253,33 +261,50 @@ def fmtx(p, model, photo='Farquhar', inf_gb=True):
         Ci, mask = Ci_sup_dem(p, trans, photo=photo, inf_gb=inf_gb)
 
     if model == 'ProfitMax2':
-        expr =  np.abs(np.gradient(A_trans(p, trans[mask], Ci, inf_gb=inf_gb),
-                                   trans[mask]) * (trans[-1] - trans[mask]) -
-                       A_trans(p, trans[mask], Ci, inf_gb=inf_gb))
+        expr = A_trans(p, trans[mask], Ci, inf_gb=inf_gb) * (1. - trans[mask] /
+                                                                  trans[-1])
 
     if model == 'CGain':
-        cost = fPLC(p, P[mask])
-        expr = A_trans(p, trans[mask], Ci, inf_gb=inf_gb) - p.Kappa * cost
+        expr = (A_trans(p, trans[mask], Ci, inf_gb=inf_gb) -
+                p.Kappa * fPLC(p, P[mask]))
 
     if model == 'LeastCost':
-        expr = np.abs(dEoAdXi(p, trans[mask], Ci, inf_gb=inf_gb) + p.Eta *
-                      dVmaxoAdXi(p, trans[mask], Ci, inf_gb=inf_gb))
+        expr = ((p.Eta * conv.MILI * trans[mask] +
+                 dVmaxoAdXi(p, trans[mask], Ci, inf_gb=inf_gb)) /
+                A_trans(p, trans[mask], Ci, inf_gb=inf_gb))
+        #where = np.where(np.diff(expr, 2) / np.diff(Ci / p.CO2, 2) > 0.)[0]
+        #expr = np.abs(np.gradient(expr, Ci / p.CO2))
 
     # leaf energy balance
     gc, gs, gb, ww = leaf_energy_balance(p, trans, inf_gb=inf_gb)
 
-    if (model == 'CMax') or (model == 'WUE-LWP'):
-        if model == 'CMax':
-            cost = dcost_dpsi(p, P[mask], gs[mask])
+    #if (model == 'CMax') or (model == 'WUE-LWP'):
+    #    if model == 'CMax':
+    #        cost = dcost_dpsi(p, P[mask], gs[mask])
 
-        if model == 'WUE-LWP':
-            try:
-                cost = p.Lambda * dEdgs(gs[mask], gb, ww[mask])
+    #    if model == 'WUE-LWP':
+    #        try:
+    #            cost = p.Lambda * dEdgs(gs[mask], gb, ww[mask])
 
-            except IndexError:  # only one Tleaf
-                cost = p.Lambda * dEdgs(gs[mask], gb, ww)
+    #        except IndexError:  # only one Tleaf
+    #            cost = p.Lambda * dEdgs(gs[mask], gb, ww)
 
-        expr = np.abs(dAdgs(p, gs[mask], gb, Ci) - cost)
+    #    expr = np.abs(dAdgs(p, gs[mask], gb, Ci) - cost)
+
+    if model == 'CMax':
+
+        try:
+            expr = np.abs(np.gradient(A_trans(p, trans[mask], Ci,
+                                              inf_gb=inf_gb),
+                                      P[mask]) - dcost_dpsi(p, P[mask], gs))
+
+        except Exception:
+
+            return 9999. * 1000.  # returning an actual NaN causes trouble
+
+    if model == 'WUE-LWP':
+        expr = (A_trans(p, trans[mask], Ci, inf_gb=inf_gb) -
+                p.Lambda * conv.MILI * trans[mask])
 
     if model == 'CAP':
         cost = phiLWP(P, p.PcritC)
@@ -290,7 +315,7 @@ def fmtx(p, model, photo='Farquhar', inf_gb=True):
                                          Vmax25=sVmax25[mask], inf_gb=inf_gb)
 
         try:
-            expr = np.abs(np.gradient(An, gs[mask]))
+            expr = An #np.abs(np.gradient(An, gs[mask]))
 
         except Exception:
 
@@ -299,28 +324,28 @@ def fmtx(p, model, photo='Farquhar', inf_gb=True):
     if model == 'MES':  # Ci is Cc
         cost = phiLWP(P, p.PcritM)
         Cc, mask = Ci_sup_dem(p, trans, photo=photo, phi=cost, inf_gb=inf_gb)
-        expr = np.abs(dAdgs(p, gs[mask], gb, Cc))
+        An, __, __ = calc_photosynthesis(p, trans[mask], Cc, photo,
+                                         inf_gb=inf_gb)
+
+        try:
+            expr = An  #np.abs(np.gradient(An, gs[mask]))
+
+        except Exception:
+
+            return 9999. * 1000.  # returning an actual NaN causes trouble
 
     if inf_gb:  # deal with edge cases by rebounding the solution
         check = expr[gc[mask] > cst.zero]
 
-        # erratic model behaviour at low VPD and low-ish PAR
-        if (model == 'ProfitMax2') and ((p.VPD < 1.) or (p.PPFD < 500.)):
-            check = check[:np.minimum(np.argmax(np.diff(check) > 0.) +
-                                      int(len(P) / 20), len(check) - 1)]
-
     else:
         check = expr[np.logical_and(gc[mask] > cst.zero, gs[mask] < 1.5 * gb)]
 
-    if model == 'ProfitMax2':   # expr can have 'fake' zeros passed opt pt
-        check = check[check > 1.e-9]
-
     try:
-        if (model == 'ProfitMax') or (model == 'CGain'):
-            idx = np.isclose(expr, max(check))
+        if (model == 'LeastCost') or (model == 'CMax'):
+            idx = np.isclose(expr, min(check))
 
         else:
-            idx = np.isclose(expr, min(check))
+            idx = np.isclose(expr, max(check))
 
         idx = [list(idx).index(e) for e in idx if e]
 
@@ -339,10 +364,9 @@ def fmtx(p, model, photo='Farquhar', inf_gb=True):
 
 def fres(params, model, inputs, target, inf_gb):
 
-    if model == 'Tuzet':  # dummy init. of stress factor
-        inputs['fLWP_ini'] = fLWP(inputs.loc[0], inputs['Ps_pd'] -
-                                  inputs.loc[0, 'height'] * cst.rho * cst.g0 *
-                                  conv.MEGA)
+    if model == 'Tuzet':
+        inputs['LWP_ini'] = (inputs['Ps_pd'] - inputs.loc[0, 'height'] *
+                             cst.rho * cst.g0 * conv.MEGA)
 
     # copy and transform pandas to recarray object for speed
     inputs = inputs.copy().to_records(index=False)
@@ -366,7 +390,7 @@ def fres(params, model, inputs, target, inf_gb):
 
                 if model == 'Tuzet':
                     if inputs[step + 1].doy == inputs[step].doy:
-                        inputs[step + 1].fLWP_ini = oo
+                        inputs[step + 1].LWP_ini = oo
 
                 else:
                     inputs[step + 1:].ksc_prev = oo
@@ -374,12 +398,17 @@ def fres(params, model, inputs, target, inf_gb):
             except IndexError:
                 pass
 
-    elif model in ['Medlyn-LWP', 'Tuzet', 'Eller']:
+    elif model in ['Medlyn-LWP', 'Eller']:
         ymodel = np.asarray([floop(inputs[step].copy(), model, inf_gb=inf_gb)
                              for step in range(len(inputs))], dtype=np.float64)
 
     else:
         ymodel = np.asarray([fmtx(inputs[step].copy(), model, inf_gb=inf_gb)
                              for step in range(len(inputs))], dtype=np.float64)
+
+    if not inf_gb:
+        if len(np.isclose(ymodel, 9999.)) <= round(0.1 * len(target)):
+            target[np.isclose(ymodel, 9999.)] = np.nan
+            ymodel[np.isclose(ymodel, 9999.)] = np.nan
 
     return ymodel - target

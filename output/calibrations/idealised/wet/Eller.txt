@@ -22,7 +22,7 @@
     Bayesian info crit = 3418.71530
 [[Variables]]
     kmaxS1:  0.34811066 +/- 0.00349022 (1.00%) (init = 0.4)
-
+    
 [[Fit Statistics]]
     # fitting method   = Nelder-Mead
     # function evals   = 34

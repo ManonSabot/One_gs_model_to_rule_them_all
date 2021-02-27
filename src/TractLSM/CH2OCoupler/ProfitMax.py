@@ -105,7 +105,7 @@ def photo_gain(p, trans, photo, res, inf_gb=False):
     return gain, Ci, mask
 
 
-def profit_psi(p, photo='Farquhar', res='low', inf_gb=False):
+def profit_psi(p, photo='Farquhar', res='low', inf_gb=False, deriv=False):
 
     """
     Finds the instateneous profit maximization, following the
@@ -167,6 +167,9 @@ def profit_psi(p, photo='Farquhar', res='low', inf_gb=False):
     gain, Ci, mask = photo_gain(p, trans, photo, res, inf_gb=inf_gb)
     expr = gain - cost[mask]
 
+    if deriv:
+        expr = np.abs(np.gradient(expr, P[mask]))
+
     # deal with edge cases by rebounding the solution
     gc, gs, gb, __ = leaf_energy_balance(p, trans[mask], inf_gb=inf_gb)
 
@@ -178,6 +181,10 @@ def profit_psi(p, photo='Farquhar', res='low', inf_gb=False):
             check = expr[np.logical_and(gc > cst.zero, gs < 1.5 * gb)]
 
         idx = np.isclose(expr, max(check))
+
+        if deriv:
+            idx = np.isclose(expr, min(check))
+
         idx = [list(idx).index(e) for e in idx if e]
 
         if inf_gb:  # check for algo. "overshooting" due to inf. gb

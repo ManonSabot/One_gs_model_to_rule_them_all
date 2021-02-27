@@ -88,7 +88,7 @@ def prep_training_N_target(ifile, ofile):
 
 #==============================================================================
 
-to_fit = True
+to_fit = False
 
 # declare empty dataframe which will be used to analyse the calibrations
 odf = pd.DataFrame(columns=['Model', 'training', 'solver', 'BIC', 'Rank', 'p1',
@@ -102,13 +102,10 @@ ipath = os.path.join(os.path.join(os.path.join(base_dir, 'input'),
 opath = os.path.join(os.path.join(os.path.join(base_dir, 'output'),
                      'calibrations'), 'obs_driven')
 
-xfiles = sorted([e for e in os.listdir(ipath) if e.endswith('_x.csv')])
-yfiles = sorted([e for e in os.listdir(ipath) if e.endswith('_y.csv')])
+xfiles = sorted([e for e in os.listdir(ipath) if e.endswith('_x.csv')])[-2:]
+yfiles = sorted([e for e in os.listdir(ipath) if e.endswith('_y.csv')])[-2:]
 
 if to_fit:
-
-    xfiles = xfiles[9:10]  #, xfiles[-1]]
-    yfiles = yfiles[9:10]  #, yfiles[-1]]
 
     for ifile, ofile in zip(xfiles, yfiles):  # loop over the files
 
@@ -122,29 +119,28 @@ if to_fit:
             os.makedirs(out)
 
         # use a non-linear least square minimiser to train the models
-        for test in ['dual_annealing']:  #  'differential_evolution', 'powell',
+        for test in ['leastsq']:  #['differential_evolution', 'powell', 'dual_annealing']:
 
             XX = X.copy()
             nlmfit = NLMFIT(method=test, store=out, inf_gb=False)
 
             #__ = nlmfit.run(XX, Y, 'Medlyn-LWP', g1=True)
-            __ = nlmfit.run(XX, Y, 'Tuzet')
+            #__ = nlmfit.run(XX, Y, 'Tuzet')
+            #__ = nlmfit.run(XX, Y, 'Eller')
 
-            """
-            __ = nlmfit.run(XX, Y, 'Eller')
-            __ = nlmfit.run(XX, Y, 'SOX-OPT')
-            __ = nlmfit.run(XX, Y, 'CAP')
-            __ = nlmfit.run(XX, Y, 'MES')
-            __ = nlmfit.run(XX, Y, 'LeastCost')
-            __ = nlmfit.run(XX, Y, 'ProfitMax2')
+            #__ = nlmfit.run(XX, Y, 'SOX-OPT')
+            #__ = nlmfit.run(XX, Y, 'CAP')
+            #__ = nlmfit.run(XX, Y, 'MES')
+            #__ = nlmfit.run(XX, Y, 'LeastCost')
+            #__ = nlmfit.run(XX, Y, 'ProfitMax2')
 
             # use ProfitMax's kmax
             fkmax = nlmfit.run(XX, Y, 'ProfitMax')
-            XX['kmax'] = fkmax['kmax']
-            __ = nlmfit.run(XX, Y, 'WUE-LWP')
-            __ = nlmfit.run(XX, Y, 'CMax')
-            __ = nlmfit.run(XX, Y, 'CGain')
-            """
+            #XX['kmax'] = fkmax['kmax']
+
+            #__ = nlmfit.run(XX, Y, 'WUE-LWP')
+            #__ = nlmfit.run(XX, Y, 'CMax')
+            #__ = nlmfit.run(XX, Y, 'CGain')
 
     exit(1)
 
@@ -217,8 +213,17 @@ else:  # read over the calibration files and analyse these outputs
 
                         odf = odf.append(dic, ignore_index=True)
 
+            # add the median param info to rerank the models
+            by = ['Model', 'training']
+            odf['med1'] = (odf['v1'] / odf.groupby(by)['v1'].transform('median')
+                           - 1.).abs()
+            odf['med2'] = (odf['v2'] / odf.groupby(by)['v2'].transform('median')
+                           - 1.).abs()
+            odf['med'] = odf[['med1', 'med2']].mean(axis=1)
+
             # rank the solvers (absolute ranking)
-            odf['Rank'] = (odf.groupby(['Model', 'training'])['BIC'].rank()
+            odf['Rank'] = (odf.sort_values(['BIC', 'med'])
+                              .groupby(by)[['BIC', 'med']].rank(method='first')
                               .astype(int))
 
         # change param name for ProfitMax2 to allow differentiation
@@ -318,7 +323,6 @@ else:  # read over the calibration files and analyse these outputs
         # specific param names on a per model basis
         odf['p2'].loc[odf['Model'] == 'WUE-LWP'] = 'kmaxWUE'
         odf['p2'].loc[odf['Model'] == 'CGain'] = 'kmaxCN'
-        odf['p3'].loc[odf['Model'] == 'Tuzet'] = 'kmaxT'
         odf['p3'].loc[odf['Model'] == 'CMax'] = 'kmaxCM'
 
         for training in odf['training'].unique():  # add the param values
@@ -338,7 +342,7 @@ else:  # read over the calibration files and analyse these outputs
                 odf.loc[idx, 'v2'] = float(value)
 
                 idx = (sub[np.logical_and(sub['solver'] == solver,
-                                         sub['Model'].isin(['Tuzet', 'CMax']))]
+                                         sub['Model'].isin(['CMax']))]
                           .index)
                 odf.loc[idx, 'v3'] = float(value)
 

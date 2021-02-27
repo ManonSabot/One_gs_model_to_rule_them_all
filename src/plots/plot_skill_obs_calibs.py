@@ -234,7 +234,7 @@ def heatmap(df, fname, to_plot, what='NSE'):
         if what == 'All':
             fig, axes = plt.subplots(len(to_plot), len(metrics),
                                      figsize=(12., 10.), sharey=True)
-            plt.subplots_adjust(hspace=0.2, wspace=0.1)
+            plt.subplots_adjust(hspace=0.25, wspace=0.1)
             axes = axes.flat
 
         else:
@@ -259,26 +259,26 @@ def heatmap(df, fname, to_plot, what='NSE'):
                 mask = np.logical_and(df['variable'] == to_plot[i],
                                       df['metric'] == metric)
 
-                if metric == 'rBIC':
-                    orders += [df[mask]['mean'].sort_values()]
-
-                else:
+                if metric == 'MASE':
                     orders += [df[mask]['median'].sort_values()]
 
-        elif what == 'rBIC':
-            orders += [df[df['variable'] == to_plot[i]]['mean'].sort_values()]
+                else:
+                    orders += [df[mask]['mean'].sort_values()]
+
+        elif what == 'MASE':
+            orders += [df[df['variable'] == to_plot[i]]['median'].sort_values()]
 
         else:
-            orders += [df[df['variable'] == to_plot[i]]['median'].sort_values()]
+            orders += [df[df['variable'] == to_plot[i]]['mean'].sort_values()]
 
     if what == 'All':
         df.drop(['mean', 'median'], axis=1, inplace=True)
 
-    elif what == 'rBIC':
-        df.drop('mean', axis=1, inplace=True)
+    elif what == 'MASE':
+        df.drop('median', axis=1, inplace=True)
 
     else:
-        df.drop('median', axis=1, inplace=True)
+        df.drop('mean', axis=1, inplace=True)
 
     # info needed by shared colormap, limit extremes
     if what == 'All':
@@ -451,6 +451,7 @@ else:
 # order by MAP: wet to dry
 df.set_index('model', inplace=True)
 order = ['San_Lorenzo_Carapa_guianensis', 'San_Lorenzo_Tachigali_versicolor',
+         'San_Lorenzo_Tocoyena_pittieri',
          'Parque_Natural_Metropolitano_Calycophyllum_candidissimum',
          'ManyPeaksRange_Alphitonia_excelsa',
          'ManyPeaksRange_Austromyrtus_bidwillii',
@@ -462,7 +463,7 @@ order = ['San_Lorenzo_Carapa_guianensis', 'San_Lorenzo_Tachigali_versicolor',
          'Sevilleta_Juniperus_monosperma', 'Sevilleta_Pinus_edulis']
 
 # make the figure
-fname = os.path.join(ofdir, '%s_skill_for_%s.png' % (what, '_'.join(to_plot)))
+fname = os.path.join(ofdir, '%s_skill_for_%s.jpg' % (what, '_'.join(to_plot)))
 
 if not os.path.isfile(fname):
     if what == 'All':
@@ -472,8 +473,8 @@ if not os.path.isfile(fname):
         heatmap(df[['mean', 'median', 'metric', 'variable'] + order], fname,
                 to_plot, what=what)
 
-    elif what == 'rBIC':
-        heatmap(df[['mean', 'variable'] + order], fname, to_plot, what=what)
+    elif what == 'MASE':
+        heatmap(df[['median', 'variable'] + order], fname, to_plot, what=what)
 
     else:
-        heatmap(df[['median', 'variable'] + order], fname, to_plot, what=what)
+        heatmap(df[['mean', 'variable'] + order], fname, to_plot, what=what)

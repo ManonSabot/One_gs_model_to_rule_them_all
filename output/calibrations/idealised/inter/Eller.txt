@@ -22,10 +22,10 @@
     Bayesian info crit = 3960.25609
 [[Variables]]
     kmaxS1:  0.22429564 +/- 0.00443459 (1.98%) (init = 0.4)
-
+    
 [[Fit Statistics]]
-    # fitting method   = Powell
-    # function evals   = 35
+    # fitting method   = Nelder-Mead
+    # function evals   = 32
     # data points      = 706
     # variables        = 1
     chi-square         = 190947.135
@@ -33,7 +33,7 @@
     Akaike info crit   = 3955.69648
     Bayesian info crit = 3960.25609
 [[Variables]]
-    kmaxS1:  0.22677058 +/- 0.00443459 (1.96%) (init = 0.4)
+    kmaxS1:  0.22676866 +/- 0.00443458 (1.96%) (init = 0.4)
 
 [[Fit Statistics]]
     # fitting method   = Powell

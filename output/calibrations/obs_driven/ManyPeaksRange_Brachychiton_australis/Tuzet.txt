@@ -1,42 +1,41 @@
 
 [[Fit Statistics]]
     # fitting method   = differential_evolution
-    # function evals   = 915
+    # function evals   = 246
     # data points      = 104
     # variables        = 2
-    chi-square         = 5660086.26
-    reduced chi-square = 55491.0418
-    Akaike info crit   = 1138.07411
-    Bayesian info crit = 1143.36290
-##  Warning: uncertainties could not be estimated:
+    chi-square         = 4470134.00
+    reduced chi-square = 43824.8432
+    Akaike info crit   = 1113.52796
+    Bayesian info crit = 1118.81674
 [[Variables]]
-    g1T:    7.73120131 +/-        nan (nan%) (init = 3.5)
-    PrefT: -5.98380952 +/-        nan (nan%) (init = -3.17)
+    g1T:    12.5000000 +/- 1.2134e-16 (0.00%) (init = 3.5)
+    kmaxT:  18.9507442 +/- 2.25231045 (11.89%) (init = 1)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 85
+    # function evals   = 103
     # data points      = 104
     # variables        = 2
-    chi-square         = 8189032.49
-    reduced chi-square = 80284.6323
-    Akaike info crit   = 1176.48720
-    Bayesian info crit = 1181.77599
+    chi-square         = 4906192.95
+    reduced chi-square = 48099.9308
+    Akaike info crit   = 1123.20826
+    Bayesian info crit = 1128.49705
 [[Variables]]
-    g1T:    13.7126161 +/- 7.31260313 (53.33%) (init = 3.5)
-    PrefT: -2.47740524 +/- 0.78356272 (31.63%) (init = -3.17)
+    g1T:    12.4970228 +/- 0.53589158 (4.29%) (init = 3.5)
+    kmaxT:  18.8034712 +/- 1.21326330 (6.45%) (init = 1)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(g1T, kmaxT) =  0.188
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing
-    # function evals   = 7679
+    # function evals   = 4019
     # data points      = 104
     # variables        = 2
-    chi-square         = 5660102.64
-    reduced chi-square = 55491.2024
-    Akaike info crit   = 1138.07442
-    Bayesian info crit = 1143.36320
+    chi-square         = 4470134.00
+    reduced chi-square = 43824.8432
+    Akaike info crit   = 1113.52796
+    Bayesian info crit = 1118.81674
 [[Variables]]
-    g1T:    7.74220965 +/- 2.23261511 (28.84%) (init = 3.5)
-    PrefT: -5.95185660 +/- 0.30356881 (5.10%) (init = -3.17)
-[[Correlations]] (unreported correlations are < 0.100)
-    C(g1T, PrefT) =  0.938
+    g1T:    12.5000000 +/- 1.02763274 (8.22%) (init = 3.5)
+    kmaxT:  18.9576756 +/- 0.72474238 (3.82%) (init = 1)

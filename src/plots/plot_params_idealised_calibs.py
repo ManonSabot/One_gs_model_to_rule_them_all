@@ -28,6 +28,7 @@ import pandas as pd  # read/write dataframes, csv files
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from cycler import cycler
+import matplotlib.patheffects as path_effects
 
 # modules required for the custom legend
 from matplotlib.legend_handler import HandlerPathCollection
@@ -189,7 +190,7 @@ def solver_performance(df):
 def solver_info_plot(df):
 
     # declare the figure and the axes
-    fig, ax = plt.subplots(nrows=1, figsize=(2.75, 3.))
+    fig, ax = plt.subplots(figsize=(2.75, 3.))
 
     if 'training' not in df.columns:
         size = 30.
@@ -238,6 +239,7 @@ def solver_info_plot(df):
 
     fig.tight_layout()
     plt.savefig(os.path.join(opath, 'solver_performance.png'))
+    plt.savefig(os.path.join(opath, 'solver_performance.jpg'))
 
     return
 
@@ -254,8 +256,14 @@ def normalise_params_by_group(df, by):
 def automate_model_order(df):
 
     df0 = normalise_params_by_group(df, ['Model', 'training', 'sub-sample'])
-    df0['div'] = np.nanmax(np.array([np.abs(1. / df0['norm_v1'] - 1.),
-                                     np.abs(1. / df0['norm_v2'] - 1.)]), axis=0)
+    where = df0[df0['norm_v1'] < 1.].index
+    df0.loc[where, 'norm_v1'] = 1. / df0.loc[where, 'norm_v1']
+    where = df0[df0['norm_v2'] < 1.].index
+    df0.loc[where, 'norm_v2'] = 1. / df0.loc[where, 'norm_v2']
+    df0['norm_v1'] = np.minimum(df0['norm_v1'], 10.)  # focus on most data
+    df0['norm_v2'] = np.minimum(df0['norm_v2'], 10.)  # focus on most data
+    df0['div'] = np.nanmean(np.array([np.abs(df0['norm_v1'] - 1.),
+                                      np.abs(df0['norm_v2'] - 1.)]), axis=0)
     df0 = (df0.groupby('Model')['div'].sum().sort_values()
               .drop(index='Medlyn-LWP'))
     df0.rename(index={'SOX': 'Eller', 'CGainNet': 'CGain'}, inplace=True)
@@ -347,7 +355,8 @@ def parameter_names(df):
                                     'kmaxS2': r'$k_{max}$',
                                     'kmaxLC': r'$k_{max}$',
                                     'Lambda': r'$\lambda$', 'Alpha': '$a$',
-                                    'krlC': r'$k_{rl}$', 'krlM': r'$k_{rl}$'}})
+                                    'krlC': r'$k_{max}$',
+                                    'krlM': r'$k_{max}$'}})
     params = [[pdf.loc[i, 'p1'], pdf.loc[i, 'p2']] for i in range(len(pdf))]
     params = [str(e) for ee in params for e in ee
               if str(e) not in ['nan', 'kmaxCN', 'kmaxWUE']]
@@ -357,7 +366,7 @@ def parameter_names(df):
     params[params.index('Beta')] = '$b$'
     params[params.index('Kappa')] = r'$\varpi$'
     params[params.index('Eta')] = r'$\eta$'
-    params[params.index('ksc_prev')] = r'$k_{\varPsi_l(t_0)}$'
+    params[params.index('ksc_prev')] = r'$k_{\varPsi_m(t_{o}-1)}$'
     params[params.index('PcritC')] = r'$\varPsi_{\varphi,lim}$'
     params[params.index('PcritM')] = r'$\varPsi_{\varphi,lim}$'
 
@@ -519,8 +528,8 @@ def calib_info_plot(df1, df2, df3, calibs='wet', orientation='landscape'):
     best_i = [best_i[i] for i in all]
 
     # all solver data
-    Npoints = 500  # smooth violins
-    bw = 0.4
+    Npoints = 1000  # smooth violins
+    bw = 0.35
 
     if calibs != 'inter':
         vp1 = ax.violinplot(wet1, showextrema=False, points=Npoints,
@@ -543,14 +552,14 @@ def calib_info_plot(df1, df2, df3, calibs='wet', orientation='landscape'):
         slice_vplot(vp1, s1, ec='gray')
         slice_vplot(vp2, s2, ec='gray')
 
-    # top 3 solver data, if no improvement, then no plot
+    # top 3 solver data, if no substantial improvement, no plot
     bw *= 2.
-    plt_wet = np.array([(np.amax(wet2[i]) - np.amin(wet2[i])) <
-                        0.9 * (np.amax(wet1[i]) - np.amin(wet1[i]))
+    plt_wet = np.array([(np.amax(wet2[i]) - np.amin(wet2[i])) < 0.75 *
+                        (np.amax(wet1[i]) - np.amin(wet1[i]))
                         for i in range(len(wet1))])
-    plt_inter = np.array([(np.amax(wet2[i]) - np.amin(wet2[i])) <
-                          0.9 * (np.amax(wet1[i]) - np.amin(wet1[i]))
-                         for i in range(len(wet1))])
+    plt_inter = np.array([(np.amax(inter2[i]) - np.amin(inter2[i])) < 0.75 *
+                          (np.amax(inter1[i]) - np.amin(inter1[i]))
+                          for i in range(len(inter1))])
     wet2 = [wet2[i] for i in range(len(wet2)) if plt_wet[i]]
     inter2 = [inter2[i] for i in range(len(inter2)) if plt_inter[i]]
 
@@ -622,7 +631,7 @@ def calib_info_plot(df1, df2, df3, calibs='wet', orientation='landscape'):
                   bbox_to_anchor=[0., 1.03])
 
     # add grid and format the axes
-    lpos = np.asarray([0.1, 0.5, 0.9, 1., 1.1, 2., 10.])
+    lpos = np.asarray([0.05, 0.5, 0.9, 1., 1.1, 2., 20.])
     mpos = np.copy(pos)
     mpos[isec - 1] += (mpos[isec] - mpos[isec - 1] ) / 2.
     mpos = np.delete(mpos, isec)
@@ -654,7 +663,7 @@ def calib_info_plot(df1, df2, df3, calibs='wet', orientation='landscape'):
         ax.set_yticks(mpos + 0.15)
 
     # nicer display of the model names and normalised param values
-    pvals = ['0.1', '0.5', '0.9', '', '1.1', '2', '10']
+    pvals = ['0.05', '0.5', '0.9', '', '1.1', '2', '20']
     models[models.index('WUE-LWP')] = r'WUE-$f_{\varPsi_l}$'
     models[models.index('SOX-OPT')] = r'SOX$_\mathrm{\mathsf{opt}}$'
 
@@ -680,26 +689,17 @@ def calib_info_plot(df1, df2, df3, calibs='wet', orientation='landscape'):
 
         for i in range(len(params)):  # add param names
 
-            if i == len(params) - 10:
-                yy = pos[i] - 0.075
+            yy = pos[i] + 0.125
 
-            elif (i == len(params) - 3) or (i == len(params) - 5):
-                yy = pos[i] - 0.225
+            if i in [9, 14, 15, 16]:
+                yy = pos[i] + 0.375
 
-            elif i == len(params) - 1:
-                yy = pos[i] - 0.125
+            t = ax.text(-(vscale ** 4.4), yy, params[i], ha='right', va='top')
 
-            else:
-                yy = pos[i] + 0.125
-
-            if i > len(params) - 3:
-                t = ax.text(-(vscale ** 2.4), yy, params[i], ha='right',
-                            va='top')
-
-            else:
-                t = ax.text(-(vscale ** 4.4), yy, params[i], ha='right',
-                            va='top')
-
+            if i == 12:
+                t.set_path_effects([path_effects.Stroke(linewidth=0.75,
+                                                        foreground='w'),
+                                    path_effects.Normal()])
 
         ax.tick_params(axis='y', direction='in', pad=-5.)
         plt.setp(ax.get_yticklabels(), bbox=dict(boxstyle='round', fc='w',
@@ -716,6 +716,8 @@ def calib_info_plot(df1, df2, df3, calibs='wet', orientation='landscape'):
     fig.tight_layout()
     plt.savefig(os.path.join(opath,
                 'model_calibs_%s_%s.png' % (calibs, orientation)))
+    plt.savefig(os.path.join(opath,
+                'model_calibs_%s_%s.jpg' % (calibs, orientation)))
 
 
 #=======================================================================

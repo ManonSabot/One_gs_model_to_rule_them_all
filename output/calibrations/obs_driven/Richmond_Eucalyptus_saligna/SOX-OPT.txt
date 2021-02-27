@@ -1,43 +1,43 @@
 
 [[Fit Statistics]]
     # fitting method   = differential_evolution
-    # function evals   = 273
-    # data points      = 77
+    # function evals   = 183
+    # data points      = 78
     # variables        = 2
-    chi-square         = 1037625.44
-    reduced chi-square = 13835.0059
-    Akaike info crit   = 736.165281
-    Bayesian info crit = 740.852892
+    chi-square         = 1040463.13
+    reduced chi-square = 13690.3043
+    Akaike info crit   = 744.880478
+    Bayesian info crit = 749.593895
 ##  Warning: uncertainties could not be estimated:
 [[Variables]]
-    kmaxS2:    2.65375224 (init = 0.8)
-    factor:    0.99988461 (init = 0.7)
-    ksc_prev:  2.65344603 == 'factor * kmaxS2'
+    kmaxS2:    2.14033310 +/- 0.13890236 (6.49%) (init = 0.8)
+    factor:    0.90919178 +/-        nan (nan%) (init = 0.7)
+    ksc_prev:  1.94597327 +/-        nan (nan%) == 'factor * kmaxS2'
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 142
-    # data points      = 77
+    # function evals   = 119
+    # data points      = 78
     # variables        = 2
-    chi-square         = 1036923.44
-    reduced chi-square = 13825.6458
-    Akaike info crit   = 736.113169
-    Bayesian info crit = 740.800780
+    chi-square         = 1038239.04
+    reduced chi-square = 13661.0400
+    Akaike info crit   = 744.713567
+    Bayesian info crit = 749.426984
 [[Variables]]
-    kmaxS2:    2.62177005 +/- 0.17038708 (6.50%) (init = 0.8)
-    factor:    0.86871512 +/- 0.97348055 (112.06%) (init = 0.7)
-    ksc_prev:  2.27757127 +/- 2.54926413 (111.93%) == 'factor * kmaxS2'
+    kmaxS2:    2.08510259 +/- 0.13962371 (6.70%) (init = 0.8)
+    factor:    0.70198387 +/- 0.74089223 (105.54%) (init = 0.7)
+    ksc_prev:  1.46370838 +/- 1.54293589 (105.41%) == 'factor * kmaxS2'
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing
-    # function evals   = 4106
-    # data points      = 77
+    # function evals   = 4091
+    # data points      = 78
     # variables        = 2
-    chi-square         = 1036173.61
-    reduced chi-square = 13815.6482
-    Akaike info crit   = 736.057468
-    Bayesian info crit = 740.745079
+    chi-square         = 1036254.91
+    reduced chi-square = 13634.9330
+    Akaike info crit   = 744.564362
+    Bayesian info crit = 749.277780
 [[Variables]]
-    kmaxS2:    2.65484283 +/- 0.17244754 (6.50%) (init = 0.8)
-    factor:    0.90537929 +/- 1.55220774 (171.44%) (init = 0.7)
-    ksc_prev:  2.40363971 +/- 4.11460097 (171.18%) == 'factor * kmaxS2'
+    kmaxS2:    2.14490600 +/- 0.13487103 (6.29%) (init = 0.8)
+    factor:    0.69350265 +/- 0.63594566 (91.70%) (init = 0.7)
+    ksc_prev:  1.48749800 +/- 1.36255292 (91.60%) == 'factor * kmaxS2'

@@ -1,40 +1,43 @@
 
 [[Fit Statistics]]
     # fitting method   = differential_evolution
-    # function evals   = 540
+    # function evals   = 1563
     # data points      = 92
     # variables        = 2
-    chi-square         = 3687708.83
-    reduced chi-square = 40974.5426
-    Akaike info crit   = 979.082915
-    Bayesian info crit = 984.126492
+    chi-square         = 1293698.68
+    reduced chi-square = 14374.4298
+    Akaike info crit   = 882.712911
+    Bayesian info crit = 887.756488
+##  Warning: uncertainties could not be estimated:
 [[Variables]]
-    kmaxLC:  1.32308630 +/- 0.12619752 (9.54%) (init = 1)
-    BoA:     249.847103 +/- 1.11950227 (0.45%) (init = 200)
+    kmaxLC:  1.38308177 +/- 0.00711689 (0.51%) (init = 1)
+    Eta:     0.45966666 +/-        nan (nan%) (init = 5)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 144
+    # function evals   = 171
     # data points      = 92
     # variables        = 2
-    chi-square         = 3694998.74
-    reduced chi-square = 41055.5416
-    Akaike info crit   = 979.264602
-    Bayesian info crit = 984.308179
+    chi-square         = 1339635.26
+    reduced chi-square = 14884.8362
+    Akaike info crit   = 885.922981
+    Bayesian info crit = 890.966558
 ##  Warning: uncertainties could not be estimated:
 [[Variables]]
-    kmaxLC:  1.35047991 (init = 1)
-    BoA:     249.996202 (init = 200)
+    kmaxLC:  1.23236111 +/- 0.04077791 (3.31%) (init = 1)
+    Eta:     0.58072294 +/-        nan (nan%) (init = 5)
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing
-    # function evals   = 6911
+    # function evals   = 6668
     # data points      = 92
     # variables        = 2
-    chi-square         = 3686711.66
-    reduced chi-square = 40963.4629
-    Akaike info crit   = 979.058034
-    Bayesian info crit = 984.101611
+    chi-square         = 1325562.92
+    reduced chi-square = 14728.4769
+    Akaike info crit   = 884.951446
+    Bayesian info crit = 889.995023
 [[Variables]]
-    kmaxLC:  1.28946279 +/- 0.11935530 (9.26%) (init = 1)
-    BoA:     249.863257 +/- 2.09041638 (0.84%) (init = 200)
+    kmaxLC:  1.26877398 +/- 0.04806261 (3.79%) (init = 1)
+    Eta:     0.53001873 +/- 0.02132290 (4.02%) (init = 5)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(kmaxLC, Eta) = -0.259

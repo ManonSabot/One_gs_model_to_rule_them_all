@@ -249,20 +249,10 @@ def kcost(p, P, Ppd):
     # Weibull parameters setting the shape of the vulnerability curve
     b, c = Weibull_params(p)  # MPa, unitless
 
-    # restrict the leaf water potentials P
-    Pcrit = - b * np.log(1. / p.ratiocrit) ** (1. / c)  # MPa
-
-    try:
-        if len(P) > 1:
-            P = P[P >= Pcrit]
-
-    except TypeError:
-        pass
-
     # from kmax @ Pleaf,pd to Pcrit
     cost = f(0.5 * (Ppd + P), b, c)  # normalized, unitless
 
-    return cost, P
+    return cost
 
 
 def dcost_dpsi(p, P, gs):
@@ -280,4 +270,4 @@ def dcost_dpsi(p, P, gs):
 
     """
 
-    return np.gradient(P, gs) * (p.Alpha * P + p.Beta)
+    return p.Alpha * np.abs(P) + p.Beta  #np.gradient(P, gs) * (p.Alpha * P + p.Beta)

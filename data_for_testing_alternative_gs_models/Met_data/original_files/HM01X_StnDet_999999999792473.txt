@@ -1,6 +1,0 @@
-
-*  Percentage complete between first and last records assumes 48 observation per day.
-   Some days there may be more then 48 reports if there have been significant changes in 
-   the weather, so the percentage completeness is an estimate. 
-
-st,032040,32  ,TOWNSVILLE AERO                         ,01/1940,       ,-19.2483, 146.7661,GPS            ,QLD,   4.3,   4.6,94294,2000,2001,100,  0,100,  0,  0,  0,#

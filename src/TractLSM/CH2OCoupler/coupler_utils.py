@@ -102,19 +102,10 @@ def calc_trans(p, Tleaf, gs, inf_gb=False):
     return trans, real_zero, gw, gb, Dleaf
 
 
-def dAdgs(p, gs, gb, Ci):
-
-    dA = (conv.U * ((gb * conv.GbcvGb) ** 2.) * (p.CO2 - Ci) /
-          (p.Patm * conv.MILI * (gb * conv.GbcvGb + gs * conv.GcvGw) ** 2.))
-
-    return dA
-
-
 def A_trans(p, trans, Ci, Tleaf=None, inf_gb=False):
 
     """
-    Calculates the assimilation rate given the supply function, gc. No
-    respiration here as this is the "physics" An.
+    Calculates the assimilation rate given the supply function, gc.
 
     Arguments:
     ----------
@@ -223,12 +214,10 @@ def mtx_minimise(p, trans, all_Cis, photo, Vmax25=None, all_Ccs=None,
     supply = A_trans(p, np.expand_dims(trans, axis=1), all_Cis, inf_gb=inf_gb)
 
     # find the meeting point between demand and supply
-    demand[supply < 0.] = np.nan
-    supply[supply < 0.] = np.nan
     idx = bn.nanargmin(np.abs(supply - demand), axis=1)  # closest ~0
 
     if all_Ccs is not None:
-        all_Cis = all_Ccs  # Ci is Cc for the MES's photo routine
+        all_Cis = all_Ccs
 
     # each Ci on the transpiration stream
     Ci = np.asarray([all_Cis[e, idx[e]] for e in range(len(trans))])
@@ -243,9 +232,9 @@ def Ci_sup_dem(p, trans, photo='Farquhar', res='low', Vmax25=None, phi=None,
 
     __, gs, gb, __ = leaf_energy_balance(p, trans, inf_gb=inf_gb)
 
-    # ref. photosynthesis for which the dark respiration is set to 0
-    A_ref, __, __ = calc_photosynthesis(p, trans, p.CO2, photo, Rleaf=0.,
-                                        Vmax25=Vmax25, inf_gb=inf_gb)
+    # ref. photosynthesis
+    A_ref, __, __ = calc_photosynthesis(p, trans, p.CO2, photo, Vmax25=Vmax25,
+                                        inf_gb=inf_gb)
 
     # Cs < Ca, used to ensure physical solutions
     boundary_CO2 = (p.Patm * conv.FROM_MILI * A_ref / (gb * conv.GbcvGb +
@@ -257,10 +246,10 @@ def Ci_sup_dem(p, trans, photo='Farquhar', res='low', Vmax25=None, phi=None,
         NCis = 500
 
     if res == 'med':
-        NCis = 8000
+        NCis = 2000
 
     if res == 'high':
-        NCis = 50000
+        NCis = 8000
 
     # retrieve the appropriate Cis from the supply-demand
     Cis = np.asarray([np.linspace(0.1, Cs[e], NCis) for e in

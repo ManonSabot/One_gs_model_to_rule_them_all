@@ -33,12 +33,12 @@ from TractLSM.SPAC.leaf import arrhen
 from TractLSM.SPAC import hydraulics, phiLWP
 from TractLSM.SPAC import leaf_energy_balance, leaf_temperature
 from TractLSM.SPAC import calc_photosynthesis, rubisco_limit
-from TractLSM.CH2OCoupler import Ci_sup_dem, dAdgs
+from TractLSM.CH2OCoupler import Ci_sup_dem, A_trans
 
 
 # ======================================================================
 
-def MES(p, photo='Farquhar', res='low', inf_gb=False):
+def MES(p, photo='Farquhar', res='low', inf_gb=False, deriv=False):
 
     """
     Finds the instantaneous optimal C gain for a given C cost.
@@ -90,11 +90,16 @@ def MES(p, photo='Farquhar', res='low', inf_gb=False):
     # reduction factor?
     phi = phiLWP(P, p.PcritM)
 
-    # expression of optimisation, in this case Ci is given via Cc
-    Cic, mask = Ci_sup_dem(p, trans, photo=photo, res=res, phi=phi,
-                           inf_gb=inf_gb)
+    # expression of optimisation
+    Cc, mask = Ci_sup_dem(p, trans, photo=photo, res=res, phi=phi,
+                          inf_gb=inf_gb)
+    An, Aj, Ac = calc_photosynthesis(p, trans[mask], Cc, photo=photo,
+                                     inf_gb=inf_gb)
     gc, gs, gb, __ = leaf_energy_balance(p, trans[mask], inf_gb=inf_gb)
-    expr = np.abs(dAdgs(p, gs, gb, Cic))
+    expr = An
+
+    if deriv:
+        expr = np.abs(np.gradient(expr, gs))
 
     try:
         if inf_gb:  # check on valid range
@@ -103,30 +108,34 @@ def MES(p, photo='Farquhar', res='low', inf_gb=False):
         else:  # further constrain the realm of possible gs
             check = expr[np.logical_and(gc > cst.zero, gs < 1.5 * gb)]
 
-        idx = np.isclose(expr, min(check))
+        idx = np.isclose(expr, max(check))
+
+        if deriv:
+            idx = np.isclose(expr, min(check))
+
         idx = [list(idx).index(e) for e in idx if e]
 
         if inf_gb:  # check for algo. "overshooting" due to inf. gb
-            while Cic[idx[0]] < 2. * p.gamstar25:
+            while Cc[idx[0]] < p.gamstar25:
 
                 idx[0] -= 1
 
                 if idx[0] < 3:
                     break
 
-        # optimized where Cis/Ccs for both photo models are close
-        Ci = Cic[idx[0]]  # here Cc is analogous to Ci
+        # optimized where Cis for both photo models are close
+        An = An[idx[0]]
         trans = trans[mask][idx[0]]  # mol.m-2.s-1
         gs = gs[idx[0]]
         Pleaf = P[mask][idx[0]]
 
-        # rubisco limitation or electron transport-limitation
-        An, Aj, Ac = calc_photosynthesis(p, trans, Ci, photo=photo,
-                                         inf_gb=inf_gb)
-        rublim = rubisco_limit(Aj, Ac)
-
-        # leaf temperature?
+        # Ci?
         Tleaf, __ = leaf_temperature(p, trans, inf_gb=inf_gb)
+        gamstar = arrhen(p.gamstar25, p.Egamstar, p.Tref + conv.C_2_K, Tleaf)
+        Ci = (Cc[idx[0]] - gamstar) / phi[mask][idx[0]] + gamstar
+
+        # rubisco limitation or electron transport-limitation?
+        rublim = rubisco_limit(Aj[idx[0]], Ac[idx[0]])
 
         if (np.isclose(trans, cst.zero, rtol=cst.zero, atol=cst.zero) and
             (An > 0.)) or (idx[0] == len(P) - 1) or any(np.isnan([An, Ci,

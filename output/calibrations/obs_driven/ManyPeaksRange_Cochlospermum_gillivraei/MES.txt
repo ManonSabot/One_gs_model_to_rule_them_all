@@ -1,39 +1,44 @@
 
 [[Fit Statistics]]
     # fitting method   = differential_evolution
-    # function evals   = 270
+    # function evals   = 273
     # data points      = 100
     # variables        = 2
-    chi-square         = 8777825.02
-    reduced chi-square = 89569.6431
-    Akaike info crit   = 1142.25690
-    Bayesian info crit = 1147.46724
+    chi-square         = 8037914.67
+    reduced chi-square = 82019.5375
+    Akaike info crit   = 1133.45101
+    Bayesian info crit = 1138.66135
+##  Warning: uncertainties could not be estimated:
 [[Variables]]
-    krlM:    67.6385284 +/- 317.580720 (469.53%) (init = 1)
-    PcritM: -6.14999794 +/- 0.06249995 (1.02%) (init = -1.44)
+    krlM:    2.48885546 +/- 0.81062947 (32.57%) (init = 1)
+    PcritM: -2.14300994 +/-        nan (nan%) (init = -1.44)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 94
+    # function evals   = 183
     # data points      = 100
     # variables        = 2
-    chi-square         = 8777529.93
-    reduced chi-square = 89566.6320
-    Akaike info crit   = 1142.25354
-    Bayesian info crit = 1147.46388
+    chi-square         = 8061109.03
+    reduced chi-square = 82256.2146
+    Akaike info crit   = 1133.73915
+    Bayesian info crit = 1138.94949
 [[Variables]]
-    krlM:    26.1747491 +/- 152.232541 (581.60%) (init = 1)
-    PcritM: -6.13936722 +/- 0.46036571 (7.50%) (init = -1.44)
+    krlM:    3.05944972 +/- 1.45924331 (47.70%) (init = 1)
+    PcritM: -1.59400239 +/- 0.13167416 (8.26%) (init = -1.44)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(krlM, PcritM) =  0.383
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing
-    # function evals   = 4607
+    # function evals   = 5642
     # data points      = 100
     # variables        = 2
-    chi-square         = 8777093.67
-    reduced chi-square = 89562.1803
-    Akaike info crit   = 1142.24857
-    Bayesian info crit = 1147.45891
+    chi-square         = 8036410.63
+    reduced chi-square = 82004.1901
+    Akaike info crit   = 1133.43229
+    Bayesian info crit = 1138.64263
 [[Variables]]
-    krlM:    80.0000000 +/- 158.856184 (198.57%) (init = 1)
-    PcritM: -6.00433147 +/- 9.77680958 (162.83%) (init = -1.44)
+    krlM:    2.06157796 +/- 0.66652144 (32.33%) (init = 1)
+    PcritM: -2.28652048 +/- 0.27184915 (11.89%) (init = -1.44)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(krlM, PcritM) =  0.109

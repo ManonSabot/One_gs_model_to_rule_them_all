@@ -1,41 +1,42 @@
 
 [[Fit Statistics]]
     # fitting method   = differential_evolution
-    # function evals   = 333
+    # function evals   = 303
     # data points      = 53
     # variables        = 2
-    chi-square         = 14395.9165
-    reduced chi-square = 282.272873
-    Akaike info crit   = 301.033622
-    Bayesian info crit = 304.974206
+    chi-square         = 28138.0452
+    reduced chi-square = 551.726376
+    Akaike info crit   = 336.553055
+    Bayesian info crit = 340.493639
+##  Warning: uncertainties could not be estimated:
 [[Variables]]
-    Alpha:  0.51065741 +/- 0.06186805 (12.12%) (init = 5)
-    Beta:   7.84009025 +/- 0.80161017 (10.22%) (init = 5)
+    Alpha:  0.61701840 (init = 5)
+    Beta:   0.64587969 (init = 1)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 146
+    # function evals   = 70
     # data points      = 53
     # variables        = 2
-    chi-square         = 15229.3945
-    reduced chi-square = 298.615579
-    Akaike info crit   = 304.016611
-    Bayesian info crit = 307.957195
+    chi-square         = 29404.0073
+    reduced chi-square = 576.549162
+    Akaike info crit   = 338.885500
+    Bayesian info crit = 342.826083
+##  Warning: uncertainties could not be estimated:
 [[Variables]]
-    Alpha:  0.51560900 +/- 0.08257504 (16.02%) (init = 5)
-    Beta:   7.47279486 +/- 0.67841712 (9.08%) (init = 5)
+    Alpha:  0.51321882 (init = 5)
+    Beta:   0.59390930 (init = 1)
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing
-    # function evals   = 4037
+    # function evals   = 4028
     # data points      = 53
     # variables        = 2
-    chi-square         = 14235.7673
-    reduced chi-square = 279.132692
-    Akaike info crit   = 300.440712
-    Bayesian info crit = 304.381296
+    chi-square         = 28243.5698
+    reduced chi-square = 553.795486
+    Akaike info crit   = 336.751447
+    Bayesian info crit = 340.692030
+##  Warning: uncertainties could not be estimated:
 [[Variables]]
-    Alpha:  0.52259757 +/- 0.48460018 (92.73%) (init = 5)
-    Beta:   7.98494146 +/- 0.99623339 (12.48%) (init = 5)
-[[Correlations]] (unreported correlations are < 0.100)
-    C(Alpha, Beta) = -0.516
+    Alpha:  0.56868430 (init = 5)
+    Beta:   5.58253887 (init = 1)

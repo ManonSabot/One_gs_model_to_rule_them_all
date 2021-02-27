@@ -51,7 +51,7 @@ class plt_setup(object):
     def __init__(self):
 
         # saving the figure
-        plt.rcParams['savefig.dpi'] = 1200.  # resolution
+        plt.rcParams['savefig.dpi'] = 600.  # resolution
         plt.rcParams['savefig.bbox'] = 'tight'  # no excess side padding
         plt.rcParams['savefig.pad_inches'] = 0.05  # padding to use
         plt.rcParams['savefig.jpeg_quality'] = 100
@@ -195,11 +195,11 @@ def plot_sensitivities(df, figname):
 
     iter = 1
 
-    drivers, idxs = dominant_features(df.copy())
+    drivers, idxs = ['VPD', 'Ps', 'CO2', 'PPFD', 'Tair'], ['ST',] * 5 # dominant_features(df.copy())
 
     # calculate the sensitivities
-    for mod in ['std1', 'tuz', 'sox1', 'wue', 'cmax', 'pmax', 'pmax2', 'cgn',
-                'lcst', 'sox2', 'cap', 'mes']:
+    for mod in ['std1', 'tuz', 'sox1', 'wue', 'cmax', 'pmax', 'cgn', 'sox2',
+                'pmax2', 'lcst', 'cap', 'mes']:
 
         # initialise the axis for the plot
         ax = plt.subplot(3, 4, iter, polar=True)
@@ -238,8 +238,9 @@ def plot_sensitivities(df, figname):
                 angles += [angles[0]]
 
                 # draw lines angles and labels
-                ax.set_rgrids([0., 0.25, 0.5, 0.75, 1], [])
-                ax.set_ylim(0., 1.)
+                ax.set_rgrids([0., 0.25, 0.5, 0.75], [])
+                ax.set_ylim(0., 0.95)
+                ax.spines['polar'].set_visible(False)
                 ax.set_thetagrids(np.degrees(angles[:-1]), xlabels)
 
                 # adjust label alignment based on where it is in the circle
@@ -280,18 +281,16 @@ def plot_sensitivities(df, figname):
                     zorder = 3
 
                 # plot the data
-                l = ax.plot(angles, values, zorder=zorder, label=var)
-                ax.fill(angles, values, ec=l[0].get_color(), alpha=0.25,
-                        zorder=zorder)
-
-
-                if mod == 'gs2':
-                    pad = 8.
+                if mod == 'std1' and var == r'$\varPsi_{l}$':
+                    next(ax._get_lines.prop_cycler)
 
                 else:
-                    pad = 11.
+                    l = ax.plot(angles, values, zorder=zorder, label=var)
+                    ax.fill(angles, values, ec=l[0].get_color(), alpha=0.25,
+                            zorder=zorder)
 
-                plt.title(which_model(mod), pad=pad)
+                # which model?
+                plt.title(which_model(mod), pad=10.)
 
             except IndexError:
                 pass
@@ -301,16 +300,13 @@ def plot_sensitivities(df, figname):
         iter += 1
 
     # add the legend
-    #ax.legend(loc=1, ncol=3, bbox_to_anchor=(-0.35, -0.425))
-    #ax = fig.add_axes([0.42, 0.01, 0.065, 0.065], projection='polar')
-
     ax.legend(loc=1, ncol=3, bbox_to_anchor=(-1.65, -0.425))
     ax = fig.add_axes([0.25, 0.01, 0.065, 0.065], projection='polar')
     ax.set_zorder(-1)
 
     # setup ticks and labels
-    ax.set_rgrids([0., 0.25, 0.5, 0.75, 1], ['0', '', '', '', '1'])
-    ax.set_rmax(1.)
+    ax.set_rgrids([0., 0.25, 0.5, 0.75], ['0', '', '', '0.75'])
+    ax.set_rmax(0.75)
 
     # draw lines angles
     ax.set_thetagrids(np.degrees([0, -45]), [])
@@ -326,7 +322,7 @@ def plot_sensitivities(df, figname):
 
 base_dir = get_main_dir()
 figname = os.path.join(os.path.join(os.path.join(base_dir, 'output'),
-                       'plots'), 'model_sensitivities_total_1.5.png')
+                       'plots'), 'model_sensitivities_ST_1.5.jpg')
 
 #if not os.path.isfile(figname):
 fname = os.path.join(os.path.join(os.path.join(os.path.join(os.path.join(

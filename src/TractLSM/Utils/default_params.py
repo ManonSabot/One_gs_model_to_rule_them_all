@@ -112,8 +112,8 @@ class default_params(object):  # default inputs needed to run model
         self.g1 = 2.4942  # sensitivity of gs to VPD and An (kPa0.5)
         self.g1T = 3.5  # sensitivity of gs to LWP and An (unitless)
         self.Kappa = 5.  # max water use in C units (umol m-2 s-1)
-        self.Lambda = 5.  # WUE term (mol H2O mol-1 C)
-        self.Eta = 200.  # cost of Rd:Vcmax to cost of sapwood:E (unitless)
+        self.Lambda = 5.  # WUE term (mol C mol-1 H2O)
+        self.Eta = 5.  # cost of Rd:Vcmax to cost of sapwood:E (mol C mol-1 H2O)
 
         # hydraulics
         self.P50 = 3.13  # xylem pressure at P50 (-MPa) - P. tadea

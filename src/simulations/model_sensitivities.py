@@ -190,7 +190,8 @@ for i in range(len(dfs)):
         df3 = hrun(fname, dfs[i], len(dfs[i]), 'Farquhar',
                    models=['Medlyn', 'Tuzet', 'SOX12', 'WUE', 'CMax',
                            'ProfitMax', 'ProfitMax2', 'CGain', 'LeastCost',
-                           'CAP', 'MES'], inf_gb=True, temporal=False)
+                           'CAP', 'MES'], resolution='low', inf_gb=True,
+                   temporal=False)
         df3.columns = df3.columns.droplevel(level=1)  # drop the units
 
     exit(1)

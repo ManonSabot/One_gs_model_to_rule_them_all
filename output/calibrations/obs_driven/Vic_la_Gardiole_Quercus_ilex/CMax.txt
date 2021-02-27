@@ -1,43 +1,42 @@
 
 [[Fit Statistics]]
     # fitting method   = differential_evolution
-    # function evals   = 393
+    # function evals   = 333
     # data points      = 45
     # variables        = 2
-    chi-square         = 54523.0203
-    reduced chi-square = 1267.97722
-    Akaike info crit   = 323.487211
-    Bayesian info crit = 327.100536
+    chi-square         = 78976.6480
+    reduced chi-square = 1836.66623
+    Akaike info crit   = 340.161025
+    Bayesian info crit = 343.774350
+##  Warning: uncertainties could not be estimated:
 [[Variables]]
-    Alpha:  4.61371108 +/- 0.38118457 (8.26%) (init = 5)
-    Beta:   7.78059899 +/- 0.14401202 (1.85%) (init = 5)
+    Alpha:  0.75318218 (init = 5)
+    Beta:   5.58252640 (init = 1)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 226
+    # function evals   = 25
     # data points      = 45
     # variables        = 2
-    chi-square         = 53511.7667
-    reduced chi-square = 1244.45969
-    Akaike info crit   = 322.644746
-    Bayesian info crit = 326.258071
+    chi-square         = 325287.359
+    reduced chi-square = 7564.82231
+    Akaike info crit   = 403.861079
+    Bayesian info crit = 407.474404
+##  Warning: uncertainties could not be estimated:
 [[Variables]]
-    Alpha:  3.20907688 +/- 0.71947719 (22.42%) (init = 5)
-    Beta:   4.97870218 +/- 2.38359722 (47.88%) (init = 5)
-[[Correlations]] (unreported correlations are < 0.100)
-    C(Alpha, Beta) =  0.910
+    Alpha:  79.8934786 (init = 5)
+    Beta:   7.96699598 (init = 1)
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing
-    # function evals   = 4076
+    # function evals   = 4031
     # data points      = 45
     # variables        = 2
-    chi-square         = 54469.3970
-    reduced chi-square = 1266.73016
-    Akaike info crit   = 323.442931
-    Bayesian info crit = 327.056256
+    chi-square         = 79682.6011
+    reduced chi-square = 1853.08375
+    Akaike info crit   = 340.561482
+    Bayesian info crit = 344.174807
+##  Warning: uncertainties could not be estimated:
 [[Variables]]
-    Alpha:  4.68579295 +/- 0.88011119 (18.78%) (init = 5)
-    Beta:   7.81609044 +/- 3.25012258 (41.58%) (init = 5)
-[[Correlations]] (unreported correlations are < 0.100)
-    C(Alpha, Beta) =  0.884
+    Alpha:  0.74277925 (init = 5)
+    Beta:   3.71671738 (init = 1)

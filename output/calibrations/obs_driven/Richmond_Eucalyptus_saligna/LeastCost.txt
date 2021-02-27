@@ -1,39 +1,39 @@
 
 [[Fit Statistics]]
     # fitting method   = differential_evolution
-    # function evals   = 552
-    # data points      = 77
+    # function evals   = 1683
+    # data points      = 78
     # variables        = 2
-    chi-square         = 615377.912
-    reduced chi-square = 8205.03883
-    Akaike info crit   = 695.936355
-    Bayesian info crit = 700.623966
+    chi-square         = 665636.586
+    reduced chi-square = 8758.37613
+    Akaike info crit   = 710.039644
+    Bayesian info crit = 714.753062
 [[Variables]]
-    kmaxLC:  1.93782898 +/- 0.09283288 (4.79%) (init = 1)
-    BoA:     180.890552 +/- 16.2102764 (8.96%) (init = 200)
+    kmaxLC:  1.71254546 +/- 0.08396255 (4.90%) (init = 1)
+    Eta:     2.80111144 +/- 1.00352531 (35.83%) (init = 5)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 179
-    # data points      = 77
+    # function evals   = 235
+    # data points      = 78
     # variables        = 2
-    chi-square         = 612563.525
-    reduced chi-square = 8167.51366
-    Akaike info crit   = 695.583393
-    Bayesian info crit = 700.271004
+    chi-square         = 678166.578
+    reduced chi-square = 8923.24445
+    Akaike info crit   = 711.494273
+    Bayesian info crit = 716.207691
 [[Variables]]
-    kmaxLC:  1.94668158 +/- 0.08919973 (4.58%) (init = 1)
-    BoA:     176.799091 +/- 15.3482536 (8.68%) (init = 200)
+    kmaxLC:  1.70173981 +/- 0.08089649 (4.75%) (init = 1)
+    Eta:     2.54613834 +/- 0.16144872 (6.34%) (init = 5)
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing
-    # function evals   = 5147
-    # data points      = 77
+    # function evals   = 6335
+    # data points      = 78
     # variables        = 2
-    chi-square         = 612563.525
-    reduced chi-square = 8167.51366
-    Akaike info crit   = 695.583393
-    Bayesian info crit = 700.271004
+    chi-square         = 671521.015
+    reduced chi-square = 8835.80283
+    Akaike info crit   = 710.726158
+    Bayesian info crit = 715.439575
 [[Variables]]
-    kmaxLC:  1.94668157 +/- 0.08997975 (4.62%) (init = 1)
-    BoA:     177.457110 +/- 0.80360650 (0.45%) (init = 200)
+    kmaxLC:  1.77009362 +/- 0.08817941 (4.98%) (init = 1)
+    Eta:     2.54246717 +/- 0.10086694 (3.97%) (init = 5)

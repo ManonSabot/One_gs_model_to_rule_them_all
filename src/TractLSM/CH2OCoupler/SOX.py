@@ -35,7 +35,7 @@ import bottleneck as bn  # faster C-compiled np for all nan operations
 
 # own modules
 from TractLSM import conv, cst  # unit converter & general constants
-from TractLSM.SPAC import kcost, leaf_temperature
+from TractLSM.SPAC import kcost, hydraulics, leaf_temperature
 from TractLSM.SPAC import calc_colim_Ci, calc_photosynthesis, rubisco_limit
 from TractLSM.SPAC.leaf import arrhen
 from TractLSM.CH2OCoupler import calc_trans
@@ -54,16 +54,16 @@ def Ci_stream(p, Cs, Tleaf, res):
         NCis = 500
 
     if res == 'med':
-        NCis = 8000
+        NCis = 2000
 
     if res == 'high':
-        NCis = 50000
+        NCis = 8000
 
     return np.linspace(gamstar, Cs, NCis, endpoint=False)
 
 
 def supply_max(p, photo='Farquhar', case=1, res='low', iter_max=40,
-               threshold_conv=0.1, inf_gb=False):
+               threshold_conv=0.1, inf_gb=False, deriv=False):
 
     """
     Finds the instateneous profit maximization, following the
@@ -127,6 +127,7 @@ def supply_max(p, photo='Farquhar', case=1, res='low', iter_max=40,
 
     # hydraulics
     Pleaf_pd = p.Ps_pd - p.height * cst.rho * cst.g0 * conv.MEGA
+    P, E = hydraulics(p, res=res, kmax=p.kmaxS1)
 
     # iter on the solution until it is stable enough
     iter = 0
@@ -148,8 +149,8 @@ def supply_max(p, photo='Farquhar', case=1, res='low', iter_max=40,
             dAdCi = dA * conv.GwvGc * p.Patm / dCi
 
             # kcost, unitless
-            cost_pd, __ = kcost(p, Pleaf_pd, Pleaf_pd)
-            cost_mid, __ = kcost(p, -p.P50, Pleaf_pd)
+            cost_pd = kcost(p, Pleaf_pd, Pleaf_pd)
+            cost_mid = kcost(p, -p.P50, Pleaf_pd)
             dkcost = cost_pd - cost_mid
 
             # dkcostdP is needed to calculate gs
@@ -173,20 +174,25 @@ def supply_max(p, photo='Farquhar', case=1, res='low', iter_max=40,
         else:  # retrieve the Ci stream of possible Ci values
             Cis = Ci_stream(p, Cs, Tleaf, res)
 
-            # gross rate of photosynthesis, μmol m-2 s-1
-            A, __, __ = calc_photosynthesis(p, 0., Cis, photo, Tleaf=Tleaf,
-                                            Rleaf=0.)
+            # rate of photosynthesis, μmol m-2 s-1
+            A, __, __ = calc_photosynthesis(p, 0., Cis, photo, Tleaf=Tleaf)
 
-            # trans (perfect coupling) for the hydraulic cost, mmol m-2 s-1
+            # gas-exchange trans is used, mmol m-2 s-1
             E = A * conv.GwvGc * Dleaf / (p.CO2 - Cis)
 
             # kcost, Pleaf
-            cost, P = kcost(p, Pleaf_pd - E / p.ksc_prev, Pleaf_pd)
+            mask = np.logical_and(Pleaf_pd - E / p.ksc_prev <= Pleaf_pd,
+                                  Pleaf_pd - E / p.ksc_prev >= P[-1])
+            P = (Pleaf_pd - E / p.ksc_prev)[mask]
+            cost = kcost(p, P, Pleaf_pd)
 
             # optimal point
-            A = A[:len(cost)] # shortening avoids multiple kcost = 0
-            iopt = np.argmax(cost * A)
-            Ci = Cis[iopt]
+            iopt = np.argmax(cost * A[mask])
+
+            if deriv:
+                iopt = np.argmin(np.abs(np.gradient(cost * A[mask], Cis[mask])))
+
+            Ci = Cis[mask][iopt]
 
             # get net rate of photosynthesis at optimum, μmol m-2 s-1
             An, Aj, Ac = calc_photosynthesis(p, 0., Ci, photo, Tleaf=Tleaf)
@@ -232,11 +238,11 @@ def supply_max(p, photo='Farquhar', case=1, res='low', iter_max=40,
         iter += 1
 
     if case == 1:  # infer leaf water potential, MPa
-        Pleaf = Pleaf_pd - trans * conv.MILI / (p.kmaxS1 * cost_pd)
+        Pleaf = P[bn.nanargmin(np.abs(E - trans))]
 
     else:
         Pleaf = P[iopt]
-        ksc_prev = p.kmaxS2 * cost[iopt]
+        ksc = p.kmaxS2 * cost[iopt]
 
     rublim = rubisco_limit(Aj, Ac)  # lim?
 
@@ -256,4 +262,4 @@ def supply_max(p, photo='Farquhar', case=1, res='low', iter_max=40,
 
     else:
 
-        return An, Ci, rublim, trans, gs, gb, new_Tleaf, Pleaf, ksc_prev
+        return An, Ci, rublim, trans, gs, gb, new_Tleaf, Pleaf, ksc

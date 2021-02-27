@@ -1,93 +1,105 @@
-
-[[Fit Statistics]]
-    # fitting method   = differential_evolution
-    # function evals   = 1032
-    # data points      = 706
-    # variables        = 2
-    chi-square         = 13987.5585
-    reduced chi-square = 19.8686910
-    Akaike info crit   = 2112.33366
-    Bayesian info crit = 2121.45289
-[[Variables]]
-    g1T:    3.22184402 +/- 0.00587319 (0.18%) (init = 3.5)
-    PrefT: -2.71815774 +/- 0.00871906 (0.32%) (init = -3.13)
-
-[[Fit Statistics]]
-    # fitting method   = basinhopping
-    # function evals   = 30007
-    # data points      = 706
-    # variables        = 2
-    chi-square         = 13993.2440
-    reduced chi-square = 19.8767671
-    Akaike info crit   = 2112.62057
-    Bayesian info crit = 2121.73980
-[[Variables]]
-    g1T:    3.22259151 +/- 0.00582210 (0.18%) (init = 3.5)
-    PrefT: -2.65463495 +/- 0.00862356 (0.32%) (init = -3.13)
     
 [[Fit Statistics]]
-    # fitting method   = Nelder-Mead
-    # function evals   = 199
+    # fitting method   = differential_evolution
+    # function evals   = 807
     # data points      = 706
     # variables        = 2
-    chi-square         = 13982.8580
-    reduced chi-square = 19.8620143
-    Akaike info crit   = 2112.09637
-    Bayesian info crit = 2121.21560
+    chi-square         = 39827.5417
+    reduced chi-square = 56.5732126
+    Akaike info crit   = 2851.08529
+    Bayesian info crit = 2860.20452
 [[Variables]]
-    g1T:    3.21832010 +/- 0.00583729 (0.18%) (init = 3.5)
-    PrefT: -2.71575360 +/- 0.00858621 (0.32%) (init = -3.13)
+    g1T:    3.04910865 +/- 0.00940151 (0.31%) (init = 3.5)
+    PrefT: -2.65916765 +/- 0.03653878 (1.37%) (init = -3.13)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(g1T, PrefT) =  0.353
+    
+[[Fit Statistics]]
+    # fitting method   = basinhopping
+    # function evals   = 39380
+    # data points      = 706
+    # variables        = 2
+    chi-square         = 40437.8685
+    reduced chi-square = 57.4401542
+    Akaike info crit   = 2861.82215
+    Bayesian info crit = 2870.94138
+[[Variables]]
+    g1T:    3.07063193 +/- 0.00407300 (0.13%) (init = 3.5)
+    PrefT: -2.56209765 +/- 0.00525411 (0.21%) (init = -3.13)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(g1T, PrefT) =  0.130
 
+[[Fit Statistics]]
+    # fitting method   = Nelder-Mead
+    # function evals   = 210
+    # data points      = 706
+    # variables        = 2
+    chi-square         = 39842.8465
+    reduced chi-square = 56.5949524
+    Akaike info crit   = 2851.35654
+    Bayesian info crit = 2860.47577
+[[Variables]]
+    g1T:    3.05109584 +/- 0.00958960 (0.31%) (init = 3.5)
+    PrefT: -2.69229436 +/- 0.02752042 (1.02%) (init = -3.13)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(g1T, PrefT) =  0.395
+    
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 168
+    # function evals   = 173
     # data points      = 706
     # variables        = 2
-    chi-square         = 13978.0937
-    reduced chi-square = 19.8552467
-    Akaike info crit   = 2111.85577
-    Bayesian info crit = 2120.97500
+    chi-square         = 39852.9220
+    reduced chi-square = 56.6092642
+    Akaike info crit   = 2851.53505
+    Bayesian info crit = 2860.65428
 [[Variables]]
-    g1T:    3.21887128 +/- 0.00577027 (0.18%) (init = 3.5)
-    PrefT: -2.72023876 +/- 0.00866958 (0.32%) (init = -3.13)
-
+    g1T:    3.04248308 +/- 0.00972525 (0.32%) (init = 3.5)
+    PrefT: -2.68766434 +/- 0.03829131 (1.42%) (init = -3.13)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(g1T, PrefT) =  0.369
+    
 [[Fit Statistics]]
     # fitting method   = COBYLA
-    # function evals   = 34
+    # function evals   = 39
     # data points      = 706
     # variables        = 2
-    chi-square         = 14007.2959
-    reduced chi-square = 19.8967271
-    Akaike info crit   = 2113.32917
-    Bayesian info crit = 2122.44840
+    chi-square         = 40951.1909
+    reduced chi-square = 58.1693053
+    Akaike info crit   = 2870.72778
+    Bayesian info crit = 2879.84701
 [[Variables]]
-    g1T:    3.21756634 +/- 0.00622854 (0.19%) (init = 3.5)
-    PrefT: -2.71919647 +/- 0.00872974 (0.32%) (init = -3.13)
+    g1T:    3.05103355 +/- 0.00961042 (0.31%) (init = 3.5)
+    PrefT: -2.51101044 +/- 0.03135741 (1.25%) (init = -3.13)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(g1T, PrefT) =  0.264
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing
-    # function evals   = 6257
+    # function evals   = 5930
     # data points      = 706
     # variables        = 2
-    chi-square         = 13968.5459
-    reduced chi-square = 19.8416845
-    Akaike info crit   = 2111.37337
-    Bayesian info crit = 2120.49260
+    chi-square         = 39791.1346
+    reduced chi-square = 56.5214980
+    Akaike info crit   = 2850.43963
+    Bayesian info crit = 2859.55886
 [[Variables]]
-    g1T:    3.21832362 +/- 0.00592641 (0.18%) (init = 3.5)
-    PrefT: -2.69721382 +/- 0.00869131 (0.32%) (init = -3.13)
-
+    g1T:    3.04944116 +/- 0.00953434 (0.31%) (init = 3.5)
+    PrefT: -2.64605538 +/- 0.03307148 (1.25%) (init = -3.13)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(g1T, PrefT) =  0.385
+    
 [[Fit Statistics]]
     # fitting method   = ampgo, with L-BFGS-B as local solver
-    # function evals   = 35052
+    # function evals   = 29469
     # data points      = 706
     # variables        = 2
-    chi-square         = 13976.2468
-    reduced chi-square = 19.8526233
-    Akaike info crit   = 2111.76249
-    Bayesian info crit = 2120.88172
+    chi-square         = 41079.9718
+    reduced chi-square = 58.3522327
+    Akaike info crit   = 2872.94448
+    Bayesian info crit = 2882.06371
 [[Variables]]
-    g1T:    3.22198365 +/- 0.00594860 (0.18%) (init = 3.5)
-    PrefT: -2.50936936 +/- 0.24125221 (9.61%) (init = -3.13)
+    g1T:    3.07231389 +/- 0.00411329 (0.13%) (init = 3.5)
+    PrefT: -2.51168566 +/- 0.20675503 (8.23%) (init = -3.13)
 [[Correlations]] (unreported correlations are < 0.100)
-    C(g1T, PrefT) =  0.131
+    C(g1T, PrefT) = -0.124

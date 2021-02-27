@@ -1,84 +1,84 @@
 
 [[Fit Statistics]]
     # fitting method   = differential_evolution
-    # function evals   = 167
+    # function evals   = 107
     # data points      = 178
     # variables        = 1
-    chi-square         = 62067.9920
-    reduced chi-square = 350.666621
-    Akaike info crit   = 1044.04798
-    Bayesian info crit = 1047.22977
+    chi-square         = 47513.1417
+    reduced chi-square = 268.435829
+    Akaike info crit   = 996.482096
+    Bayesian info crit = 999.663880
 [[Variables]]
-    Lambda:  10.7484936 +/- 0.17315148 (1.61%) (init = 5)
-
+    Lambda:  1.99009804 +/- 0.21994029 (11.05%) (init = 5)
+    
 [[Fit Statistics]]
     # fitting method   = basinhopping
     # function evals   = 303
     # data points      = 178
     # variables        = 1
-    chi-square         = 62866.9750
-    reduced chi-square = 355.180650
-    Akaike info crit   = 1046.32470
-    Bayesian info crit = 1049.50649
+    chi-square         = 48067.3827
+    reduced chi-square = 271.567134
+    Akaike info crit   = 998.546450
+    Bayesian info crit = 1001.72823
 [[Variables]]
-    Lambda:  10.5890927 +/- 0.16518933 (1.56%) (init = 5)
-    
+    Lambda:  2.06936630 +/- 0.07991846 (3.86%) (init = 5)
+
 [[Fit Statistics]]
     # fitting method   = Nelder-Mead
-    # function evals   = 35
+    # function evals   = 37
     # data points      = 178
     # variables        = 1
-    chi-square         = 62100.0494
-    reduced chi-square = 350.847736
-    Akaike info crit   = 1044.13990
-    Bayesian info crit = 1047.32168
+    chi-square         = 46218.9156
+    reduced chi-square = 261.123817
+    Akaike info crit   = 991.566235
+    Bayesian info crit = 994.748019
 [[Variables]]
-    Lambda:  10.7990919 +/- 0.17187766 (1.59%) (init = 5)
+    Lambda:  2.11863796 +/- 0.07768159 (3.67%) (init = 5)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 59
+    # function evals   = 102
     # data points      = 178
     # variables        = 1
-    chi-square         = 62066.5863
-    reduced chi-square = 350.658680
-    Akaike info crit   = 1044.04395
-    Bayesian info crit = 1047.22574
+    chi-square         = 45666.9805
+    reduced chi-square = 258.005540
+    Akaike info crit   = 989.427809
+    Bayesian info crit = 992.609592
 [[Variables]]
-    Lambda:  10.6374799 +/- 0.16433227 (1.54%) (init = 5)
+    Lambda:  2.20708442 +/- 0.07869810 (3.57%) (init = 5)
 
 [[Fit Statistics]]
     # fitting method   = COBYLA
     # function evals   = 22
     # data points      = 178
     # variables        = 1
-    chi-square         = 62299.5714
-    reduced chi-square = 351.974980
-    Akaike info crit   = 1044.71088
-    Bayesian info crit = 1047.89266
+    chi-square         = 45845.7320
+    reduced chi-square = 259.015435
+    Akaike info crit   = 990.123183
+    Bayesian info crit = 993.304967
 [[Variables]]
-    Lambda:  10.8192959 +/- 0.17913044 (1.66%) (init = 5)
+    Lambda:  2.11575461 +/- 0.07462517 (3.53%) (init = 5)
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing
-    # function evals   = 2027
+    # function evals   = 2019
     # data points      = 178
     # variables        = 1
-    chi-square         = 62149.1636
-    reduced chi-square = 351.125218
-    Akaike info crit   = 1044.28062
-    Bayesian info crit = 1047.46240
+    chi-square         = 45762.6204
+    reduced chi-square = 258.545878
+    Akaike info crit   = 989.800202
+    Bayesian info crit = 992.981986
 [[Variables]]
-    Lambda:  10.9045680 +/- 0.17424975 (1.60%) (init = 5)
+    Lambda:  2.13955805 +/- 0.07090459 (3.31%) (init = 5)
 
 [[Fit Statistics]]
     # fitting method   = ampgo, with L-BFGS-B as local solver
-    # function evals   = 4720
+    # function evals   = 5368
     # data points      = 178
     # variables        = 1
-    chi-square         = 68303.1913
-    reduced chi-square = 385.893736
-    Akaike info crit   = 1061.08722
-    Bayesian info crit = 1064.26901
+    chi-square         = 48951.8976
+    reduced chi-square = 276.564393
+    Akaike info crit   = 1001.79216
+    Bayesian info crit = 1004.97394
 [[Variables]]
-    Lambda:  11.6040844 +/- 0.97224607 (8.38%) (init = 5)
+    Lambda:  2.27365501 +/- 0.07619457 (3.35%) (init = 5)

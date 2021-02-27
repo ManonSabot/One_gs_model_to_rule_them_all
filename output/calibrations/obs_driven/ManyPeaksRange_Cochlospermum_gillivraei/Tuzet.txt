@@ -1,41 +1,39 @@
 
 [[Fit Statistics]]
     # fitting method   = differential_evolution
-    # function evals   = 432
+    # function evals   = 654
     # data points      = 100
     # variables        = 2
-    chi-square         = 5402622.34
-    reduced chi-square = 55128.7994
-    Akaike info crit   = 1093.72248
-    Bayesian info crit = 1098.93282
+    chi-square         = 5440357.32
+    reduced chi-square = 55513.8502
+    Akaike info crit   = 1094.41851
+    Bayesian info crit = 1099.62885
 [[Variables]]
-    g1T:    14.9999996 +/- 0.00757380 (0.05%) (init = 3.5)
-    PrefT: -1.82330124 +/- 0.07131372 (3.91%) (init = -1.44)
+    g1T:    12.3218601 +/- 0.23614734 (1.92%) (init = 3.5)
+    kmaxT:  4.59073248 +/- 0.71584999 (15.59%) (init = 1)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 57
+    # function evals   = 152
     # data points      = 100
     # variables        = 2
-    chi-square         = 5402622.34
-    reduced chi-square = 55128.7994
-    Akaike info crit   = 1093.72248
-    Bayesian info crit = 1098.93282
+    chi-square         = 6202873.14
+    reduced chi-square = 63294.6239
+    Akaike info crit   = 1107.53530
+    Bayesian info crit = 1112.74564
 [[Variables]]
-    g1T:    15.0000000 +/- 1.4924e-05 (0.00%) (init = 3.5)
-    PrefT: -1.82330079 +/- 0.07131283 (3.91%) (init = -1.44)
+    g1T:    12.5000000 +/- 3.1580e-11 (0.00%) (init = 3.5)
+    kmaxT:  18.8086971 +/- 2.04351123 (10.86%) (init = 1)
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing
-    # function evals   = 4454
+    # function evals   = 4031
     # data points      = 100
     # variables        = 2
-    chi-square         = 5402612.21
-    reduced chi-square = 55128.6960
-    Akaike info crit   = 1093.72230
-    Bayesian info crit = 1098.93264
+    chi-square         = 5416212.56
+    reduced chi-square = 55267.4751
+    Akaike info crit   = 1093.97372
+    Bayesian info crit = 1099.18406
 [[Variables]]
-    g1T:    14.9978406 +/- 2.43562372 (16.24%) (init = 3.5)
-    PrefT: -1.81116571 +/- 0.09174670 (5.07%) (init = -1.44)
-[[Correlations]] (unreported correlations are < 0.100)
-    C(g1T, PrefT) =  0.626
+    g1T:    12.5000000 +/- 0.16340978 (1.31%) (init = 3.5)
+    kmaxT:  4.70783082 +/- 0.20319733 (4.32%) (init = 1)

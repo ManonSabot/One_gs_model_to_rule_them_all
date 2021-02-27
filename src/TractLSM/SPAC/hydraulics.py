@@ -218,7 +218,7 @@ def transpiration(P, kmax, b, c):
 
     for i in range(len(P)):  # at Ps, trans=0; at Pcrit, trans=transcrit
 
-        trans[i], err = quad(f, P[i], P[0], args=(b, c))
+        trans[i], __ = quad(f, P[i], P[0], args=(b, c))
 
     trans[trans > cst.zero] *= kmax * conv.FROM_MILI  # mol.s-1.m-2
 

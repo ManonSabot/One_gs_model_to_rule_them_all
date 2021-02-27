@@ -43,7 +43,7 @@ from TractLSM.CH2OCoupler import Ci_sup_dem, A_trans
 
 # ======================================================================
 
-def profit_E(p, photo='Farquhar', res='low', inf_gb=False):
+def profit_AE(p, photo='Farquhar', res='low', inf_gb=False, deriv=False):
 
     """
     Finds the instateneous profit maximization, following the
@@ -102,9 +102,11 @@ def profit_E(p, photo='Farquhar', res='low', inf_gb=False):
 
     # expression of optimization
     Ci, mask = Ci_sup_dem(p, trans, photo=photo, res=res, inf_gb=inf_gb)
-    expr =  np.abs(np.gradient(A_trans(p, trans[mask], Ci, inf_gb=inf_gb),
-                               trans[mask]) * (trans[-1] - trans[mask]) -
-                   A_trans(p, trans[mask], Ci, inf_gb=inf_gb))
+    expr = A_trans(p, trans[mask], Ci, inf_gb=inf_gb) * (1 - trans[mask] /
+                                                         trans[-1])
+
+    if deriv:
+        expr = np.abs(np.gradient(expr, trans[mask]))
 
     # deal with edge cases by rebounding the solution
     gc, gs, gb, __ = leaf_energy_balance(p, trans[mask], inf_gb=inf_gb)
@@ -113,18 +115,14 @@ def profit_E(p, photo='Farquhar', res='low', inf_gb=False):
         if inf_gb:  # check on valid range
             check = expr[gc > cst.zero]
 
-            # erratic model behaviour at low VPD and low-ish PAR
-            if (p.VPD < 1.) or (p.PPFD < 500.):
-                check = check[:np.minimum(np.argmax(np.diff(check) > 0.) +
-                                          int(len(P) / 20), len(check) - 1)]
-
         else:  # further constrain the realm of possible gs
             check = expr[np.logical_and(gc > cst.zero, gs < 1.5 * gb)]
 
-        # expr can have several "zeros" passed the actual optimal pt
-        check = check[check > 1.e-9]
+        idx = np.isclose(expr, max(check))
 
-        idx = np.isclose(expr, min(check))
+        if deriv:
+            idx = np.isclose(expr, min(check))
+
         idx = [list(idx).index(e) for e in idx if e]
 
         if inf_gb:  # check for algo. "overshooting" due to inf. gb

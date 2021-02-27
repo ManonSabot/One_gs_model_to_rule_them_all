@@ -1,84 +1,84 @@
 
 [[Fit Statistics]]
     # fitting method   = differential_evolution
-    # function evals   = 95
+    # function evals   = 121
     # data points      = 178
     # variables        = 1
-    chi-square         = 27967.3000
-    reduced chi-square = 158.007345
-    Akaike info crit   = 902.147370
-    Bayesian info crit = 905.329154
+    chi-square         = 27967.1992
+    reduced chi-square = 158.006775
+    Akaike info crit   = 902.146729
+    Bayesian info crit = 905.328513
 [[Variables]]
-    sref:  1.25261366 +/- 0.07491656 (5.98%) (init = 2)
+    sref:  1.25255737 +/- 0.07491533 (5.98%) (init = 2)
     
 [[Fit Statistics]]
     # fitting method   = basinhopping
-    # function evals   = 12754
+    # function evals   = 14965
     # data points      = 178
     # variables        = 1
-    chi-square         = 27967.3000
-    reduced chi-square = 158.007345
-    Akaike info crit   = 902.147370
-    Bayesian info crit = 905.329154
+    chi-square         = 27967.1992
+    reduced chi-square = 158.006775
+    Akaike info crit   = 902.146729
+    Bayesian info crit = 905.328513
 [[Variables]]
-    sref:  1.25261367 +/- 0.07491656 (5.98%) (init = 2)
+    sref:  1.25255738 +/- 0.07491533 (5.98%) (init = 2)
 
 [[Fit Statistics]]
     # fitting method   = Nelder-Mead
-    # function evals   = 30
+    # function evals   = 32
     # data points      = 178
     # variables        = 1
-    chi-square         = 27967.3000
-    reduced chi-square = 158.007345
-    Akaike info crit   = 902.147371
-    Bayesian info crit = 905.329154
+    chi-square         = 27967.1992
+    reduced chi-square = 158.006775
+    Akaike info crit   = 902.146729
+    Bayesian info crit = 905.328513
 [[Variables]]
-    sref:  1.25265862 +/- 0.07491706 (5.98%) (init = 2)
+    sref:  1.25255470 +/- 0.07491530 (5.98%) (init = 2)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 36
+    # function evals   = 49
     # data points      = 178
     # variables        = 1
-    chi-square         = 27967.3000
-    reduced chi-square = 158.007345
-    Akaike info crit   = 902.147370
-    Bayesian info crit = 905.329154
+    chi-square         = 27967.1992
+    reduced chi-square = 158.006775
+    Akaike info crit   = 902.146729
+    Bayesian info crit = 905.328513
 [[Variables]]
-    sref:  1.25261365 +/- 0.07491656 (5.98%) (init = 2)
+    sref:  1.25255740 +/- 0.07491533 (5.98%) (init = 2)
 
 [[Fit Statistics]]
     # fitting method   = COBYLA
     # function evals   = 23
     # data points      = 178
     # variables        = 1
-    chi-square         = 27967.3013
-    reduced chi-square = 158.007352
-    Akaike info crit   = 902.147379
-    Bayesian info crit = 905.329162
+    chi-square         = 27967.2029
+    reduced chi-square = 158.006796
+    Akaike info crit   = 902.146752
+    Bayesian info crit = 905.328536
 [[Variables]]
-    sref:  1.25239987 +/- 0.07491418 (5.98%) (init = 2)
+    sref:  1.25291373 +/- 0.07491931 (5.98%) (init = 2)
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing
-    # function evals   = 2023
+    # function evals   = 2021
     # data points      = 178
     # variables        = 1
-    chi-square         = 27967.3000
-    reduced chi-square = 158.007345
-    Akaike info crit   = 902.147370
-    Bayesian info crit = 905.329154
+    chi-square         = 27967.1992
+    reduced chi-square = 158.006775
+    Akaike info crit   = 902.146729
+    Bayesian info crit = 905.328513
 [[Variables]]
-    sref:  1.26542179 +/- 0.07491656 (5.92%) (init = 2)
+    sref:  1.26536516 +/- 0.07491533 (5.92%) (init = 2)
 
 [[Fit Statistics]]
     # fitting method   = ampgo, with L-BFGS-B as local solver
-    # function evals   = 2860
+    # function evals   = 3162
     # data points      = 178
     # variables        = 1
-    chi-square         = 27967.3000
-    reduced chi-square = 158.007345
-    Akaike info crit   = 902.147370
-    Bayesian info crit = 905.329154
+    chi-square         = 27967.1992
+    reduced chi-square = 158.006775
+    Akaike info crit   = 902.146729
+    Bayesian info crit = 905.328513
 [[Variables]]
-    sref:  1.25261368 +/- 0.07491656 (5.98%) (init = 2)
+    sref:  1.35240375 +/- 0.07491533 (5.54%) (init = 2)

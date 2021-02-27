@@ -36,8 +36,117 @@ from TractLSM.CH2OCoupler import calc_trans
 
 # ======================================================================
 
-def Tuzet(p, photo='Farquhar', res='low', iter_max=40, threshold_conv=0.1,
-          inf_gb=False):
+def gas_exchange(p, fw, photo='Farquhar', res='low', dynamic=True, inf_gb=False,
+                 iter_max=40, threshold_conv=0.1):
+
+    # initial state
+    Cs = p.CO2  # Pa
+    Tleaf = p.Tair  # deg C
+
+    # hydraulics
+    P, E = hydraulics(p, res=res, kmax=p.kmaxT)
+
+    # initialise gs over A
+    g0 = 1.e-9  # g0 ~ 0, removing it entirely introduces errors
+    Cs_umol_mol = Cs * conv.MILI / p.Patm  # umol mol-1
+    gsoA = g0 + p.g1T * fw / Cs_umol_mol
+
+    # iter on the solution until it is stable enough
+    iter = 0
+
+    while True:
+
+        An, Aj, Ac, Ci = calc_photosynthesis(p, 0., Cs, photo, Tleaf=Tleaf,
+                                             gs_over_A=gsoA)
+
+        # stomatal conductance, with fwsoil effect
+        gs = np.maximum(cst.zero, conv.GwvGc * gsoA * An)
+
+        # calculate new trans, gw, gb, etc.
+        trans, real_zero, gw, gb, __ = calc_trans(p, Tleaf, gs, inf_gb=inf_gb)
+        new_Tleaf, __ = leaf_temperature(p, trans, Tleaf=Tleaf, inf_gb=inf_gb)
+        Pleaf = P[bn.nanargmin(np.abs(E - trans))]
+
+        # new Cs (in Pa)
+        boundary_CO2 = p.Patm * conv.FROM_MILI * An / (gb * conv.GbcvGb +
+                                                       gs * conv.GcvGw)
+        Cs = np.maximum(cst.zero, np.minimum(p.CO2, p.CO2 - boundary_CO2))
+        Cs_umol_mol = Cs * conv.MILI / p.Patm
+
+        # update gs over A
+        gsoA = g0 + p.g1T * fw / Cs_umol_mol
+
+        # force stop when atm. conditions yield E < 0. (non-physical)
+        if (iter < 1) and (not real_zero):
+            real_zero = None
+
+        # check for convergence
+        if ((real_zero is None) or (iter >= iter_max) or ((iter >= 2) and
+            real_zero and (abs(Tleaf - new_Tleaf) <= threshold_conv) and not
+            np.isclose(gs, cst.zero, rtol=cst.zero, atol=cst.zero))):
+            break
+
+        # no convergence, iterate on leaf temperature
+        Tleaf = new_Tleaf
+        iter += 1
+
+    if ((np.isclose(trans, cst.zero, rtol=cst.zero, atol=cst.zero) and
+        (An > 0.)) or np.isclose(Ci, 0., rtol=cst.zero, atol=cst.zero) or
+        (Ci < 0.) or np.isclose(Ci, p.CO2, rtol=cst.zero, atol=cst.zero) or
+        (Ci > p.CO2) or (real_zero is None) or (not real_zero) or
+       any(np.isnan([An, Ci, trans, gs, Tleaf, Pleaf]))):
+        An, Ci, trans, gs, gb, Tleaf, Pleaf = (9999.,) * 7
+
+    return An, Aj, Ac, Ci, trans, gs, gb, new_Tleaf, Pleaf
+
+
+def fLWP_stable(p, photo='Farquhar', res='low', inf_gb=False):
+
+    # hydraulics
+    P, __ = hydraulics(p, res=res, kmax=p.kmaxT)
+
+    # directionality?
+    if np.isclose(p.LWP_ini, p.Ps_pd - p.height * cst.rho * cst.g0 * conv.MEGA):
+        down = True  # downstream from Ps
+
+    else:
+        fw = fLWP(p, p.LWP_ini)  # previous stress factor
+        __, __, __, __, __, __, __, __, Pleaf = gas_exchange(p, fw, photo=photo,
+                                                             res=res,
+                                                             dynamic=False,
+                                                             inf_gb=inf_gb,
+                                                             iter_max=5)
+
+        if abs(Pleaf - p.LWP_ini) < P[0] - P[1]:  # no need to look further
+
+            return fw
+
+        elif Pleaf - p.LWP_ini > 0.:
+            P = np.flip(P[P >= p.LWP_ini])
+            down = False  # upstream from the previous LWP
+
+        else:
+            P = P[P <= p.LWP_ini]
+            down = True  # downstream from the previous LWP
+
+    for Psi in P:  # now look for most stable LWP
+
+        fw = fLWP(p, Psi)  # update stress factor
+        __, __, __, __, __, __, __, __, Pleaf = gas_exchange(p, fw, photo=photo,
+                                                             res=res,
+                                                             dynamic=False,
+                                                             inf_gb=inf_gb,
+                                                             iter_max=5)
+
+        if ((down and (Pleaf - Psi > P[1] - P[0])) or
+            ((not down) and (Pleaf - Psi < P[0] - P[1]))):  # converges
+
+            return fw
+
+    return 0.
+
+
+def Tuzet(p, photo='Farquhar', res='low', inf_gb=False):
 
     """
     Checks the energy balance by looking for convergence of the new leaf
@@ -48,9 +157,6 @@ def Tuzet(p, photo='Farquhar', res='low', iter_max=40, threshold_conv=0.1,
     ----------
     p: recarray object or pandas series or class containing the data
         time step's met data & params
-
-    sw: float
-        mean volumetric soil moisture content [m3 m-3]
 
     photo: string
         either the Farquhar model for photosynthesis, or the Collatz
@@ -89,72 +195,17 @@ def Tuzet(p, photo='Farquhar', res='low', iter_max=40, threshold_conv=0.1,
 
     """
 
-    # initial state
-    Cs = p.CO2  # Pa
-    Tleaf = p.Tair  # deg C
+    # stability pre-requisites
+    fw = fLWP_stable(p, photo=photo, res=res, inf_gb=inf_gb)
 
-    # hydraulics
-    P, E = hydraulics(p, res=res, kmax=p.kmaxT)
-
-    # initialise gs over A
-    fw = p.fLWP_ini  # init. stress factor
-    g0 = 1.e-9  # g0 ~ 0, removing it entirely introduces errors
-    Cs_umol_mol = Cs * conv.MILI / p.Patm  # umol mol-1
-    gsoA = g0 + p.g1T * fw / Cs_umol_mol
-
-    # iter on the solution until it is stable enough
-    iter = 0
-
-    while True:
-
-        An, Aj, Ac, Ci = calc_photosynthesis(p, 0., Cs, photo, Tleaf=Tleaf,
-                                             gs_over_A=gsoA)
-
-        # stomatal conductance, with fwsoil effect
-        gs = np.maximum(cst.zero, conv.GwvGc * gsoA * An)
-
-        # calculate new trans, gw, gb, mol.m-2.s-1
-        trans, real_zero, gw, gb, __ = calc_trans(p, Tleaf, gs, inf_gb=inf_gb)
-        new_Tleaf, __ = leaf_temperature(p, trans, Tleaf=Tleaf, inf_gb=inf_gb)
-
-        # new Cs (in Pa)
-        boundary_CO2 = p.Patm * conv.FROM_MILI * An / (gb * conv.GbcvGb +
-                                                       gs * conv.GcvGw)
-        Cs = np.maximum(cst.zero, np.minimum(p.CO2, p.CO2 - boundary_CO2))
-        Cs_umol_mol = Cs * conv.MILI / p.Patm
-
-        # update stress functions
-        Pleaf = P[bn.nanargmin(np.abs(E - trans))]
-
-        if np.abs(fw - fLWP(p, Pleaf)) < 0.25:  # is fw stable?
-            fw = fLWP(p, Pleaf)  # update
-
-        gsoA = g0 + p.g1T * fw / Cs_umol_mol
-
-        # force stop when atm. conditions yield E < 0. (non-physical)
-        if (iter < 1) and (not real_zero):
-            real_zero = None
-
-        # check for convergence
-        if ((real_zero is None) or (iter >= iter_max) or ((iter >= 2) and
-            real_zero and (abs(Tleaf - new_Tleaf) <= threshold_conv) and not
-            np.isclose(gs, cst.zero, rtol=cst.zero, atol=cst.zero))):
-            break
-
-        # no convergence, iterate on leaf temperature
-        Tleaf = new_Tleaf
-        iter += 1
-
+    # run the energy balance sub-routine
+    An, Aj, Ac, Ci, trans, gs, gb, Tleaf, Pleaf = gas_exchange(p, fw,
+                                                               photo=photo,
+                                                               res=res,
+                                                               inf_gb=inf_gb)
     rublim = rubisco_limit(Aj, Ac)  # lim?
 
-    if ((np.isclose(trans, cst.zero, rtol=cst.zero, atol=cst.zero) and
-        (An > 0.)) or np.isclose(Ci, 0., rtol=cst.zero, atol=cst.zero) or
-        (Ci < 0.) or np.isclose(Ci, p.CO2, rtol=cst.zero, atol=cst.zero) or
-        (Ci > p.CO2) or (real_zero is None) or (not real_zero) or
-       any(np.isnan([An, Ci, trans, gs, new_Tleaf, Pleaf]))):
-        An, Ci, trans, gs, gb, new_Tleaf, Pleaf = (9999.,) * 7
-
-    elif not np.isclose(trans, cst.zero, rtol=cst.zero, atol=cst.zero):
+    if not np.isclose(trans, cst.zero, rtol=cst.zero, atol=cst.zero):
         trans *= conv.MILI  # mmol.m-2.s-1
 
-    return An, Ci, rublim, trans, gs, gb, new_Tleaf, Pleaf, fw
+    return An, Ci, rublim, trans, gs, gb, Tleaf, Pleaf

@@ -38,8 +38,8 @@ class NLMFIT(object):
         self.method = method  # which solver is used
 
         # MCMC-specific
-        self.steps = 11000
-        self.nchains = 3
+        self.steps = 15000
+        self.nchains = 4
         self.burn = 1000
         self.thin = 2
 
@@ -112,7 +112,8 @@ class NLMFIT(object):
 
         elif 'krl' in pname:
 
-            return 0.01, 100.
+            #return 0.01, 100.
+            return 0.005, 20.
 
         elif (P50 is not None) and (P88 is not None) and (('Pref' in pname) or
                                                           ('Pcrit' in pname)):
@@ -135,13 +136,13 @@ class NLMFIT(object):
 
             return 0.1, 8.
 
-        elif pname == 'Eta':
+        elif pname == 'Lambda':
 
-            return 0.1, 250.
+            return 0.01, 10.
 
         else:
 
-            return 0.1, 100.
+            return 0.01, 50.
 
     def run(self, X, Y, model, g1=False):
 
@@ -242,25 +243,22 @@ class NLMFIT(object):
                                  method=self.method, steps=self.steps,
                                  nwalkers=self.nchains, burn=self.burn,
                                  thin=self.thin, is_weighted=False,
-                                 progress=False)
+                                 progress=False, nan_policy='omit')
 
         else:
-            try:
-                out = lmfit.minimize(fres, params,
-                                     args=(model, X, Y, self.inf_gb,),
-                                     method=self.method)
+            out = lmfit.minimize(fres, params, args=(model, X, Y, self.inf_gb,),
+                                 method=self.method, nan_policy='omit')
 
-            except Exception:  # fix first param. value to ini. guess
-                success = False
+            for param in out.params.values():
 
-                # reset the input parameter dic and rerun
-                p1name = str(params.valuesdict().popitem(last=False)[0])
-                p1val = params.valuesdict().popitem(last=False)[1]
-                params[p1name] = lmfit.Parameter(name=p1name, value=p1val,
-                                                 vary=False)
-                out = lmfit.minimize(fres, params,
-                                     args=(model, X, Y, self.inf_gb,),
-                                     method=self.method)
+                if np.isclose(param.value, param.init_value):
+                    params[param.name] = lmfit.Parameter(name=param.name,
+                                                         value=1.5 *
+                                                               param.init_value)
+                    out = lmfit.minimize(fres, params,
+                                         args=(model, X, Y, self.inf_gb,),
+                                         method=self.method,
+                                         nan_policy='omit')
 
         if not os.path.isfile(os.path.join(self.opath, '%s.txt' % (model))):
             txt = open(os.path.join(self.opath, '%s.txt' % (model)), 'w+')

@@ -455,7 +455,7 @@ def quad_solve_Ci(p, Cs, gs_over_A, Rleaf, gamstar, v1, v2):
         gs/A as predicted by the USO (Medlyn, 2011) model
 
     Rleaf: float
-        leaf dark respiration [μmol m-2 s-1]
+        leaf day respiration [μmol m-2 s-1]
 
     gamstar: float
         CO2 compensation point [Pa]
@@ -571,7 +571,7 @@ def calc_photosynthesis(p, trans, Ci_s, photo, smooth=True, Tleaf=None,
         leaf temperature [degC]
 
     Rleaf: float
-        leaf dark respiration [μmol m-2 s-1]
+        leaf day respiration [μmol m-2 s-1]
 
     gs_over_A: float
         gs/A as predicted by USO (Medlyn, 2011) model. Used for the
@@ -630,7 +630,7 @@ def calc_photosynthesis(p, trans, Ci_s, photo, smooth=True, Tleaf=None,
     Vmax = adjust_low_T(Vmax, Tleaf)
     Jmax = adjust_low_T(Jmax, Tleaf)
 
-    if Rleaf is None:  # leaf dark respiration
+    if Rleaf is None:  # leaf day respiration
         Rleaf = Vmax * 0.015  # μmol m-2 s-1
 
     # Michaelis-Menten constants
@@ -715,7 +715,7 @@ def calc_photosynthesis(p, trans, Ci_s, photo, smooth=True, Tleaf=None,
         Rublim = rubisco_limit(Aj, Ac)
 
         if Rublim == 'True':
-            Ci = Ci_c  # the system is Rubisco-limited, this Ci was used
+            Ci = Ci_c  # the system is Rubisco-limited, this Ci
 
         return An, Aj, Ac, Ci
 

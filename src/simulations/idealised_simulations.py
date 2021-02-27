@@ -133,7 +133,8 @@ def combine_dfs(df1, df2, xpe):
     df2 = df2.merge(df1, on=['doy', 'hod'])
 
     # only keep the variables, i.e. remove parameters
-    df2 = df2[[c for c in list(df2) if len(df2[c].unique()) > 1]]
+    #df2 = df2[[c for c in list(df2) if len(df2[c].unique()) > 1]]
+    df2 = df2.iloc[:, :df2.columns.get_loc('u')]
     df2 = df2.drop(df2.filter(like='Ps(').columns, axis=1)
     df2['CO2'] = df1['CO2'].iloc[0]  # keep Ca
 
@@ -145,49 +146,6 @@ def combine_dfs(df1, df2, xpe):
 
     return df2
 
-
-def calc_rmse(df1, df2, var='gs'):
-
-    if var == 'gs':
-        idx1 = 0
-
-    elif var == 'E':
-        idx1 = len(df1.filter(like='%s(' % (var)).columns)
-
-    else:
-        idx1 = 2 * len(df1.filter(like='%s(' % (var)).columns)
-
-    for i, e in enumerate(df1.filter(like='%s(' % (var)).columns):
-
-        rmse = (((df1['%s' % (e)] - df1['%s(std1)' % (var)]) ** 2.).mean()
-                ** 0.5)
-
-        if df2.loc[idx1 + i].isnull().all().all():  # columns all empty
-            df2.loc[idx1 + i, 'model'] = e.split('%s(' % (var))[1].split(')')[0]
-            df2.loc[idx1 + i, 'variable'] = var
-
-        df2.loc[idx1 + i, df1['xpe'].iloc[0]] = rmse
-
-    return
-
-
-def model_performance(df, which='RMSE'):
-
-    columns = list(np.unique(df['xpe'])) + ['model', 'variable']
-    perf = pd.DataFrame(columns=columns,
-                        index=np.arange(3 * len(df.filter(like='gs(').columns)))
-
-    if which == 'MAPE':
-        df.groupby('xpe').apply(calc_mape, df2=perf)
-        df.groupby('xpe').apply(calc_mape, df2=perf, var='E')
-        df.groupby('xpe').apply(calc_mape, df2=perf, var='A')
-
-    else:
-        df.groupby('xpe').apply(calc_rmse, df2=perf)
-        df.groupby('xpe').apply(calc_rmse, df2=perf, var='E')
-        df.groupby('xpe').apply(calc_rmse, df2=perf, var='A')
-
-    return perf
 
 ###############################################################################
 
@@ -210,6 +168,8 @@ for training in trainings:
     if not os.path.isfile(os.path.join(ipath,
                                        '%s_calibration.csv' % (training))):
         build_calibrated_forcing(training)
+
+combis = [e for e in combis if ((e[0] == e[1]) or (e[2] == 'insample'))]
 
 for combi in combis:  # loop over all the possibilities
 
@@ -234,7 +194,7 @@ for combi in combis:  # loop over all the possibilities
         df1['VPD'] *= 2.
 
     elif combi[2] == 'highCa':
-        df1['CO2'] *= 1.5
+        df1['CO2'] *= 2.
 
     # soil moisture profile
     df1['sw'] = df1['theta_sat']
@@ -242,14 +202,14 @@ for combi in combis:  # loop over all the possibilities
     df1['sw'], df1['Ps'] = soil_water(df1, combi[1])
 
     # run the models
-    models = ['Medlyn12', 'Tuzet', 'SOX12', 'ProfitMax', 'ProfitMax2', 'CGain',
-              'WUE', 'CMax', 'LeastCost', 'CAP', 'MES']
+    models = ['Medlyn12', 'Tuzet', 'SOX12', 'WUE', 'CMax', 'ProfitMax', 'CGain',
+              'ProfitMax2', 'LeastCost', 'CAP', 'MES']
 
     fname = os.path.join(ofdir, '%s.csv' % (xpe))
 
     if not os.path.isfile(fname):  # create file if it doesn't exist
         df2 = hrun(fname, df1, len(df1.index), 'Farquhar', models=models,
-                   resolution='low', inf_gb=True)
+                   resolution='med', inf_gb=True)
         df2.columns = df2.columns.droplevel(level=1)
 
     else:
@@ -295,30 +255,96 @@ else:
     dfs = (pd.read_csv(fname).dropna(axis=0, how='all')
              .dropna(axis=1, how='all').squeeze())
 
+
 # create an impact df
-fname = fname.replace('idealised_simulations', 'cumulative_impacts')
+fname = fname.replace('idealised_simulations', 'relative_impacts')
 
 if not os.path.isfile(fname):
-    dfs.replace(9999., 0., inplace=True)  # NaNs don't matter for cumuls
+    df = dfs.copy()
+    df.replace(9999., np.nan, inplace=True)
+
+    # fluxes relative to Medlyn
+    gs = df.filter(like='gs(').columns.to_list()[1:]
+    A = df.filter(like='A(').columns.to_list()[1:]
+    E = df.filter(like='E(').columns.to_list()[1:]
+
+    for e in gs[1:]:
+
+        df[e] = (df[e] - df['gs(std1)']) / df['gs(std1)']
+
+    for e in A:
+
+        df[e] = (df[e] - df['A(std1)']) / df['A(std1)']
+
+    for e in E:
+
+        df[e] = (df[e] - df['E(std1)']) / df['E(std1)']
+
+    # relative fluxes
+    all = df.groupby('xpe')[gs + A + E].mean() * 100.
+    low_light = np.logical_or(df['hod'] < 10., df['hod'] > 17.)
+    morn = df[low_light].groupby('xpe')[gs + A + E].mean() * 100.
+    arvo = df[~low_light].groupby('xpe')[gs + A + E].mean() * 100.
+
+    # save relative change df
+    (pd.concat([all, morn, arvo], keys=['day', 'mornNeve', 'arvo'])
+       .to_csv(fname, na_rep='', encoding='utf-8'))
+
+
+# create an impact df
+fname = fname.replace('relative_impacts', 'cumulative_impacts')
+
+if not os.path.isfile(fname):
+    df = dfs.copy()
+    df.replace(9999., 0., inplace=True)  # NaNs don't matter for cumuls
+    df.replace('9999.0', 0., inplace=True)  # NaNs don't matter for cumuls
 
     # cumulative fluxes
-    GPP = dfs.filter(like='A(').columns.to_list()
-    E = dfs.filter(like='E(').columns.to_list()
-    impacts = dfs.groupby('xpe')[GPP + E].sum()
+    GPP = df.filter(like='A(').columns.to_list()
+    E = df.filter(like='E(').columns.to_list()
+    impacts = df.groupby('xpe')[GPP + E].sum()
+    impacts[GPP] *= conv.umolCpm2ps_2_gCpm2phlfhr / 4.
+    impacts[E] *= conv.mmolH2Opm2ps_2_mmphlfhr / 4.
 
-    # upscale from 4 weeks to 1 year
-    weeks_p_y = 52.1429 / 4.
-    impacts[GPP] *= conv.umolCpm2ps_2_gCpm2phlfhr * weeks_p_y
-    impacts[E] *= conv.mmolH2Opm2ps_2_mmphlfhr * weeks_p_y
+    # add the water use efficiency
+    for mod in [e.split(')')[0].split('(')[1] for e in GPP]:
+
+        impacts['WUE(%s)' % (mod)] = (impacts['A(%s)' % (mod)] /
+                                      impacts['E(%s)' % (mod)])
+
+    # relative to Medlyn
+    WUE = impacts.filter(like='WUE(').columns.to_list()
+    relMed = impacts.copy()
+
+    for e in GPP[1:]:
+
+        relMed[e] = (relMed[e] - relMed['A(std1)']) / relMed['A(std1)'] * 100.
+
+    relMed['A(std1)'] = 0.
+
+    for e in E[1:]:
+
+        relMed[e] = (relMed[e] - relMed['E(std1)']) / relMed['E(std1)'] * 100.
+
+    relMed['E(std1)'] = 0.
+
+    for e in WUE[1:]:
+
+        relMed[e] = (relMed[e] - relMed['WUE(std1)']) / relMed['WUE(std1)'] * 100.
+
+    relMed['WUE(std1)'] = 0.
+
+    # relative to its ref calibration
+    relself = impacts.copy()
+    wet = [e for e in relself.index.to_list() if ((e.split('_')[-1] == 'wet') and not ('insample_wet' in e))]
+    inter = [e for e in relself.index.to_list() if ((e.split('_')[-1] == 'inter') and not ('insample_inter' in e))]
+
+    relself.loc[wet] = (relself.loc[wet] - relself.loc['insample_wet_wet']) / relself.loc['insample_wet_wet']
+    relself.loc[inter] = (relself.loc[inter] - relself.loc['insample_inter_inter']) / relself.loc['insample_inter_inter']
+
+    relself.loc[[e for e in relself.index.to_list() if 'insample_wet_wet' in e]] = 0.
+    relself.loc[[e for e in relself.index.to_list() if 'insample_inter_inter' in e]] = 0.
 
     # save impact df
-    impacts.to_csv(fname, na_rep='', encoding='utf-8')
-
-# create a RMSE df
-fname = fname.replace('cumulative_impacts', 'RMSEs')
-
-if not os.path.isfile(fname):
-
-    # the var gb RMSE will need to be corrected to account for inf v varying
-    rmses = model_performance(dfs)
-    rmses.to_csv(fname, index=False, na_rep='', encoding='utf-8')
+    (pd.concat([impacts, relMed, relself], keys=['actual', 'relMedlyn', 'relSelf'])
+       .to_csv(fname, na_rep='', encoding='utf-8'))

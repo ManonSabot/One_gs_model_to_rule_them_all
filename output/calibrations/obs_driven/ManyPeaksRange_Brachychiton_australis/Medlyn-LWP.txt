@@ -1,43 +1,41 @@
 
 [[Fit Statistics]]
     # fitting method   = differential_evolution
-    # function evals   = 390
+    # function evals   = 267
     # data points      = 104
     # variables        = 2
-    chi-square         = 4937718.46
-    reduced chi-square = 48409.0045
-    Akaike info crit   = 1123.87440
-    Bayesian info crit = 1129.16318
+    chi-square         = 5061685.93
+    reduced chi-square = 49624.3718
+    Akaike info crit   = 1126.45320
+    Bayesian info crit = 1131.74199
 [[Variables]]
-    sref:  1.76462128 +/- 0.28636426 (16.23%) (init = 2)
-    g1:    12.4999052 +/- 1.9176e-04 (0.00%) (init = 2.4942)
+    sref:  0.61286151 +/- 0.26530414 (43.29%) (init = 2)
+    g1:    12.4999038 +/- 1.8691e-06 (0.00%) (init = 2.4942)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 170
+    # function evals   = 133
     # data points      = 104
     # variables        = 2
-    chi-square         = 4937812.37
-    reduced chi-square = 48409.9252
-    Akaike info crit   = 1123.87637
-    Bayesian info crit = 1129.16516
+    chi-square         = 5055999.09
+    reduced chi-square = 49568.6185
+    Akaike info crit   = 1126.33629
+    Bayesian info crit = 1131.62508
 [[Variables]]
-    sref:  1.76858457 +/- 0.32832819 (18.56%) (init = 2)
-    g1:    12.4759463 +/- 0.93035074 (7.46%) (init = 2.4942)
-[[Correlations]] (unreported correlations are < 0.100)
-    C(sref, g1) =  0.482
+    sref:  0.58099429 +/- 0.26442222 (45.51%) (init = 2)
+    g1:    12.4999038 +/- 2.5625e-08 (0.00%) (init = 2.4942)
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing
-    # function evals   = 4064
+    # function evals   = 4028
     # data points      = 104
     # variables        = 2
-    chi-square         = 4937718.46
-    reduced chi-square = 48409.0045
-    Akaike info crit   = 1123.87440
-    Bayesian info crit = 1129.16318
+    chi-square         = 5061685.93
+    reduced chi-square = 49624.3718
+    Akaike info crit   = 1126.45320
+    Bayesian info crit = 1131.74199
 [[Variables]]
-    sref:  1.76462098 +/- 0.37103024 (21.03%) (init = 2)
-    g1:    12.4855522 +/- 2.77243709 (22.21%) (init = 2.4942)
+    sref:  0.61286132 +/- 0.33986264 (55.46%) (init = 2)
+    g1:    12.4855522 +/- 3.02563579 (24.23%) (init = 2.4942)
 [[Correlations]] (unreported correlations are < 0.100)
-    C(sref, g1) =  0.636
+    C(sref, g1) =  0.625

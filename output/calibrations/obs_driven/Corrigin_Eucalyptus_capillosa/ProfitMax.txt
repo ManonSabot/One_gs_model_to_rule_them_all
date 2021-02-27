@@ -1,36 +1,36 @@
 
 [[Fit Statistics]]
     # fitting method   = differential_evolution
-    # function evals   = 327
-    # data points      = 114
+    # function evals   = 337
+    # data points      = 132
     # variables        = 1
-    chi-square         = 76612.9170
-    reduced chi-square = 677.990416
-    Akaike info crit   = 744.176768
-    Bayesian info crit = 746.912966
+    chi-square         = 96244.9129
+    reduced chi-square = 734.693992
+    Akaike info crit   = 872.124131
+    Bayesian info crit = 875.006933
 [[Variables]]
-    kmax:  13.1205739 +/- 0.49244721 (3.75%) (init = 1)
+    kmax:  10.0330626 +/- 0.40258507 (4.01%) (init = 1)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 59
-    # data points      = 114
+    # function evals   = 131
+    # data points      = 132
     # variables        = 1
-    chi-square         = 75621.6473
-    reduced chi-square = 669.218118
-    Akaike info crit   = 742.692133
-    Bayesian info crit = 745.428332
+    chi-square         = 97925.9622
+    reduced chi-square = 747.526429
+    Akaike info crit   = 874.409788
+    Bayesian info crit = 877.292590
 [[Variables]]
-    kmax:  13.3580733 +/- 0.50006855 (3.74%) (init = 1)
+    kmax:  10.0941057 +/- 0.40937353 (4.06%) (init = 1)
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing
-    # function evals   = 2323
-    # data points      = 114
+    # function evals   = 2363
+    # data points      = 132
     # variables        = 1
-    chi-square         = 75956.5896
-    reduced chi-square = 672.182208
-    Akaike info crit   = 743.195945
-    Bayesian info crit = 745.932144
+    chi-square         = 96886.5819
+    reduced chi-square = 739.592229
+    Akaike info crit   = 873.001260
+    Bayesian info crit = 875.884062
 [[Variables]]
-    kmax:  13.2401804 +/- 0.02897700 (0.22%) (init = 1)
+    kmax:  11.1823585 +/- 0.49977009 (4.47%) (init = 1)

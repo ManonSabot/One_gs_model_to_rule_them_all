@@ -1,45 +1,45 @@
 
 [[Fit Statistics]]
     # fitting method   = differential_evolution
-    # function evals   = 294
+    # function evals   = 360
     # data points      = 92
     # variables        = 2
-    chi-square         = 1941541.29
-    reduced chi-square = 21572.6810
-    Akaike info crit   = 920.062779
-    Bayesian info crit = 925.106356
+    chi-square         = 1689662.64
+    reduced chi-square = 18774.0293
+    Akaike info crit   = 907.279080
+    Bayesian info crit = 912.322657
 [[Variables]]
-    sref:  0.93528130 +/- 0.16579798 (17.73%) (init = 2)
-    g1:    11.9588659 +/- 0.73552014 (6.15%) (init = 2.4942)
+    sref:  0.82801995 +/- 0.15584964 (18.82%) (init = 2)
+    g1:    11.2493639 +/- 0.65144437 (5.79%) (init = 2.4942)
 [[Correlations]] (unreported correlations are < 0.100)
-    C(sref, g1) =  0.759
+    C(sref, g1) =  0.767
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 113
+    # function evals   = 56
     # data points      = 92
     # variables        = 2
-    chi-square         = 1941541.29
-    reduced chi-square = 21572.6810
-    Akaike info crit   = 920.062779
-    Bayesian info crit = 925.106356
+    chi-square         = 1682515.95
+    reduced chi-square = 18694.6217
+    Akaike info crit   = 906.889126
+    Bayesian info crit = 911.932704
 [[Variables]]
-    sref:  0.93526034 +/- 0.16579741 (17.73%) (init = 2)
-    g1:    11.9588208 +/- 0.73552252 (6.15%) (init = 2.4942)
+    sref:  0.84507066 +/- 0.16081714 (19.03%) (init = 2)
+    g1:    11.5257929 +/- 0.69336728 (6.02%) (init = 2.4942)
 [[Correlations]] (unreported correlations are < 0.100)
-    C(sref, g1) =  0.759
+    C(sref, g1) =  0.783
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing
     # function evals   = 4037
     # data points      = 92
     # variables        = 2
-    chi-square         = 1941541.29
-    reduced chi-square = 21572.6810
-    Akaike info crit   = 920.062779
-    Bayesian info crit = 925.106356
+    chi-square         = 1689662.64
+    reduced chi-square = 18774.0293
+    Akaike info crit   = 907.279080
+    Bayesian info crit = 912.322657
 [[Variables]]
-    sref:  0.93527942 +/- 0.16579776 (17.73%) (init = 2)
-    g1:    11.9776774 +/- 0.73551891 (6.14%) (init = 2.4942)
+    sref:  0.82802464 +/- 0.15585007 (18.82%) (init = 2)
+    g1:    11.2561982 +/- 0.65144558 (5.79%) (init = 2.4942)
 [[Correlations]] (unreported correlations are < 0.100)
-    C(sref, g1) =  0.759
+    C(sref, g1) =  0.767

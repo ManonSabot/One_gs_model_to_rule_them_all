@@ -28,8 +28,8 @@ import itertools
 # plotting
 import matplotlib.pyplot as plt
 from cycler import cycler
-import scipy.signal as signal
-from pygam import LinearGAM  # fit the functional shapes
+import scipy.signal as signal  # smooth
+import statsmodels.api as sm  # smooth
 import matplotlib.ticker as ticker
 from matplotlib.lines import Line2D
 import string   # automate subplot lettering
@@ -58,9 +58,9 @@ class plt_setup(object):
 
         # colors
         if colours is None:  # use the default colours
-            colours = ['#1a1a1a', '#6f32c7', '#a182bf', '#1087e8', '#9be2fd',
-                       '#086527', '#33b15d', '#a6d96a', '#a2a203', '#ecec3a',
-                       '#a42565', '#f9aab7']
+            colours = ['#1a1a1a', '#6f32c7', '#a182bf', '#197aff', '#9be2fd',
+                       '#009231', '#a6d96a', '#6b3b07', '#ff8e12', '#ffe020',
+                       '#f10c80', '#ffc2cd']
 
         plt.rcParams['axes.prop_cycle'] = cycler(color=colours)
 
@@ -318,7 +318,12 @@ def plot_forcings(df, fname):
             ax.set_xticklabels(['week 1', 'week 2', 'week 3', 'week 4'])
 
         ax.yaxis.set_major_locator(ticker.MaxNLocator(4))
-        ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
+
+        if i < 2:
+            ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%d'))
+
+        else:
+            ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
 
         # subplot labelling
         t = ax.text(0.025, 0.925,
@@ -331,6 +336,50 @@ def plot_forcings(df, fname):
     render_ylabels(axes[1], 'Air temperature', '$^\circ$C')
     render_ylabels(axes[2], 'Vapour pressure deficit', 'kPa')
     render_ylabels(axes[3], 'Soil water content', 'm$^{3}$ m$^{-3}$')
+
+    fig.savefig(fname)
+    plt.close()
+
+
+def plot_target(df1, df2, fname):
+
+    fig, axes = plt.subplots(figsize=(5.5, 2), ncols=2, sharey=True)
+    plt.subplots_adjust(wspace=0.05)
+
+    # first, plot the atmospheric conditions
+    wavg, wmax, wmin = weekly(df1)
+    axes[0].plot(wavg['gs(std1)'], color='k')
+
+    # and the weekly diurnal uncertainties
+    axes[0].fill_between(wmax['gs(std1)'].index, wmin['gs(std1)'],
+                         wmax['gs(std1)'], facecolor='lightgrey',
+                         edgecolor='none')
+
+    wavg, wmax, wmin = weekly(df2)
+    axes[1].plot(wavg['gs(std1)'], color='k')
+
+    # and the weekly diurnal uncertainties
+    axes[1].fill_between(wmax['gs(std1)'].index, wmin['gs(std1)'],
+                         wmax['gs(std1)'], facecolor='lightgrey',
+                         edgecolor='none')
+
+    for i, ax in enumerate(axes):
+
+        # subplot labelling
+        t = ax.text(0.015, 0.925,
+                    r'\textbf{(%s)}' % (string.ascii_lowercase[i]),
+                    transform=ax.transAxes, weight='bold')
+        t.set_bbox(dict(boxstyle='round,pad=0.1', fc='w', ec='none', alpha=0.8))
+
+        ax.set_xlim([0, len(wavg)])
+        ax.set_xticks([48. * 0.5, 48. * 1.5, 48. * 2.5, 48. * 3.5])
+        ax.set_xticklabels(['week 1', 'week 2', 'week 3', 'week 4'])
+        ax.yaxis.set_major_locator(ticker.MaxNLocator(4))
+        ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.2f'))
+        ax.set_ylim(0.02, 0.085)
+
+    # axes labels
+    render_ylabels(axes[0],'$g_{s}$', r'mol m$^{-2}$ s$^{-1}$')
 
     fig.savefig(fname)
     plt.close()
@@ -396,10 +445,19 @@ def plot_diag_target(df, fname, Ca=40., P50=None, P88=None):
     davg.where(davg < 9999., inplace=True)
     (davg[davg.filter(like='gs(').columns]
          .where(davg[davg.filter(like='gs(').columns] > 1.e-9, inplace=True))
-    davg = davg[davg != 0].groupby(['hod']).mean()
+    davg = davg[~np.isclose(davg, 0.)].groupby(['hod']).mean()
 
-    # remove hod
-    davg = davg[davg[davg.filter(like='gs(').columns].sum(axis=1) > 0.]
+    # remove unnecessary hod
+    davg = davg[davg[davg.filter(like='gs(').columns].sum(axis=1) != 0.]
+
+    # smooth the lines
+    lowess = sm.nonparametric.lowess
+
+    for col in davg.columns.to_list():
+
+        where = davg[np.logical_and(davg.index > 6.5, davg.index < 17.5)].index
+        davg.loc[where, col] = lowess(davg.loc[where, col], where, frac=0.3,
+                                      return_sorted=False)
 
     # inset axis for LWP
     if any(davg[davg.filter(like='Pleaf(').columns] < P50):
@@ -412,11 +470,8 @@ def plot_diag_target(df, fname, Ca=40., P50=None, P88=None):
         iax.axhline(P50, linestyle=':', linewidth=1.)
         iax.axhline(P88, linestyle=':', linewidth=1.)
 
-    # smooth the min-max diurnals
-    B, A = signal.butter(3, 0.4)
-
-    for mod in ['std1', 'tuz', 'sox1', 'wue', 'cmax', 'pmax', 'pmax2', 'cgn',
-                'lcst', 'sox2', 'cap', 'mes']:
+    for mod in ['std1', 'tuz', 'sox1', 'wue', 'cmax', 'pmax', 'cgn', 'sox2',
+                'pmax2', 'lcst', 'cap', 'mes']:
 
         if mod == 'std1':
             lw = 4.
@@ -426,24 +481,18 @@ def plot_diag_target(df, fname, Ca=40., P50=None, P88=None):
             lw = plt.rcParams['lines.linewidth']
             alpha = 0.8
 
-        axes[0].plot(davg['gs(%s)' % (mod)].rolling(window=2).mean(),
-                     linewidth=lw, alpha=alpha, label=which_model(mod))
-        axes[1].plot(davg['Ci(%s)' % (mod)].rolling(window=2).mean() / Ca,
-                     linewidth=lw, alpha=alpha)
+        axes[0].plot(davg['gs(%s)' % (mod)], linewidth=lw, alpha=alpha,
+                     label=which_model(mod))
+        axes[1].plot(davg['Ci(%s)' % (mod)] / Ca, linewidth=lw,
+                     alpha=alpha)
 
-        if mod == 'tuz':
-            iax.plot(davg['Pleaf(%s)' % (mod)].rolling(window=2).mean(),
-                     linewidth=plt.rcParams['lines.linewidth'], alpha=alpha)
-            axes[2].plot(davg['Pleaf(%s)' % (mod)].rolling(window=2).mean(),
-                         linewidth=lw, alpha=alpha)
-
-        elif any(davg['Pleaf(%s)' % (mod)] < P50):
-            iax.plot(davg['Pleaf(%s)' % (mod)].rolling(window=2).mean(),
+        if (mod != 'std1') and any(davg['Pleaf(%s)' % (mod)] < P50):
+            iax.plot(davg['Pleaf(%s)' % (mod)],
                      linewidth=lw, alpha=alpha)
             next(axes[2]._get_lines.prop_cycler)
 
         elif mod != 'std1':
-            axes[2].plot(davg['Pleaf(%s)' % (mod)].rolling(window=2).mean(),
+            axes[2].plot(davg['Pleaf(%s)' % (mod)],
                          linewidth=lw, alpha=alpha)
             next(iax._get_lines.prop_cycler)
 
@@ -451,15 +500,19 @@ def plot_diag_target(df, fname, Ca=40., P50=None, P88=None):
             next(axes[2]._get_lines.prop_cycler)
             next(iax._get_lines.prop_cycler)
 
-        axes[3].plot(davg['A(%s)' % (mod)].rolling(window=2).mean(),
+        axes[3].plot(davg['A(%s)' % (mod)],
                      linewidth=lw, alpha=alpha)
-        axes[4].plot(davg['E(%s)' % (mod)].rolling(window=2).mean(),
+        axes[4].plot(davg['E(%s)' % (mod)],
                      linewidth=lw, alpha=alpha)
 
+    # adjust LWP axis limits
+    bottom, __ = axes[2].get_ylim()
+    axes[2].set_ylim(bottom, 0.175)
+
     # axes labels
-    render_ylabels(axes[0], r'$g_{s}$', r'mol m$^{-2}$ s$^{-1}$')
-    render_ylabels(axes[1], r'$C_{i}$ : $C_{a}$', '-')
-    render_ylabels(axes[2], r'$\Psi$$_{l}$', 'MPa')
+    render_ylabels(axes[0], r'$g_s$', r'mol m$^{-2}$ s$^{-1}$')
+    render_ylabels(axes[1], r'$C_i$ : $C_{a}$', '-')
+    render_ylabels(axes[2], r'$\Psi$$_l$', 'MPa')
     render_ylabels(axes[3], r'$A_n$', '$\mu$mol m$^{-2}$ s$^{-1}$')
     render_ylabels(axes[4], r'$E$', 'mmol m$^{-2}$ s$^{-1}$')
     axes[-1].set_xlabel('hour of day (h)')
@@ -479,7 +532,7 @@ def plot_diag_target(df, fname, Ca=40., P50=None, P88=None):
         else:
             ax.set_xticklabels([])
 
-        if (ax == axes[0]) or (ax == axes[-1]):  # gs and Ci:Ca
+        if (ax == axes[0]) or (ax == axes[1]):  # gs and Ci:Ca
             ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.2f'))
 
         else:
@@ -492,7 +545,7 @@ def plot_diag_target(df, fname, Ca=40., P50=None, P88=None):
         t.set_bbox(dict(boxstyle='round,pad=0.1', fc='w', ec='none', alpha=0.8))
 
     iax.xaxis.set_major_locator(plt.NullLocator())
-    iax.set_yticks([-0.5, round(P50)])
+    iax.set_yticks([-1., round(P50), round(P88)])
     iax.tick_params(axis='y', colors='grey')
 
     # split the legend in several parts
@@ -511,8 +564,12 @@ def plot_impact_summary(df, fname):
     plt.subplots_adjust(hspace=0.05, wspace=0.065)
     axes = axes.flat
 
-    mods = ['tuz', 'sox1', 'wue', 'cmax', 'pmax', 'pmax2', 'cgn', 'lcst',
-            'sox2', 'cap', 'mes']
+    mods = ['tuz', 'sox1', 'wue', 'cmax', 'pmax', 'cgn', 'sox2',
+            'pmax2', 'lcst', 'cap', 'mes']
+
+    # exclude unnecessary data
+    df = df[df['Unnamed: 0'] == 'actual']
+    df.drop(df.filter(like='WUE(').columns.to_list(), axis=1, inplace=True)
 
     GPP = df.filter(like='A(').columns.to_list()
     E = df.filter(like='E(').columns.to_list()
@@ -565,13 +622,13 @@ def plot_impact_summary(df, fname):
         if i > 1:
             ax.set_xticks(np.arange(0.4, 4.5))
             ax.set_xticklabels(['Wet', 'Inter.', 'Dry', '2 x $D_a$',
-                                '1.5 x $C_a$'])
+                                '2 x $C_a$'])
 
             if i < 3:
-                render_ylabels(ax, r'$E$', r'mm y$^{-1}$')
+                render_ylabels(ax, r'$E$', r'mm w$^{-1}$')
 
         elif i < 1:
-            render_ylabels(ax, 'GPP', r'gC y$^{-1}$')
+            render_ylabels(ax, 'GPP', r'gC m$^{-2}$ w$^{-1}$')
             ax.set_title('Wet calibration')
 
         else:
@@ -594,6 +651,9 @@ def plot_impact_summary(df, fname):
         #ax.grid(which='major', axis='y')
         ax.xaxis.grid(which='minor')
         ax.yaxis.grid(which='major')
+
+        __, top = ax.get_ylim()
+        ax.set_ylim(0., top)
 
     # legend
     handles, labels = ax.get_legend_handles_labels()
@@ -630,6 +690,16 @@ figname = os.path.join(figdir, 'training_forcing_soil_moisture.png')
 if not os.path.isfile(figname):
     plot_forcings(df1, figname)
 
+# plot the calibration targets
+fname2 = os.path.join(ifdir.replace('simulation', 'calibration'),
+                      'training_wet_y.csv')
+df2, __ = read_csv(fname2)
+df3, __ = read_csv(fname2.replace('wet_y', 'inter_y'))
+figname = os.path.join(figdir, 'training_targets.png')
+
+if not os.path.isfile(figname):
+    plot_target(df2, df3, figname)
+
 for training in ['wet', 'inter']:
 
     ifdir = ifdir.replace('simulations', 'calibrations')
@@ -639,7 +709,7 @@ for training in ['wet', 'inter']:
     fname = os.path.join(opath, 'insample_%s_%s.csv' % (training, training))
     df2, __ = read_csv(fname)
 
-    figname = os.path.join(figdir, 'calib_variables_%s.png' % (training))
+    figname = os.path.join(figdir, 'calib_variables_%s.jpg' % (training))
 
     if not os.path.isfile(figname):
         plot_diag_target(df2, figname, Ca=df1.loc[0, 'CO2'],
@@ -658,7 +728,7 @@ df = pd.read_csv(os.path.join(ofdir, 'all_cumulative_impacts.csv'))
 df = df[df['xpe'].isin(univar_xpes)]
 df.set_index('xpe', inplace=True)
 
-figname = os.path.join(figdir, 'cummulative_impacts.png')
+figname = os.path.join(figdir, 'cumulative_impacts.jpg')
 
 if not os.path.isfile(figname):
     plot_impact_summary(df, figname)

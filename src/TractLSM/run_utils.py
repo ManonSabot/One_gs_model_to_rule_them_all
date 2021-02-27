@@ -154,6 +154,7 @@ def write_csv(fname, df, dic):
     df.columns = pd.MultiIndex.from_tuples(these_headers)
 
     # write the csv
-    df.to_csv(fname, index=False, na_rep='', encoding='utf-8')
+    if fname is not None:
+        df.to_csv(fname, index=False, na_rep='', encoding='utf-8')
 
     return df

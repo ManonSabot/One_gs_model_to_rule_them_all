@@ -28,34 +28,14 @@ import numpy as np  # array manipulations, math operators
 
 # own modules
 from TractLSM import conv, cst  # unit converter & general constants
-from TractLSM.SPAC.leaf import arrhen
+from TractLSM.SPAC.leaf import arrhen, adjust_low_T
 from TractLSM.SPAC import vpsat, hydraulics
 from TractLSM.SPAC import leaf_temperature, leaf_energy_balance
 from TractLSM.SPAC import calc_photosynthesis, rubisco_limit
-from TractLSM.CH2OCoupler import Ci_sup_dem
+from TractLSM.CH2OCoupler import Ci_sup_dem, A_trans
 
 
 # ======================================================================
-
-def dEoAdXi(p, trans, Ci, inf_gb=False):
-
-    try:  # is Tleaf one of the input fields?
-        Tleaf = p.Tleaf
-
-    except (IndexError, AttributeError, ValueError):  # calc. Tleaf
-        Tleaf, __ = leaf_temperature(p, trans, inf_gb=inf_gb)
-
-    # saturation vapour pressure of water at T
-    esat_l = vpsat(Tleaf)  # kPa
-    esat_a = vpsat(p.Tair)  # kPa
-
-    # get the leaf CO2 diff. conductance
-    Dleaf = (esat_l - (esat_a - p.VPD))  # leaf-air vpd, kPa
-
-    dEoA = conv.MILI * conv.GcvGw * (Dleaf / p.CO2) / ((1. - Ci / p.CO2)) ** 2.
-
-    return dEoA
-
 
 def dVmaxoAdXi(p, trans, Ci, inf_gb=False):
 
@@ -72,19 +52,21 @@ def dVmaxoAdXi(p, trans, Ci, inf_gb=False):
     gamstar = arrhen(p.gamstar25, p.Egamstar, Tref, Tleaf)
 
     # Michaelis-Menten constants
-    Kc = arrhen(p.Kc25, p.Ec, Tref, Tleaf)  # cst for carboxylation, Pa
-    Ko = arrhen(p.Ko25, p.Eo, Tref, Tleaf)  # cst for oxygenation, kPa
-    Ko = np.maximum(cst.zero, Ko)  # we don't want zeros in Km div
+    #Kc = arrhen(p.Kc25, p.Ec, Tref, Tleaf)  # cst for carboxylation, Pa
+    #Ko = arrhen(p.Ko25, p.Eo, Tref, Tleaf)  # cst for oxygenation, kPa
+    #Ko = np.maximum(cst.zero, Ko)  # we don't want zeros in Km div
 
     # Michaelis-Menten constant for O2/CO2
-    Km = Kc * (1. + p.O2 / Ko)
+    #Km = Kc * (1. + p.O2 / Ko)
 
-    dVmaxoA = -(p.CO2 * (Km + gamstar)) / ((Ci - gamstar) ** 2.)
+    #dVmaxoA = -(p.CO2 * (Km + gamstar)) / ((Ci - gamstar) ** 2.)
+    Vmax = arrhen(p.Vmax25, p.Ev, Tref, Tleaf, deltaS=p.deltaSv, Hd=p.Hdv)
+    Vmax = adjust_low_T(Vmax, Tleaf)
 
-    return dVmaxoA
+    return Vmax  #dVmaxoA
 
 
-def least_cost(p, photo='Farquhar', res='low', inf_gb=False):
+def least_cost(p, photo='Farquhar', res='low', inf_gb=False, deriv=False):
 
     """
     Finds the instantaneous optimal C gain for a given C cost.
@@ -128,20 +110,31 @@ def least_cost(p, photo='Farquhar', res='low', inf_gb=False):
     # energy balance
     P, trans = hydraulics(p, res=res, kmax=p.kmaxLC)
 
-    # expression of optimization
     Ci, mask = Ci_sup_dem(p, trans, photo=photo, res=res, inf_gb=inf_gb)
-    expr = np.abs(dEoAdXi(p, trans[mask], Ci, inf_gb=inf_gb) + p.Eta *
-                  dVmaxoAdXi(p, trans[mask], Ci, inf_gb=inf_gb))
+    gc, gs, gb, ww = leaf_energy_balance(p, trans[mask], inf_gb=inf_gb)
 
-    # deal with edge cases by rebounding the solution
-    gc, gs, gb, __ = leaf_energy_balance(p, trans[mask], inf_gb=inf_gb)
+    # expression of optimization
+    expr = ((p.Eta * conv.MILI * trans[mask] +
+            dVmaxoAdXi(p, trans[mask], Ci, inf_gb=inf_gb)) /
+            A_trans(p, trans[mask], Ci, inf_gb=inf_gb))
+
+    if deriv:
+        where = np.where(np.diff(expr, 2) / np.diff(Ci / p.CO2, 2) > 0.)[0]
+        expr = np.abs(np.gradient(expr, Ci / p.CO2))
 
     try:
         if inf_gb:  # check on valid range
             check = expr[gc > cst.zero]
 
+            if deriv:
+                check = expr[where][gc[where] > cst.zero]
+
         else:  # further constrain the realm of possible gs
             check = expr[np.logical_and(gc > cst.zero, gs < 1.5 * gb)]
+
+            if deriv:
+                check = expr[where][np.logical_and(gc[where] > cst.zero,
+                                                   gs[where] < 1.5 * gb)]
 
         idx = np.isclose(expr, min(check))
         idx = [list(idx).index(e) for e in idx if e]

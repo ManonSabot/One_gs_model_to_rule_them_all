@@ -28,7 +28,7 @@ from TractLSM import conv, cst  # unit converter
 from TractLSM.SPAC import hydraulics, dcost_dpsi
 from TractLSM.SPAC import leaf_energy_balance, leaf_temperature
 from TractLSM.SPAC import calc_photosynthesis, rubisco_limit
-from TractLSM.CH2OCoupler import Ci_sup_dem, dAdgs
+from TractLSM.CH2OCoupler import Ci_sup_dem, A_trans
 
 
 #==============================================================================
@@ -80,7 +80,8 @@ def Cmax_gs(p, photo='Farquhar', res='low', inf_gb=False):
     # expression of optimization
     Ci, mask = Ci_sup_dem(p, trans, photo=photo, res=res, inf_gb=inf_gb)
     gc, gs, gb, __ = leaf_energy_balance(p, trans[mask], inf_gb=inf_gb)
-    expr = np.abs(dAdgs(p, gs, gb, Ci) - dcost_dpsi(p, P[mask], gs))
+    expr = np.abs(np.gradient(A_trans(p, trans[mask], Ci, inf_gb=inf_gb),
+                              P[mask]) - dcost_dpsi(p, P[mask], gs))
 
     try:
         if inf_gb:  # check on valid range

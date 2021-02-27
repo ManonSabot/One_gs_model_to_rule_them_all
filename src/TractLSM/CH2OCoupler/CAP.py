@@ -33,12 +33,12 @@ from TractLSM.SPAC.leaf import arrhen
 from TractLSM.SPAC import hydraulics, phiLWP
 from TractLSM.SPAC import leaf_energy_balance, leaf_temperature
 from TractLSM.SPAC import calc_photosynthesis, rubisco_limit
-from TractLSM.CH2OCoupler import Ci_sup_dem, dAdgs
+from TractLSM.CH2OCoupler import Ci_sup_dem, A_trans
 
 
 # ======================================================================
 
-def CAP(p, photo='Farquhar', res='low', inf_gb=False):
+def CAP(p, photo='Farquhar', res='low', inf_gb=False, deriv=False):
 
     """
     Finds the instantaneous optimal C gain for a given C cost.
@@ -95,10 +95,13 @@ def CAP(p, photo='Farquhar', res='low', inf_gb=False):
     sVmax25 = p.Vmax25 * phi
     Ci, mask = Ci_sup_dem(p, trans, photo=photo, res=res, Vmax25=sVmax25,
                           inf_gb=inf_gb)
-    An, Aj, Ac = calc_photosynthesis(p, trans[mask], Ci, photo,
+    An, Aj, Ac = calc_photosynthesis(p, trans[mask], Ci, photo=photo,
                                      Vmax25=sVmax25[mask], inf_gb=inf_gb)
     gc, gs, gb, __ = leaf_energy_balance(p, trans[mask], inf_gb=inf_gb)
-    expr = np.abs(np.gradient(An, gs))
+    expr = An
+
+    if deriv:
+        expr = np.abs(np.gradient(expr, gs))
 
     try:
         if inf_gb:  # check on valid range
@@ -107,7 +110,11 @@ def CAP(p, photo='Farquhar', res='low', inf_gb=False):
         else:  # further constrain the realm of possible gs
             check = expr[np.logical_and(gc > cst.zero, gs < 1.5 * gb)]
 
-        idx = np.isclose(expr, min(check))
+        idx = np.isclose(expr, max(check))
+
+        if deriv:
+            idx = np.isclose(expr, min(check))
+            
         idx = [list(idx).index(e) for e in idx if e]
 
         if inf_gb:  # check for algo. "overshooting" due to inf. gb
