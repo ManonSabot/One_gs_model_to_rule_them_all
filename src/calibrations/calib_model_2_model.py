@@ -106,12 +106,8 @@ def soil_water(df, profile):
 
     if profile == 'inter':
         start = 0.9 * sw[0]
-        rate = -5. / len(df) * (np.log(sw[0]) - np.log(df['fc'][0]))
-        sw_min = (df['fc'][0] + df['pwp'][0]) / 2.
-
-        # alternative
-        #start = sw[0]
-        #rate = -8. / len(df) * (np.log(sw[0]) - np.log(df['fc'][0]))
+        rate = -6. / len(df) * (np.log(sw[0]) - np.log(df['fc'][0]))
+        sw_min = df['pwp'][0]
 
     for i in range(len(df)):
 
@@ -168,7 +164,7 @@ def check_X_Y(swaters):
             df1.fillna(method='ffill', inplace=True)
 
             __ = hrun(fname2, df1, len(df1.index), 'Farquhar',
-                      models=['Medlyn1'], inf_gb=True)
+                      models=['Medlyn'], inf_gb=True)
 
     return
 
@@ -255,7 +251,7 @@ def prep_training_N_target(profile, sub=None):
     df1.fillna(method='ffill', inplace=True)
 
     # drop everything below min threshold for photosynthesis and reindex
-    Y = np.asarray(df2['gs(std1)'][df1['PPFD'] > 50.]) * 1000.  # mmol m-2 s-1
+    Y = np.asarray(df2['gs(std)'][df1['PPFD'] > 50.]) * 1000.  # mmol m-2 s-1
     X = df1[df1['PPFD'] > 50.]
     X.reset_index(inplace=True, drop=True)
 
@@ -271,7 +267,7 @@ def prep_training_N_target(profile, sub=None):
 
 #==============================================================================
 
-to_fit = False
+to_fit = True
 sample = None # None, 1, 2, or 3
 
 swaters = ['wet', 'inter']  # two different soil moisture profiles
@@ -305,14 +301,11 @@ if to_fit:
             os.makedirs(opath)
 
         # use a non-linear least square minimiser to train the models
-        for test in ['differential_evolution', 'basinhopping', 'nelder',
-                     'powell', 'cobyla', 'dual_annealing', 'ampgo']:  # 'emcee',
+        for test in ['nelder', 'powell', 'cobyla']:
+            #for test in ['differential_evolution', 'basinhopping', 'dual_annealing', 'ampgo']:
 
             XX = X.copy()
             nlmfit = NLMFIT(method=test, store=opath)
-
-            if swater == 'inter':  # no point in calibrating this when wet
-                __ = nlmfit.run(XX, Y, 'Medlyn-LWP')
 
             __ = nlmfit.run(XX, Y, 'Eller')
             __ = nlmfit.run(XX, Y, 'SOX-OPT')

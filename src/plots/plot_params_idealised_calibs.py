@@ -729,6 +729,6 @@ if __name__ == "__main__":
     fname2 = 'top_3_fits.csv'  # 3 best solvers
     fname3 = 'best_fit.csv'  # best solvers
     calibs = 'both'  # or wet or inter
-    orientation = 'portrait'  # or landscape or portrait
+    orientation = 'landscape'  # or landscape or portrait
 
     main(fname1, fname2, fname3, calibs=calibs, orientation=orientation)

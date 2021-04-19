@@ -126,7 +126,7 @@ def calc_perf(df1, df2, var='gs', metric='NSE'):
         elif (metric == 'BIC') or (metric == 'RBIC'):
             N = 1
 
-            if (('std2' in e) or ('sox2' in e) or ('wue' in e) or ('cgn' in e)
+            if (('std' in e) or ('sox2' in e) or ('wue' in e) or ('cgn' in e)
                 or ('lcst' in e) or ('cap' in e) or ('mes' in e)):
                 N = 2
 
@@ -244,7 +244,7 @@ for file in os.listdir(ipath):  # loop over all the possibilities
 
     if not os.path.isfile(fname):  # create file if it doesn't exist
         df2 = hrun(fname, df1, len(df1.index), 'Farquhar',
-                   models=['Medlyn2', 'Tuzet', 'SOX12', 'WUE', 'CMax',
+                   models=['Medlyn', 'Tuzet', 'SOX12', 'WUE', 'CMax',
                            'ProfitMax', 'CGain', 'ProfitMax2', 'LeastCost',
                            'CAP', 'MES'], resolution='high')
         df2.columns = df2.columns.droplevel(level=1)

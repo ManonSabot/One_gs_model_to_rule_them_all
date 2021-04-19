@@ -127,8 +127,8 @@ def soil_water(df, profile):
 
     elif profile == 'inter':
         start = 0.9 * sw[0]
-        rate = -5. / len(df) * (np.log(sw[0]) - np.log(df['fc'][0]))
-        sw_min = (df['fc'][0] + df['pwp'][0]) / 2.
+        rate = -6. / len(df) * (np.log(sw[0]) - np.log(df['fc'][0]))
+        sw_min = df['pwp'][0] #+ (df['fc'][0] + df['pwp'][0]) / 8.  #(df['fc'][0] + df['pwp'][0]) / 2.
 
     elif profile == 'dry':
         start = 0.8 * sw[0]
@@ -191,11 +191,8 @@ def weekly(df, tidy=False):
 
 def which_model(short):
 
-    if short == 'std1':
-        lab = r'Medlyn-$\beta$'
-
-    elif short == 'std2':
-        lab = r'Medlyn-$f_{\varPsi_{l,pd}}$'
+    if short == 'std':
+        lab = 'Medlyn'
 
     elif short == 'tuz':
         lab = 'Tuzet'
@@ -348,19 +345,19 @@ def plot_target(df1, df2, fname):
 
     # first, plot the atmospheric conditions
     wavg, wmax, wmin = weekly(df1)
-    axes[0].plot(wavg['gs(std1)'], color='k')
+    axes[0].plot(wavg['gs(std)'], color='k')
 
     # and the weekly diurnal uncertainties
-    axes[0].fill_between(wmax['gs(std1)'].index, wmin['gs(std1)'],
-                         wmax['gs(std1)'], facecolor='lightgrey',
+    axes[0].fill_between(wmax['gs(std)'].index, wmin['gs(std)'],
+                         wmax['gs(std)'], facecolor='lightgrey',
                          edgecolor='none')
 
     wavg, wmax, wmin = weekly(df2)
-    axes[1].plot(wavg['gs(std1)'], color='k')
+    axes[1].plot(wavg['gs(std)'], color='k')
 
     # and the weekly diurnal uncertainties
-    axes[1].fill_between(wmax['gs(std1)'].index, wmin['gs(std1)'],
-                         wmax['gs(std1)'], facecolor='lightgrey',
+    axes[1].fill_between(wmax['gs(std)'].index, wmin['gs(std)'],
+                         wmax['gs(std)'], facecolor='lightgrey',
                          edgecolor='none')
 
     for i, ax in enumerate(axes):
@@ -470,10 +467,10 @@ def plot_diag_target(df, fname, Ca=40., P50=None, P88=None):
         iax.axhline(P50, linestyle=':', linewidth=1.)
         iax.axhline(P88, linestyle=':', linewidth=1.)
 
-    for mod in ['std1', 'tuz', 'sox1', 'wue', 'cmax', 'pmax', 'cgn', 'sox2',
+    for mod in ['std', 'tuz', 'sox1', 'wue', 'cmax', 'pmax', 'cgn', 'sox2',
                 'pmax2', 'lcst', 'cap', 'mes']:
 
-        if mod == 'std1':
+        if mod == 'std':
             lw = 4.
             alpha = 1.
 
@@ -486,12 +483,12 @@ def plot_diag_target(df, fname, Ca=40., P50=None, P88=None):
         axes[1].plot(davg['Ci(%s)' % (mod)] / Ca, linewidth=lw,
                      alpha=alpha)
 
-        if (mod != 'std1') and any(davg['Pleaf(%s)' % (mod)] < P50):
+        if (mod != 'std') and any(davg['Pleaf(%s)' % (mod)] < P50):
             iax.plot(davg['Pleaf(%s)' % (mod)],
                      linewidth=lw, alpha=alpha)
             next(axes[2]._get_lines.prop_cycler)
 
-        elif mod != 'std1':
+        elif mod != 'std':
             axes[2].plot(davg['Pleaf(%s)' % (mod)],
                          linewidth=lw, alpha=alpha)
             next(iax._get_lines.prop_cycler)
@@ -600,9 +597,9 @@ def plot_impact_summary(df, fname):
         pos = np.arange(float(len(sub)) + 1)
 
         # ref model
-        ax.hlines(sub[sub.filter(like='std1').columns], pos[:-1] - 0.1,
+        ax.hlines(sub[sub.filter(like='std').columns], pos[:-1] - 0.1,
                   pos[1:] - 0.1, linewidth=0.75, alpha=0.75, zorder=20,
-                  label=which_model('std1'))
+                  label=which_model('std'))
         pos += 0.0275  # necessary alignment when plotting
 
         for j, p in enumerate(pos[:-1]):

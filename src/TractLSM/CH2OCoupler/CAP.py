@@ -81,14 +81,8 @@ def CAP(p, photo='Farquhar', res='low', inf_gb=False, deriv=False):
 
     """
 
-    # hydraulics
-    P = hydraulics(p, res=res, Kirchhoff=False, Pcrit=p.PcritC)
-    ksr = np.maximum(p.ksrmaxC * (p.Psie / p.Ps) ** (2. + 3. / p.bch),
-                     p.krlC / 100.)  # criteria to limit crazy low results
-    ksl = 1. / (1. / ksr + 1. / p.krlC)  # soil-leaf hydraulic conductance
-    trans = ksl * (p.Ps - P) * conv.FROM_MILI  # mol.s-1.m-2
-
-    # reduction factor?
+    # hydraulics and reduction factor
+    P, trans = hydraulics(p, res=res, kmax=p.krlC, Pcrit=p.PcritC)
     phi = phiLWP(P, p.PcritC)
 
     # expression of optimisation
@@ -114,7 +108,7 @@ def CAP(p, photo='Farquhar', res='low', inf_gb=False, deriv=False):
 
         if deriv:
             idx = np.isclose(expr, min(check))
-            
+
         idx = [list(idx).index(e) for e in idx if e]
 
         if inf_gb:  # check for algo. "overshooting" due to inf. gb

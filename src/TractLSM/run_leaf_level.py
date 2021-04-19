@@ -105,12 +105,6 @@ def over_time(idata, step, Nsteps, dic, photo, resolution, inf_gb, temporal,
     # tuple of return values
     tpl_return = ()
 
-    # if Medlyn case number >= 1
-    Mcases = [key for key in dic.keys() if 'std' in key]
-
-    if len(Mcases) >= 1:  # dic to store each Medlyn case values
-        m_cases = [sub.replace('std', '') for sub in Mcases]
-
     # if SOX case number >= 1
     Scases = [key for key in dic.keys() if 'sox' in key]
 
@@ -132,30 +126,18 @@ def over_time(idata, step, Nsteps, dic, photo, resolution, inf_gb, temporal,
     else:  # day time
         p.Rnet = net_radiation(p)  # radiative conditions
 
-        if len(Mcases) >= 1:  # standard model (Medlyn)
+        if 'std' in dic.keys():  # standard model (Medlyn)
+            try:
+                dic['std']['A'], dic['std']['Ci'], dic['std']['Rublim'], \
+                    dic['std']['E'], dic['std']['gs'], dic['std']['gb'], \
+                    dic['std']['Tleaf'], dic['std']['Pleaf'] = \
+                        solve_std(p, p.sw, photo=photo, res=resolution,
+                                  inf_gb=inf_gb)
 
-            for icase in range(len(m_cases)):
-
-                STD = 'std%s' % (m_cases[icase])
-                this_case = int(m_cases[icase])
-
-                if (this_case == 1) and (dic[STD]['Ps'] <= -1.5):  # wilted
-                        dic[STD]['A'], dic[STD]['Ci'], dic[STD]['Rublim'], \
-                            dic[STD]['E'], dic[STD]['gs'], dic[STD]['gb'], \
-                            dic[STD]['Tleaf'], dic[STD]['Pleaf'] = (9999.,) * 8
-
-                else:
-                    try:
-                        dic[STD]['A'], dic[STD]['Ci'], dic[STD]['Rublim'], \
-                            dic[STD]['E'], dic[STD]['gs'], dic[STD]['gb'], \
-                            dic[STD]['Tleaf'], dic[STD]['Pleaf'] = \
-                                solve_std(p, p.sw, photo=photo, res=resolution,
-                                          case=this_case, inf_gb=inf_gb)
-
-                    except (IndexError, ValueError):  # no solve
-                        dic[STD]['A'], dic[STD]['Ci'], dic[STD]['Rublim'], \
-                            dic[STD]['E'], dic[STD]['gs'], dic[STD]['gb'], \
-                            dic[STD]['Tleaf'], dic[STD]['Pleaf']  = (9999.,) * 8
+            except (IndexError, ValueError):  # no solve
+                dic['std']['A'], dic['std']['Ci'], dic['std']['Rublim'], \
+                    dic['std']['E'], dic['std']['gs'], dic['std']['gb'], \
+                    dic['std']['Tleaf'], dic['std']['Pleaf']  = (9999.,) * 8
 
         if 'tuz' in dic.keys():  # Tuzet
             try:
@@ -371,22 +353,10 @@ def run(fname, df, Nsteps, photo, models=['Medlyn', 'ProfitMax'],
     # for the output dic, the order of the keys matters!
     subdic2 = collections.OrderedDict([(key, None) for key in dic_keys])
 
-    # are any specific Medlyn cases specified?
-    Mcases = find_model_cases(models, 'Medlyn')
-
-    # if cases aren't specified, then set to the default Medlyn case
-    if (len(Mcases) < 1) and (('Medlyn' in models) or
-       ('Medlyn'.lower() in models)):
-        dic['std1'] = subdic.copy()
-        output_dic['std1'] = subdic2.copy()
-
-    # if several Medlyn cases
-    if len(Mcases) >= 1:
-
-        for case in Mcases:
-
-            dic['std%d' % (case)] = subdic.copy()
-            output_dic['std%d' % (case)] = subdic2.copy()
+    # Medlyn model
+    if ('Medlyn' in models) or ('Medlyn'.lower() in models):
+        dic['std'] = subdic.copy()
+        output_dic['std'] = subdic2.copy()
 
     # Tuzet model
     if ('Tuzet' in models) or ('Tuzet'.lower() in models):

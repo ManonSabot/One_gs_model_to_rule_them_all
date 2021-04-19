@@ -81,13 +81,8 @@ def MES(p, photo='Farquhar', res='low', inf_gb=False, deriv=False):
 
     """
 
-    # hydraulics
-    P = hydraulics(p, res=res, Kirchhoff=False, Pcrit=p.PcritC)
-    ksr = p.ksrmaxM * (p.Psie / np.maximum(p.Ps, -1.2)) ** (2. + 3. / p.bch)
-    ksl = 1. / (1. / ksr + 1. / p.krlM)  # soil-leaf hydraulic conductance
-    trans = ksl * (p.Ps - P) * conv.FROM_MILI  # mol.s-1.m-2
-
-    # reduction factor?
+    # hydraulics and reduction factor
+    P, trans = hydraulics(p, res=res, kmax=p.krlM, Pcrit=p.PcritM)
     phi = phiLWP(P, p.PcritM)
 
     # expression of optimisation

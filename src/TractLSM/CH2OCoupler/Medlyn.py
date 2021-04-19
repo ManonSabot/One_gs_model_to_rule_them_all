@@ -44,14 +44,14 @@ import bottleneck as bn  # faster C-compiled np for all nan operations
 
 # own modules
 from TractLSM import conv, cst  # unit converter & general constants
-from TractLSM.SPAC import hydraulics, fwsoil, fwLWPpd
+from TractLSM.SPAC import hydraulics, fwsoil, fwWP
 from TractLSM.SPAC import leaf_temperature, calc_photosynthesis, rubisco_limit
 from TractLSM.CH2OCoupler import calc_trans
 
 
 # ======================================================================
 
-def solve_std(p, sw, photo='Farquhar', res='low', case=1, iter_max=40,
+def solve_std(p, sw, photo='Farquhar', res='low', iter_max=40,
               threshold_conv=0.1, inf_gb=False):
 
     """
@@ -112,12 +112,11 @@ def solve_std(p, sw, photo='Farquhar', res='low', case=1, iter_max=40,
     # hydraulics
     P, E = hydraulics(p, res=res)
 
-    if case == 1:
-        g1 = p.g1 * fwsoil(p, sw)
+    if sw >= p.fc:
+        g1 = p.g1
 
     else:
-        Pleaf_pd = p.Ps_pd - p.height * cst.rho * cst.g0 * conv.MEGA
-        g1 = p.g1 * fwLWPpd(p, Pleaf_pd)
+        g1 = p.g1 * fwWP(p, p.Ps)
 
     # initialise gs over A
     g0 = 1.e-9  # g0 ~ 0, removing it entirely introduces errors

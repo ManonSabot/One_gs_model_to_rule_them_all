@@ -89,7 +89,7 @@ def conductances(p, Tleaf=None, gs=None, inf_gb=False):
     Returns:
     --------
     gw: float
-            total leaf conductance to water vapour [mol m-2 s-1]
+        total leaf conductance to water vapour [mol m-2 s-1]
 
     gH: float
         total leaf conductance to heat [mol m-2 s-1]
@@ -135,20 +135,20 @@ def conductances(p, Tleaf=None, gs=None, inf_gb=False):
 
     # boundary layer cond to free convect. (Campbell & Norman, 1998)
     gHf = (p.LAI * (0.54 * cmolar * cst.DH * ((grashof * prandtl) ** 0.25)) / d)
-    gHa = np.maximum(cst.zero, 2. * (gHa + gHf))  # mol m-2 s-1
+    gHa = np.maximum(cst.zero, 2. * (gHa + gHf))  # mol m-2 s-1, units heat
 
     # boundary layer conductance to water vapour
     if inf_gb:
-        gb = conv.MILI  # 1.e3 mol m-2 s-1 prescribed
-        gHa = conv.MILI  # 1.e3 mol m-2 s-1 prescribed
+        gb = conv.MILI  # 1.e3 mol H2O m-2 s-1, large so disappears
+        gHa = conv.MILI  # 1.e3 mol m-2 s-1, unit heat, large so disappears
 
     else:
         try:  # is gb one of the input fields?
-            gb = p.gb
-            gHa = gb * conv.GbhvGb  # corresponding gHa
+            gb = p.gb  # mol H2O m-2 s-1, 1-sided in LICOR
+            gHa = gb * 2. * conv.GbhvGb  # 2-sided, unit heat
 
         except (IndexError, AttributeError, ValueError):  # calc. gb
-            gb = np.maximum(cst.zero, gHa * conv.GbvGbh)  # mol m-2 s-1
+            gb = np.maximum(cst.zero, gHa * conv.GbvGbh)  # mol H2O m-2 s-1
 
             if np.isclose(gHa, cst.zero, rtol=cst.zero, atol=cst.zero):
                 gb = cst.zero  # mol m-2 s-1
@@ -164,6 +164,7 @@ def conductances(p, Tleaf=None, gs=None, inf_gb=False):
         gH = cst.zero
 
     if gs is None:
+
         return gH, gb, gr
 
     if gs is not None:  # total cond to water vap (Medlyn et al., 2007)
@@ -304,7 +305,7 @@ def leaf_energy_balance(p, trans, Tleaf=None, inf_gb=False):
 
     # leaf vapour crown diff. cond, mol s-1 m-2
     gw = p.Patm * trans / Dleaf
-    gc = np.maximum(cst.zero, gw * conv.GcvGw)  # mol s-1 m-2
+    gc = np.maximum(cst.zero, gw * conv.GcvGw)  # mol CO2 s-1 m-2
     gw[np.isclose(trans, cst.zero, rtol=cst.zero, atol=cst.zero)] = cst.zero
     gc[np.isclose(gw, cst.zero, rtol=cst.zero, atol=cst.zero)] = cst.zero
 

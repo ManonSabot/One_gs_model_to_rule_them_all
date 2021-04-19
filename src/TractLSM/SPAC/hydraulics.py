@@ -274,6 +274,8 @@ def hydraulics(p, res='low', Kirchhoff=True, kmax=None, Pcrit=None):
     else:
         Pcrit = np.minimum(- b * np.log(1. / p.ratiocrit) ** (1. / c), Pcrit)
 
+    # Pmax = p.Ps_pd - p.height * cst.rho * cst.g0 * conv.MEGA
+
     if p.Ps <= Pcrit:  # plants cavitate, the optimisation cannot happen
         raise IndexError('critical cavitation, no optimisation possible')
 

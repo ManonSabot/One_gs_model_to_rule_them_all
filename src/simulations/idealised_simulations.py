@@ -202,7 +202,7 @@ for combi in combis:  # loop over all the possibilities
     df1['sw'], df1['Ps'] = soil_water(df1, combi[1])
 
     # run the models
-    models = ['Medlyn12', 'Tuzet', 'SOX12', 'WUE', 'CMax', 'ProfitMax', 'CGain',
+    models = ['Medlyn', 'Tuzet', 'SOX12', 'WUE', 'CMax', 'ProfitMax', 'CGain',
               'ProfitMax2', 'LeastCost', 'CAP', 'MES']
 
     fname = os.path.join(ofdir, '%s.csv' % (xpe))
@@ -270,15 +270,15 @@ if not os.path.isfile(fname):
 
     for e in gs[1:]:
 
-        df[e] = (df[e] - df['gs(std1)']) / df['gs(std1)']
+        df[e] = (df[e] - df['gs(std)']) / df['gs(std)']
 
     for e in A:
 
-        df[e] = (df[e] - df['A(std1)']) / df['A(std1)']
+        df[e] = (df[e] - df['A(std)']) / df['A(std)']
 
     for e in E:
 
-        df[e] = (df[e] - df['E(std1)']) / df['E(std1)']
+        df[e] = (df[e] - df['E(std)']) / df['E(std)']
 
     # relative fluxes
     all = df.groupby('xpe')[gs + A + E].mean() * 100.
@@ -318,21 +318,21 @@ if not os.path.isfile(fname):
 
     for e in GPP[1:]:
 
-        relMed[e] = (relMed[e] - relMed['A(std1)']) / relMed['A(std1)'] * 100.
+        relMed[e] = (relMed[e] - relMed['A(std)']) / relMed['A(std)'] * 100.
 
-    relMed['A(std1)'] = 0.
+    relMed['A(std)'] = 0.
 
     for e in E[1:]:
 
-        relMed[e] = (relMed[e] - relMed['E(std1)']) / relMed['E(std1)'] * 100.
+        relMed[e] = (relMed[e] - relMed['E(std)']) / relMed['E(std)'] * 100.
 
-    relMed['E(std1)'] = 0.
+    relMed['E(std)'] = 0.
 
     for e in WUE[1:]:
 
-        relMed[e] = (relMed[e] - relMed['WUE(std1)']) / relMed['WUE(std1)'] * 100.
+        relMed[e] = (relMed[e] - relMed['WUE(std)']) / relMed['WUE(std)'] * 100.
 
-    relMed['WUE(std1)'] = 0.
+    relMed['WUE(std)'] = 0.
 
     # relative to its ref calibration
     relself = impacts.copy()

@@ -1069,7 +1069,7 @@ def VPD_closure(df, figname, keep):
 
         # limit the dry soil effect by applying set threshold
         wherewhere = (df.loc[where][df.loc[where, 'Ps'] <
-                                    df.loc[where, 'Ps'].quantile(0.5)].index)
+                                    df.loc[where, 'Ps'].quantile(0.75)].index)
         df.loc[wherewhere] = np.nan
 
     df = df.dropna(how='all')

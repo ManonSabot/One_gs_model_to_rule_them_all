@@ -82,7 +82,7 @@ def fwsoil(p, sw):
     return np.maximum(cst.zero, np.minimum(1., (sw - p.pwp) / (p.fc - p.pwp)))
 
 
-def fwLWPpd(p, Ppd):
+def fwWP(p, Psi):
 
     """
     Calculates the empirical soil water potential factor (i.e. a proxy
@@ -101,7 +101,7 @@ def fwLWPpd(p, Ppd):
 
     """
 
-    return np.exp(p.sref * Ppd)
+    return np.exp(p.sref * Psi)
 
 
 def fLWP(p, Pleaf):

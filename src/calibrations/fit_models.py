@@ -144,19 +144,17 @@ class NLMFIT(object):
 
             return 0.01, 50.
 
-    def run(self, X, Y, model, g1=False):
+    def run(self, X, Y, model):
 
         p0 = X.iloc[0]  # read in the input info
         params = lmfit.Parameters()  # empty parameter class
         success = True  # check for success
 
-        if model == 'Medlyn-LWP':
+        if model == 'Medlyn':
+            min, max = self.param_space('g1')
+            params.add('g1', p0.g1, min=min, max=max)
             min, max = self.param_space('sref')
             params.add('sref', p0.sref, min=min, max=max)
-
-            if g1:
-                min, max = self.param_space('g1')
-                params.add('g1', p0.g1, min=min, max=max)
 
         if model == 'Eller':
             min, max = self.param_space('kmax')

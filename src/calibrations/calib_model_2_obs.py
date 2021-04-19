@@ -124,7 +124,7 @@ if to_fit:
             XX = X.copy()
             nlmfit = NLMFIT(method=test, store=out, inf_gb=False)
 
-            #__ = nlmfit.run(XX, Y, 'Medlyn-LWP', g1=True)
+            #__ = nlmfit.run(XX, Y, 'Medlyn')
             #__ = nlmfit.run(XX, Y, 'Tuzet')
             #__ = nlmfit.run(XX, Y, 'Eller')
 

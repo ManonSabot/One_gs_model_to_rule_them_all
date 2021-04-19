@@ -25,7 +25,7 @@ import numpy as np # array manipulations, math operators
 from TractLSM import conv, cst  # unit converter & general constants
 from TractLSM.SPAC import f, Weibull_params, hydraulics, leaf_energy_balance
 from TractLSM.SPAC import leaf_temperature, calc_colim_Ci, calc_photosynthesis
-from TractLSM.SPAC import fwLWPpd, fLWP, phiLWP, fPLC, hydraulic_cost, kcost
+from TractLSM.SPAC import fwWP, fLWP, phiLWP, fPLC, hydraulic_cost, kcost
 from TractLSM.SPAC import dcost_dpsi
 from TractLSM.CH2OCoupler import Ci_sup_dem, calc_trans, A_trans
 from TractLSM.CH2OCoupler.SOX import Ci_stream
@@ -64,18 +64,23 @@ def floop(p, model, photo='Farquhar', inf_gb=True):
     if model != 'Tuzet':  # energy balance requirements
         Pleaf_pd = p.Ps_pd - p.height * cst.rho * cst.g0 * conv.MEGA
 
-        if model == 'Medlyn-LWP':
+        if model == 'Medlyn':
             Dleaf = np.maximum(0.05, Dleaf)  # gs model not valid < 0.05
-            fw = fwLWPpd(p, Pleaf_pd)  # moisture stress function
+
+            if p.height > 0 and  sw >= p.fc:
+                fw = 1.  # no moisture stress
+
+            else:
+                fw = fwWP(p, p.Ps)  # moisture stress function
 
     else:  # Tuzet model
         fw = fLWP(p, p.LWP_ini)  # stress factor
 
-    if (model == 'Medlyn-LWP') or (model == 'Tuzet'): # init. gs over A
+    if (model == 'Medlyn') or (model == 'Tuzet'): # init. gs over A
         g0 = 1.e-9  # g0 ~ 0, removing it entirely introduces errors
         Cs_umol_mol = Cs * conv.MILI / p.Patm  # umol mol-1
 
-        if model == 'Medlyn-LWP':
+        if model == 'Medlyn':
             gsoA = g0 + (1. + p.g1 * fw / (Dleaf ** 0.5)) / Cs_umol_mol
 
         else:  # Tuzet
@@ -189,7 +194,7 @@ def floop(p, model, photo='Farquhar', inf_gb=True):
                 np.isclose(gs, cst.zero, rtol=cst.zero, atol=cst.zero)):
                 Dleaf = p.VPD  # kPa
 
-            if model == 'Medlyn-LWP':
+            if model == 'Medlyn':
                 Dleaf = np.maximum(0.05, Dleaf)  # gs model not valid < 0.05
 
                 # update gs over A
@@ -229,27 +234,18 @@ def floop(p, model, photo='Farquhar', inf_gb=True):
 def fmtx(p, model, photo='Farquhar', inf_gb=True):
 
     # hydraulics
-    if (model != 'CAP') and (model != 'MES'):
-        if model == 'LeastCost':
-            P, trans = hydraulics(p, kmax=p.kmaxLC)
-
-        else:
-            P, trans = hydraulics(p)
-
     if (model == 'CAP') or (model == 'MES'):
         if model == 'CAP':
-            #P = hydraulics(p, Kirchhoff=False, Pcrit=p.PcritC)
-            #ksr = p.ksrmaxC * (p.Psie / p.Ps) ** (2. + 3. / p.bch)
-            #ksl = 1. / (1. / ksr + 1. / p.krlC)  # soil-leaf conductance
             P, trans = hydraulics(p, kmax=p.krlC, Pcrit=p.PcritC)
 
-        if model == 'MES':
-            #P = hydraulics(p, Kirchhoff=False, Pcrit=p.PcritM)
-            #ksr = p.ksrmaxM * (p.Psie / p.Ps) ** (2. + 3. / p.bch)
-            #ksl = 1. / (1. / ksr + 1. / p.krlM)  # soil-leaf conductance
+        else:
             P, trans = hydraulics(p, kmax=p.krlM, Pcrit=p.PcritM)
 
-        #trans = ksl * (p.Ps - P) * conv.FROM_MILI  # mol.s-1.m-2
+    elif model == 'LeastCost':
+        P, trans = hydraulics(p, kmax=p.kmaxLC)
+
+    else:
+        P, trans = hydraulics(p)
 
     # expressions of optimisation
     if model == 'ProfitMax': # look for the most net profit
@@ -272,24 +268,9 @@ def fmtx(p, model, photo='Farquhar', inf_gb=True):
         expr = ((p.Eta * conv.MILI * trans[mask] +
                  dVmaxoAdXi(p, trans[mask], Ci, inf_gb=inf_gb)) /
                 A_trans(p, trans[mask], Ci, inf_gb=inf_gb))
-        #where = np.where(np.diff(expr, 2) / np.diff(Ci / p.CO2, 2) > 0.)[0]
-        #expr = np.abs(np.gradient(expr, Ci / p.CO2))
 
     # leaf energy balance
     gc, gs, gb, ww = leaf_energy_balance(p, trans, inf_gb=inf_gb)
-
-    #if (model == 'CMax') or (model == 'WUE-LWP'):
-    #    if model == 'CMax':
-    #        cost = dcost_dpsi(p, P[mask], gs[mask])
-
-    #    if model == 'WUE-LWP':
-    #        try:
-    #            cost = p.Lambda * dEdgs(gs[mask], gb, ww[mask])
-
-    #        except IndexError:  # only one Tleaf
-    #            cost = p.Lambda * dEdgs(gs[mask], gb, ww)
-
-    #    expr = np.abs(dAdgs(p, gs[mask], gb, Ci) - cost)
 
     if model == 'CMax':
 
@@ -308,14 +289,14 @@ def fmtx(p, model, photo='Farquhar', inf_gb=True):
 
     if model == 'CAP':
         cost = phiLWP(P, p.PcritC)
-        sVmax25 = p.Vmax25 * cost
-        Ci, mask = Ci_sup_dem(p, trans, photo=photo, Vmax25=sVmax25,
+        Ci, mask = Ci_sup_dem(p, trans, photo=photo, Vmax25=p.Vmax25 * cost,
                               inf_gb=inf_gb)
         An, __, __ = calc_photosynthesis(p, trans[mask], Ci, photo,
-                                         Vmax25=sVmax25[mask], inf_gb=inf_gb)
+                                         Vmax25=p.Vmax25 * cost[mask],
+                                         inf_gb=inf_gb)
 
         try:
-            expr = An #np.abs(np.gradient(An, gs[mask]))
+            expr = An
 
         except Exception:
 
@@ -328,7 +309,7 @@ def fmtx(p, model, photo='Farquhar', inf_gb=True):
                                          inf_gb=inf_gb)
 
         try:
-            expr = An  #np.abs(np.gradient(An, gs[mask]))
+            expr = An
 
         except Exception:
 
@@ -337,7 +318,7 @@ def fmtx(p, model, photo='Farquhar', inf_gb=True):
     if inf_gb:  # deal with edge cases by rebounding the solution
         check = expr[gc[mask] > cst.zero]
 
-    else:
+    else:  # accounting for gb
         check = expr[np.logical_and(gc[mask] > cst.zero, gs[mask] < 1.5 * gb)]
 
     try:
@@ -398,7 +379,7 @@ def fres(params, model, inputs, target, inf_gb):
             except IndexError:
                 pass
 
-    elif model in ['Medlyn-LWP', 'Eller']:
+    elif model in ['Medlyn', 'Eller']:
         ymodel = np.asarray([floop(inputs[step].copy(), model, inf_gb=inf_gb)
                              for step in range(len(inputs))], dtype=np.float64)
 

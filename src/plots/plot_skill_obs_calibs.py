@@ -419,8 +419,8 @@ def heatmap(df, fname, to_plot, what='NSE'):
 
 
 # PLOT
-what = 'All'
-to_plot = ['gs', 'E', 'A']
+what = 'rBIC'
+to_plot = ['gs']  #, 'E', 'A']
 
 plt_setup()  # rendering
 
