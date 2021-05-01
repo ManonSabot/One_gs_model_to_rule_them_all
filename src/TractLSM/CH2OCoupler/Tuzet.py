@@ -67,9 +67,8 @@ def gas_exchange(p, fw, photo='Farquhar', res='low', dynamic=True, inf_gb=False,
         new_Tleaf, __ = leaf_temperature(p, trans, Tleaf=Tleaf, inf_gb=inf_gb)
         Pleaf = P[bn.nanargmin(np.abs(E - trans))]
 
-        # new Cs (in Pa)
-        boundary_CO2 = p.Patm * conv.FROM_MILI * An / (gb * conv.GbcvGb +
-                                                       gs * conv.GcvGw)
+        # update Cs (Pa)
+        boundary_CO2 = p.Patm * conv.FROM_MILI * An / (gb * conv.GbcvGb)
         Cs = np.maximum(cst.zero, np.minimum(p.CO2, p.CO2 - boundary_CO2))
         Cs_umol_mol = Cs * conv.MILI / p.Patm
 

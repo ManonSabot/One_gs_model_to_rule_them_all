@@ -141,14 +141,8 @@ def A_trans(p, trans, Ci, Tleaf=None, inf_gb=False):
     except (IndexError, AttributeError, ValueError):  # calc. Tleaf
         pass
 
-    if Tleaf is not None:  # get CO2 diffusive conduct.
-        gc, __, __, __ = leaf_energy_balance(p, trans, Tleaf=Tleaf,
-                                             inf_gb=inf_gb)
-
-    if Tleaf is None:
-        __, gs, gb, __ = leaf_energy_balance(p, trans, inf_gb=inf_gb)
-        gc = np.maximum(cst.zero, conv.GcvGw * (gb * gs) / (gb + gs))
-
+    # get CO2 diffusive conduct.
+    gc, __, __, __ = leaf_energy_balance(p, trans, Tleaf=Tleaf, inf_gb=inf_gb)
     A_P = conv.MILI * gc * (p.CO2 - Ci) / p.Patm
 
     try:
@@ -230,16 +224,14 @@ def mtx_minimise(p, trans, all_Cis, photo, Vmax25=None, all_Ccs=None,
 def Ci_sup_dem(p, trans, photo='Farquhar', res='low', Vmax25=None, phi=None,
                inf_gb=False):
 
-    __, gs, gb, __ = leaf_energy_balance(p, trans, inf_gb=inf_gb)
-
     # ref. photosynthesis
     A_ref, __, __ = calc_photosynthesis(p, trans, p.CO2, photo, Vmax25=Vmax25,
                                         inf_gb=inf_gb)
 
     # Cs < Ca, used to ensure physical solutions
-    boundary_CO2 = (p.Patm * conv.FROM_MILI * A_ref / (gb * conv.GbcvGb +
-                    gs * conv.GcvGw))
-    Cs = np.minimum(p.CO2, p.CO2 - boundary_CO2)  # Pa
+    __, __, gb, __ = leaf_energy_balance(p, trans, inf_gb=inf_gb)
+    boundary_CO2 = p.Patm * conv.FROM_MILI * A_ref / (gb * conv.GbcvGb)
+    Cs = np.maximum(cst.zero, np.minimum(p.CO2, p.CO2 - boundary_CO2))  # Pa
 
     # potential Ci values over the full range of transpirations
     if res == 'low':

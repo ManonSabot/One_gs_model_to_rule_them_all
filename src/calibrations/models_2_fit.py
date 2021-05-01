@@ -134,8 +134,15 @@ def floop(p, model, photo='Farquhar', inf_gb=True):
             # rate of photosynthesis, μmol m-2 s-1
             A, __, __ = calc_photosynthesis(p, 0., Cis, photo, Tleaf=Tleaf)
 
-            # trans used for the hydraulic cost, mmol m-2 s-1
-            E = A * conv.GwvGc * Dleaf / (p.CO2 - Cis)
+            # gb?
+            __, gb = leaf_temperature(p, 0., Tleaf=Tleaf, inf_gb=inf_gb)
+
+            if inf_gb or (iter < 1):  # gas-exchange trans, mmol m-2 s-1
+                E = A * conv.GwvGc * Dleaf / (p.CO2 - Cis)
+
+            else:
+                E = (A * (gb * conv.GwvGc + gs * conv.GbvGbc) / (gs + gb)
+                     * Dleaf / (p.CO2 - Cis))
 
             # cost, Pleaf
             mask = np.logical_and(Pleaf_pd - E / p.ksc_prev <= Pleaf_pd,
@@ -154,11 +161,15 @@ def floop(p, model, photo='Farquhar', inf_gb=True):
             # get net rate of photosynthesis at optimum, μmol m-2 s-1
             An, __, __ = calc_photosynthesis(p, 0., Ci, photo, Tleaf=Tleaf)
 
-            # get associated gc, gb, gs (mol m-2 s-1)
+            # get associated gc and gs
             gc = p.Patm * conv.FROM_MILI * An / (p.CO2 - Ci)
-            __, gb = leaf_temperature(p, 0., Tleaf=Tleaf, inf_gb=inf_gb)
-            gs = np.maximum(cst.zero,
-                            gb * conv.GwvGc * gc / (gb - conv.GwvGc * gc))
+
+            if inf_gb:
+                gs = gc * conv.GwvGc
+
+            else:
+                gs = np.maximum(cst.zero,
+                                gc * gb * conv.GwvGc / (gb - conv.GbvGbc * gc))
 
         else:
             An, __, __, __ = calc_photosynthesis(p, 0., Cs, photo, Tleaf=Tleaf,
@@ -173,9 +184,8 @@ def floop(p, model, photo='Farquhar', inf_gb=True):
             An, __, __ = calc_photosynthesis(p, 0., Cs, photo, Tleaf=Tleaf,
                                              gsc=conv.U * conv.GcvGw * gs)
 
-        # new Cs (in Pa)
-        boundary_CO2 = p.Patm * conv.FROM_MILI * An / (gb * conv.GbcvGb +
-                                                       gs * conv.GcvGw)
+        # update Cs (Pa)
+        boundary_CO2 = p.Patm * conv.FROM_MILI * An / (gb * conv.GbcvGb)
         Cs = np.maximum(cst.zero, np.minimum(p.CO2, p.CO2 - boundary_CO2))
         Cs_umol_mol = Cs * conv.MILI / p.Patm
 

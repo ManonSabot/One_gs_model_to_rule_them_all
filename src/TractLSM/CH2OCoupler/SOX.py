@@ -177,8 +177,15 @@ def supply_max(p, photo='Farquhar', case=1, res='low', iter_max=40,
             # rate of photosynthesis, μmol m-2 s-1
             A, __, __ = calc_photosynthesis(p, 0., Cis, photo, Tleaf=Tleaf)
 
-            # gas-exchange trans is used, mmol m-2 s-1
-            E = A * conv.GwvGc * Dleaf / (p.CO2 - Cis)
+            # gb?
+            __, gb = leaf_temperature(p, 0., Tleaf=Tleaf, inf_gb=inf_gb)
+
+            if inf_gb or (iter < 1):  # gas-exchange trans, mmol m-2 s-1
+                E = A * conv.GwvGc * Dleaf / (p.CO2 - Cis)
+
+            else:
+                E = (A * (gb * conv.GwvGc + gs * conv.GbvGbc) / (gs + gb)
+                     * Dleaf / (p.CO2 - Cis))
 
             # kcost, Pleaf
             mask = np.logical_and(Pleaf_pd - E / p.ksc_prev <= Pleaf_pd,
@@ -197,25 +204,28 @@ def supply_max(p, photo='Farquhar', case=1, res='low', iter_max=40,
             # get net rate of photosynthesis at optimum, μmol m-2 s-1
             An, Aj, Ac = calc_photosynthesis(p, 0., Ci, photo, Tleaf=Tleaf)
 
-            # get associated gc, gb, gs (mol m-2 s-1)
+            # get associated gc and gs
             gc = p.Patm * conv.FROM_MILI * An / (p.CO2 - Ci)
-            __, gb = leaf_temperature(p, 0., Tleaf=Tleaf, inf_gb=inf_gb)
-            gs = np.maximum(cst.zero,
-                            gb * conv.GwvGc * gc / (gb - conv.GwvGc * gc))
+
+            if inf_gb:
+                gs = gc * conv.GwvGc
+
+            else:
+                gs = np.maximum(cst.zero,
+                                gc * gb * conv.GwvGc / (gb - conv.GbvGbc * gc))
 
         # calculate new trans, gw, gb, mol.m-2.s-1
         trans, real_zero, gw, gb, Dleaf = calc_trans(p, Tleaf, gs,
                                                      inf_gb=inf_gb)
         new_Tleaf, __ = leaf_temperature(p, trans, Tleaf=Tleaf, inf_gb=inf_gb)
 
-        if case == 1:  # calculate gc, An, Ci
+        if case == 1:  # calculate An, Ci
             An, Aj, Ac = calc_photosynthesis(p, 0., Cs, photo, Tleaf=p.Tair,
                                              gsc=conv.U * conv.GcvGw * gs)
-            Ci = Cs - p.Patm * conv.FROM_MILI * An / (conv.GcvGw * gs)  # Pa
+            Ci = Cs - p.Patm * conv.FROM_MILI * An / (gs * conv.GcvGw)  # Pa
 
-        # new Cs (in Pa)
-        boundary_CO2 = p.Patm * conv.FROM_MILI * An / (gb * conv.GbcvGb +
-                                                       gs * conv.GcvGw)
+        # update Cs (Pa)
+        boundary_CO2 = p.Patm * conv.FROM_MILI * An / (gb * conv.GbcvGb)
         Cs = np.maximum(cst.zero, np.minimum(p.CO2, p.CO2 - boundary_CO2))
 
         if (np.isclose(trans, cst.zero, rtol=cst.zero, atol=cst.zero) or

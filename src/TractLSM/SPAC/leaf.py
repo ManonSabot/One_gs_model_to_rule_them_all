@@ -300,19 +300,26 @@ def leaf_energy_balance(p, trans, Tleaf=None, inf_gb=False):
         esat_a = vpsat(p.Tair)  # kPa
         Dleaf = (esat_l - (esat_a - p.VPD))  # leaf-air vpd, kPa
 
-    # leaf-air H2O vap diff (Slatyer, 1967), moles(H2O) mole-1(air)
-    ww = Dleaf / p.Patm
-
-    # leaf vapour crown diff. cond, mol s-1 m-2
+    # total leaf vapour diff. cond, mol H2O s-1 m-2
     gw = p.Patm * trans / Dleaf
-    gc = np.maximum(cst.zero, gw * conv.GcvGw)  # mol CO2 s-1 m-2
     gw[np.isclose(trans, cst.zero, rtol=cst.zero, atol=cst.zero)] = cst.zero
-    gc[np.isclose(gw, cst.zero, rtol=cst.zero, atol=cst.zero)] = cst.zero
 
     # gs, stomatal conductance to water vapour
-    gs = gb * gw / (gb - gw)  # mol s-1 m-2
+    gs = gb * gw / (gb - gw)  # mol H2O s-1 m-2
     gs[gs < 0.] = cst.zero
-    gs[np.isclose(gs, cst.zero, rtol=cst.zero, atol=cst.zero)] = cst.zero
+    gs[np.isclose(gw, cst.zero, rtol=cst.zero, atol=cst.zero)] = cst.zero
+
+    if inf_gb:  # total leaf diff. cond to CO2, mol CO2 s-1 m-2
+        gc = np.maximum(cst.zero, gw * conv.GcvGw)
+
+    else:
+        gc = np.maximum(cst.zero,
+                        gs * gb / (gb * conv.GwvGc + gs * conv.GbvGbc))
+
+    gc[np.isclose(gw, cst.zero, rtol=cst.zero, atol=cst.zero)] = cst.zero
+
+    # leaf-air H2O vap diff (Slatyer, 1967), moles(H2O) mole-1(air)
+    ww = Dleaf / p.Patm
 
     return gc, gs, gb, ww
 

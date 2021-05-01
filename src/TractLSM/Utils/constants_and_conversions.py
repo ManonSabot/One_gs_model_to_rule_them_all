@@ -51,15 +51,13 @@ class ConvertUnits(object):
         self.ref_kPa = 101.325  # to ref kPa
         self.FROM_kPa = 1. / self.ref_kPa  # from kPa to anything
 
-        # plant conductances
+        # conductances conversions
         self.GbhvGb = 0.93  # ratio of Gbheat:Gbwater
         self.GbvGbh = 1. / self.GbhvGb  # Gbwater:Gbheat
-        self.GbhvGbc = 1.32  # Gbheat:GbCO2
-        self.GbcvGbh = 1. / self.GbhvGbc  # GbCO2:Gbheat
-        self.GbvGbc = self.GbvGbh * self.GbhvGbc  # Gbwater:GbCO2
-        self.GbcvGb = 1. / self.GbvGbc  # GbCO2:Gbwater
         self.GwvGc = 1.57  # Gwater:GCO2
         self.GcvGw = 1. / self.GwvGc  # GCO2:Gwater
+        self.GbvGbc = self.GwvGc ** (2. / 3.)  # Gbwater:GbCO2, i.e. 1.35
+        self.GbcvGb = 1. / self.GbvGbc  # GbCO2:Gbwater
 
         # time
         self.HR_2_DAY = 24.
