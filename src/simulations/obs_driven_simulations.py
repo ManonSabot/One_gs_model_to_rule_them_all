@@ -80,102 +80,133 @@ def build_calibrated_forcing(training):
 
     return
 
+
 def calc_rank(sub):
 
     return np.array([stats.percentileofscore(sub, a, 'strict') / 100.
                      for a in sub])
 
 
-def calc_perf(df1, df2, var='gs', metric='NSE'):
+def calc_perf(df1, df2, var='gs', metric='NSE', overall=False):
+
+    length = len(df1.filter(like='%s(' % (var)).columns)
 
     if var == 'gs':
         idx1 = 0
 
+    elif var == 'Ci':
+        idx1 = length
+
+    elif var == 'Pleaf':
+        idx1 = 2 * length
+
     elif var == 'E':
-        idx1 = len(df1.filter(like='%s(' % (var)).columns)
+        idx1 = 3 * len(df1.filter(like='%s(' % (var)).columns)
+
+    elif var == 'A':
+        idx1 = 4 * len(df1.filter(like='%s(' % (var)).columns)
+
+    if overall:
+        idx2 = 'overall'
 
     else:
-        idx1 = 2 * len(df1.filter(like='%s(' % (var)).columns)
+        idx2 = df1['site_spp'].iloc[0]
 
     pts = len(df1)
 
-    for i, e in enumerate(df1.filter(like='%s(' % (var)).columns):
+    try:
 
-        # mask invalid data
-        df3 = df1.copy()[~np.isclose(df1['%s' % (e)], 9999.)]
+        for i, e in enumerate(df1.filter(like='%s(' % (var)).columns):
 
-        if metric == 'NaNs':
-            perf = ((pts - len(df3) + (len(df3) - len(df3['%s' % (e)].isnull()))
-                     + len(df3[df3['%s' % (e)] / df3['%s' % (var)] < 1.e-9]))
-                    / pts)
+            # mask invalid data
+            df3 = df1.copy()[~np.isclose(df1['%s' % (e)], 9999.)]
 
-        elif metric == 'NSE':
-            perf = 1. - (((df3['%s' % (e)] - df3['%s' % (var)]) ** 2.).sum() /
-                         ((df3['%s' % (var)] - df3['%s' % (var)].mean()) ** 2.)
-                          .sum())
+            if metric == 'NaNs':
+                perf = ((pts - len(df3) + (len(df3) - len(df3['%s' % (e)].isnull()))
+                         + len(df3[df3['%s' % (e)] / df3['%s' % (var)] < 1.e-9]))
+                        / pts)
 
-        elif metric == 'KGE':
-            r, __ = stats.kendalltau(df3['%s' % (var)], df3['%s' % (e)])
-            alpha = (1. - 0.5 * np.sum(np.abs(df3['%s' % (e)].sort_values() /
-                     df3['%s' % (e)].mean() - df3['%s' % (var)].sort_values() /
-                     df3['%s' % (var)].mean())) / len(df3))
-            perf = 1. - ((r - 1.) ** 2. + (alpha - 1.) ** 2. +
-                         (df3['%s' % (e)].mean() / df3['%s' % (var)].mean()
-                          - 1.) ** 2.) ** 0.5
+            elif metric == 'R':
+                perf, __ = stats.pearsonr(df3['%s' % (var)], df3['%s' % (e)])
 
-        elif (metric == 'BIC') or (metric == 'RBIC'):
-            N = 1
+            elif metric == 'NSE':
+                perf = 1. - (((df3['%s' % (e)] - df3['%s' % (var)]) ** 2.).sum() /
+                            ((df3['%s' % (var)] - df3['%s' % (var)].mean()) ** 2.)
+                            .sum())
 
-            if (('std' in e) or ('sox2' in e) or ('wue' in e) or ('cgn' in e)
-                or ('lcst' in e) or ('cap' in e) or ('mes' in e)):
-                N = 2
+            elif (metric == 'BIC') or (metric == 'RBIC'):
+                N = 1
 
-            elif 'cmax' in e:
-                N = 3
+                if (('std' in e) or ('sox2' in e) or ('wue' in e) or ('cgn' in e)
+                    or ('lcst' in e) or ('cap' in e) or ('mes' in e)):
+                    N = 2
 
-            elif 'tuz' in e:
-                N = 4
+                elif 'cmax' in e:
+                    N = 3
 
-            coef = 1.  # avoid skewing the results due to units
+                elif 'tuz' in e:
+                    N = 4
 
-            if var == 'gs':  # limit logs <<<< 0 by computing in mmol
-                coef = 1.e3
+                coef = 1.  # avoid skewing the results due to units
 
-            rss = ((coef * (df3['%s' % (e)] - df3['%s' % (var)])) ** 2.).sum()
-            perf = len(df3) * np.log(rss / len(df3)) + N * np.log(len(df3))
+                if var == 'gs':  # limit logs <<<< 0 by computing in mmol
+                    coef = 1.e3
 
-        elif metric == 'RMSE':
-            perf = ((df3['%s' % (e)] - df3['%s' % (var)]) ** 2.).mean() ** 0.5
+                rss = ((coef * (df3['%s' % (e)] - df3['%s' % (var)])) ** 2.).sum()
+                perf = len(df3) * np.log(rss / len(df3)) + N * np.log(len(df3))
 
-        elif metric == 'NMSE':
-            perf = ((((df3['%s' % (e)] - df3['%s' % (var)]) ** 2.).mean()
-                     ** 0.5) / (df3['%s' % (var)].quantile(0.75) -
-                     df3['%s' % (var)].quantile(0.25)))
+            elif metric == 'MASE':
+                perf = ((df3['%s' % (var)] - df3['%s' % (e)]).abs().mean() /
+                         df3['%s' % (var)].diff()[1:].abs().mean())
 
-        elif metric == 'NSAE':
-            perf = ((df3['%s' % (e)] - df3['%s' % (var)]).abs().mean() /
-                    (df3['%s' % (var)].quantile(0.75) -
-                     df3['%s' % (var)].quantile(0.25)))
+            elif metric == 'MAPE':  # Wang 2020, i.e. MAE / avg(obs)
+                perf = ((df3['%s' % (var)] - df3['%s' % (e)]).abs().mean() /
+                         np.abs(df3['%s' % (var)].mean()))
 
-        elif metric == 'MASE':
-            perf = ((df3['%s' % (var)] - df3['%s' % (e)]) /
-                     df3['%s' % (var)].diff()[1:].abs().mean()).abs().mean()
+            if np.logical_and('std' in e, var == 'Pleaf'):
+                perf = np.nan
 
-        elif metric == 'WAPE':
-            df3 = df3[df3['%s' % (var)] != 0.]
-            perf = ((df3['%s' % (var)] - df3['%s' % (e)]).abs() /
-                     df3['%s' % (var)].abs()).mean()
+            if df2.loc[idx1 + i].isnull().all().all():  # columns all empty
+                df2.loc[idx1 + i, 'model'] = e.split('%s(' % (var))[1].split(')')[0]
+                df2.loc[idx1 + i, 'variable'] = var
 
-        if df2.loc[idx1 + i].isnull().all().all():  # columns all empty
-            df2.loc[idx1 + i, 'model'] = e.split('%s(' % (var))[1].split(')')[0]
-            df2.loc[idx1 + i, 'variable'] = var
+            df2.loc[idx1 + i, idx2] = perf
 
-        df2.loc[idx1 + i, df3['site_spp'].iloc[0]] = perf
+        if metric == 'RBIC':
+            sub = df2.loc[idx1:idx1 + i, idx2]
+            df2.loc[idx1:idx1 + i, idx2] = calc_rank(sub)
 
-    if metric == 'RBIC':
-        sub = df2.loc[idx1:idx1 + i, df1['site_spp'].iloc[0]]
-        rank = calc_rank(sub)
-        df2.loc[idx1:idx1 + i, df1['site_spp'].iloc[0]] = rank
+    except Exception:
+        pass
+
+    return
+
+
+def studentize(df, vars=['gs', 'E', 'A', 'Ci', 'Pleaf']):
+
+    # calc mean and standard deviation
+    mean = df.mean(axis=0)
+    std = df.std(axis=0)
+
+    # variables to consider
+    columns = [c for c in df.columns if any(var in c for var in vars)]
+
+    # give each model the avg obs attributes
+    mean.loc[[e for e in columns if 'gs(' in e]] = mean.gs
+    std.loc[[e for e in columns if 'gs(' in e]] = std.gs
+    mean.loc[[e for e in columns if 'E(' in e]] = mean.E
+    std.loc[[e for e in columns if 'E(' in e]] = std.E
+    mean.loc[[e for e in columns if 'A(' in e]] = mean.A
+    std.loc[[e for e in columns if 'A(' in e]] = std.A
+    mean.loc[[e for e in columns if 'Ci(' in e]] = mean.Ci
+    std.loc[[e for e in columns if 'Ci(' in e]] = std.Ci
+    mean.loc[[e for e in columns if 'Pleaf(' in e]] = mean.Pleaf
+    std.loc[[e for e in columns if 'Pleaf(' in e]] = std.Pleaf
+
+    # now studentize each model's variables and the obs
+    icol = [df.columns.get_loc(e) for e in columns]
+    df.iloc[:, icol] = (df.iloc[:, icol].subtract(mean, axis=1)
+                          .div(std, axis=1))
 
     return
 
@@ -185,18 +216,33 @@ def model_performance(df, which='NSE'):
     cols = ['model', 'variable']
 
     if which == 'NaNs':
-        cols = ['mean'] + cols
+        cols = ['mean', 'mean_se'] + cols
 
-    elif which != 'RMSE':
-        cols = ['mean', 'median'] + cols
+    else:
+        cols = ['mean', 'mean_se', 'median', 'overall'] + cols
 
     perf = pd.DataFrame(columns=list(df['site_spp'].unique()) + cols,
-                        index=np.arange(3 * len(df.filter(like='gs(').columns)))
+                        index=np.arange(5 * len(df.filter(like='gs(').columns)))
 
     # calculate perf by site x species
     df.groupby('site_spp').apply(calc_perf, df2=perf, metric=which)
+    df.groupby('site_spp').apply(calc_perf, df2=perf, var='Ci', metric=which)
+    df.groupby('site_spp').apply(calc_perf, df2=perf, var='Pleaf', metric=which)
     df.groupby('site_spp').apply(calc_perf, df2=perf, var='E', metric=which)
     df.groupby('site_spp').apply(calc_perf, df2=perf, var='A', metric=which)
+
+    # studentize the data and calculate overall perf
+    df.groupby('site_spp').apply(studentize)
+    calc_perf(df, perf, metric=which, overall=True)
+    calc_perf(df, perf, metric=which, var='Ci', overall=True)
+    calc_perf(df, perf, metric=which, var='Pleaf', overall=True)
+    calc_perf(df, perf, metric=which, var='E', overall=True)
+    calc_perf(df, perf, metric=which, var='A', overall=True)
+
+    # make sure data is of the right type
+    for c in perf.columns[:perf.columns.get_loc('model')]:
+
+        perf[c] = perf[c].astype('float64')
 
     return perf
 
@@ -265,7 +311,7 @@ for file in os.listdir(ipath):  # loop over all the possibilities
 
     # only keep the variables, i.e. remove parameters
     df2 = df2[[c for c in list(df2) if ((len(df2[c].unique()) > 1) or
-              (c == 'u') or ('Rublim' in c) or ('gb' in c))]]
+              ('Rublim' in c) or ('gb' in c) or ('Pleaf' in c))]]
     df2 = df2.drop(df2.filter(like='Ps(').columns, axis=1)
 
     # restrict to the hod when photosynthesis happens in the models
@@ -293,72 +339,61 @@ else:
     dfs = (pd.read_csv(fname).dropna(axis=0, how='all')
              .dropna(axis=1, how='all').squeeze())
 
+fname = os.path.join(os.path.dirname(ofdir), 'all_Rs.csv')
+
+if not os.path.isfile(fname):
+    rs = model_performance(dfs, which='R')
+
+    # centered means to avoid strong outlier effects
+    rs['mean'] = ((rs.iloc[:, :rs.columns.get_loc('mean')].sum(axis=1) -
+                   rs.iloc[:, :rs.columns.get_loc('mean')].max(axis=1) -
+                   rs.iloc[:, :rs.columns.get_loc('mean')].min(axis=1)) /
+                  (rs.columns.get_loc('mean') - 2.))
+
+    rs.to_csv(fname, index=False, na_rep='', encoding='utf-8')
+
 fname = os.path.join(os.path.dirname(ofdir), 'all_NSEs.csv')
 
 if not os.path.isfile(fname):
     nses = model_performance(dfs)
-    nses['mean'] = (nses.iloc[:, :nses.columns.get_loc('mean')].sum(axis=1) -
-                    nses.iloc[:, :nses.columns.get_loc('mean')].max(axis=1) -
-                    nses.iloc[:, :nses.columns.get_loc('mean')].min(axis=1)) / (nses.columns.get_loc('mean') - 2.)
-    nses['mean'] = nses.iloc[:, :nses.columns.get_loc('mean')].mean(axis=1)
-    nses['median'] = nses.iloc[:, :nses.columns.get_loc('mean')].median(axis=1)
-    nses['rank'] = nses.groupby(['variable'])['mean'].rank(ascending=False)
+    nses['mean'] = ((nses.iloc[:, :nses.columns.get_loc('mean')].sum(axis=1) -
+                     nses.iloc[:, :nses.columns.get_loc('mean')].max(axis=1) -
+                     nses.iloc[:, :nses.columns.get_loc('mean')].min(axis=1)) /
+                    (nses.columns.get_loc('mean') - 2.))
     nses.to_csv(fname, index=False, na_rep='', encoding='utf-8')
-
-fname = os.path.join(os.path.dirname(ofdir), 'all_KGEs.csv')
-
-if not os.path.isfile(fname):
-    kges = model_performance(dfs, which='KGE')
-    kges['mean'] = (kges.iloc[:, :kges.columns.get_loc('mean')].sum(axis=1) -
-                    kges.iloc[:, :kges.columns.get_loc('mean')].max(axis=1) -
-                    kges.iloc[:, :kges.columns.get_loc('mean')].min(axis=1)) / (kges.columns.get_loc('mean') - 2.)
-    kges['mean'] = kges.iloc[:, :kges.columns.get_loc('mean')].mean(axis=1)
-    kges['median'] = kges.iloc[:, :kges.columns.get_loc('mean')].median(axis=1)
-    kges['rank'] = kges.groupby(['variable'])['mean'].rank(ascending=False)
-    kges.to_csv(fname, index=False, na_rep='', encoding='utf-8')
-
-fname = os.path.join(os.path.dirname(ofdir), 'all_RBICs.csv')
-
-if not os.path.isfile(fname):
-    rbics = model_performance(dfs, which='RBIC')
-    rbics['mean'] = (rbics.iloc[:, :rbics.columns.get_loc('mean')].sum(axis=1) -
-                rbics.iloc[:, :rbics.columns.get_loc('mean')].max(axis=1) -
-                rbics.iloc[:, :rbics.columns.get_loc('mean')].min(axis=1)) / (rbics.columns.get_loc('mean') - 2.)
-    rbics['mean'] = rbics.iloc[:, :rbics.columns.get_loc('mean')].mean(axis=1)
-    rbics['median'] = (rbics.iloc[:, :rbics.columns.get_loc('mean')]
-                            .median(axis=1))
-    rbics['rank'] = rbics.groupby(['variable'])['mean'].rank()
-    rbics.to_csv(fname, index=False, na_rep='', encoding='utf-8')
-
-fname = os.path.join(os.path.dirname(ofdir), 'all_NMSEs.csv')
-
-if not os.path.isfile(fname):
-    nmses = model_performance(dfs, which='NMSE')
-    nmses['mean'] = (nmses.iloc[:, :nmses.columns.get_loc('mean')].sum(axis=1) -
-            nmses.iloc[:, :nmses.columns.get_loc('mean')].max(axis=1) -
-            nmses.iloc[:, :nmses.columns.get_loc('mean')].min(axis=1)) / (nmses.columns.get_loc('mean') - 2.)
-    nmses['mean'] = nmses.iloc[:, :nmses.columns.get_loc('mean')].mean(axis=1)
-    nmses['median'] = (nmses.iloc[:, :nmses.columns.get_loc('mean')]
-                            .median(axis=1))
-    nmses['rank'] = nmses.groupby(['variable'])['mean'].rank()
-    nmses.to_csv(fname, index=False, na_rep='', encoding='utf-8')
 
 fname = os.path.join(os.path.dirname(ofdir), 'all_MASEs.csv')
 
 if not os.path.isfile(fname):
     mases = model_performance(dfs, which='MASE')
-    mases['mean'] = (mases.iloc[:, :mases.columns.get_loc('mean')].sum(axis=1) -
-            mases.iloc[:, :mases.columns.get_loc('mean')].max(axis=1) -
-            mases.iloc[:, :mases.columns.get_loc('mean')].min(axis=1)) / (mases.columns.get_loc('mean') - 2.)
-    mases['mean'] = mases.iloc[:, :mases.columns.get_loc('mean')].mean(axis=1)
-    mases['median'] = (mases.iloc[:, :mases.columns.get_loc('mean')]
-                            .median(axis=1))
-    mases['rank'] = mases.groupby(['variable'])['median'].rank()
+    mases['mean'] = ((mases.iloc[:, :mases.columns.get_loc('mean')].sum(axis=1)
+                      -
+                      mases.iloc[:, :mases.columns.get_loc('mean')].max(axis=1)
+                      -
+                      mases.iloc[:, :mases.columns.get_loc('mean')].min(axis=1))
+                     / (mases.columns.get_loc('mean') - 2.))
     mases.to_csv(fname, index=False, na_rep='', encoding='utf-8')
+
+fname = os.path.join(os.path.dirname(ofdir), 'all_RBICs.csv')
+
+if not os.path.isfile(fname):
+    rbics = model_performance(dfs, which='RBIC')
+    rbics['mean'] = ((rbics.iloc[:, :rbics.columns.get_loc('mean')].sum(axis=1)
+                      -
+                      rbics.iloc[:, :rbics.columns.get_loc('mean')].max(axis=1)
+                      -
+                      rbics.iloc[:, :rbics.columns.get_loc('mean')].min(axis=1))
+                      / (rbics.columns.get_loc('mean') - 2.))
+    rbics.to_csv(fname, index=False, na_rep='', encoding='utf-8')
+
+fname = os.path.join(os.path.dirname(ofdir), 'all_MAPEs.csv')
+
+if not os.path.isfile(fname):
+    mapes = model_performance(dfs, which='MAPE')
+    mapes.to_csv(fname, index=False, na_rep='', encoding='utf-8')
 
 fname = os.path.join(os.path.dirname(ofdir), 'all_NaNs.csv')
 
 if not os.path.isfile(fname):
     nans = model_performance(dfs, which='NaNs')
-    nans['mean'] = nans.iloc[:, :nans.columns.get_loc('mean')].mean(axis=1)
     nans.to_csv(fname, index=False, na_rep='', encoding='utf-8')

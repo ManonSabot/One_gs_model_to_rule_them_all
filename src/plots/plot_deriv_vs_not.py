@@ -137,8 +137,6 @@ def plot_comparison(df1, df2, df3, df4, fname):
 
             ax2.plot(df['hod'], df['Pleaf(%s)' % (mod)], c=colours[j], ls=ls)
 
-    print('done')
-
     bottom, __ = axes[0].get_ylim()
     axes[0].set_ylim(bottom, 0.25)
 
@@ -182,12 +180,8 @@ def plot_comparison(df1, df2, df3, df4, fname):
     # split the legend in several parts
     axes[0].legend(loc=2, bbox_to_anchor=(2.15, 0.225), handleheight=1.5,
                    labelspacing=0.1)
-
-    print('done')
-    print(fname)
     fig.savefig(fname, dpi=600)
     plt.close()
-    print('done')
 
     return
 
@@ -211,6 +205,17 @@ df = df[df['doy'] >= df['doy'].iloc[0] + 7 * 3]  #4]
 
 # run the models
 models = ['WUE', 'ProfitMax', 'CGain', 'ProfitMax2', 'LeastCost']
+
+plt.rcParams['savefig.bbox'] = 'tight'  # no excess side padding
+plt.rcParams['text.usetex'] = True  # use LaTeX
+preamble = [r'\usepackage[sfdefault,light]{merriweather}',
+            r'\usepackage{mathpazo}', r'\usepackage{amsmath}']
+plt.rcParams['text.latex.preamble'] = '\n'.join(preamble)
+plt.rcParams['font.size'] = 7.
+plt.rcParams['axes.labelsize'] = 8.
+plt.rcParams['xtick.labelsize'] = 6.
+plt.rcParams['ytick.labelsize'] = 6.
+plt.rcParams['legend.edgecolor'] = 'w'
 
 # actual form
 df1 = hrun(None, df, 48, 'Farquhar', models=models,

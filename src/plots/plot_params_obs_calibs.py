@@ -135,6 +135,7 @@ def fsig_tuzet(psi_leaf, sf, psi_f):
 
     return fw
 
+
 def envelope(x, y, reject=0):
 
     """

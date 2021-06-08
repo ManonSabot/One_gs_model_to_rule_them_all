@@ -36,12 +36,17 @@ from TractLSM.CH2OCoupler import calc_trans
 
 # ======================================================================
 
-def gas_exchange(p, fw, photo='Farquhar', res='low', dynamic=True, inf_gb=False,
+def gas_exchange(p, fw, photo='Farquhar', res='low', inf_gb=False,
                  iter_max=40, threshold_conv=0.1):
 
     # initial state
     Cs = p.CO2  # Pa
-    Tleaf = p.Tair  # deg C
+
+    try:   # is Tleaf one of the input fields?
+        Tleaf = p.Tleaf
+
+    except (IndexError, AttributeError, ValueError):  # calc. Tleaf
+        Tleaf = p.Tair  # deg C
 
     # hydraulics
     P, E = hydraulics(p, res=res, kmax=p.kmaxT)
@@ -64,8 +69,14 @@ def gas_exchange(p, fw, photo='Farquhar', res='low', dynamic=True, inf_gb=False,
 
         # calculate new trans, gw, gb, etc.
         trans, real_zero, gw, gb, __ = calc_trans(p, Tleaf, gs, inf_gb=inf_gb)
-        new_Tleaf, __ = leaf_temperature(p, trans, Tleaf=Tleaf, inf_gb=inf_gb)
         Pleaf = P[bn.nanargmin(np.abs(E - trans))]
+
+        try:  # is Tleaf one of the input fields?
+            new_Tleaf = p.Tleaf
+
+        except (IndexError, AttributeError, ValueError):  # calc. Tleaf
+            new_Tleaf, __ = leaf_temperature(p, trans, Tleaf=Tleaf,
+                                             inf_gb=inf_gb)
 
         # update Cs (Pa)
         boundary_CO2 = p.Patm * conv.FROM_MILI * An / (gb * conv.GbcvGb)
@@ -99,7 +110,7 @@ def gas_exchange(p, fw, photo='Farquhar', res='low', dynamic=True, inf_gb=False,
     return An, Aj, Ac, Ci, trans, gs, gb, new_Tleaf, Pleaf
 
 
-def fLWP_stable(p, photo='Farquhar', res='low', inf_gb=False):
+def fLWP_stable(p, photo='Farquhar', res='low', inf_gb=False, iter_max=5):
 
     # hydraulics
     P, __ = hydraulics(p, res=res, kmax=p.kmaxT)
@@ -112,9 +123,8 @@ def fLWP_stable(p, photo='Farquhar', res='low', inf_gb=False):
         fw = fLWP(p, p.LWP_ini)  # previous stress factor
         __, __, __, __, __, __, __, __, Pleaf = gas_exchange(p, fw, photo=photo,
                                                              res=res,
-                                                             dynamic=False,
                                                              inf_gb=inf_gb,
-                                                             iter_max=5)
+                                                             iter_max=iter_max)
 
         if abs(Pleaf - p.LWP_ini) < P[0] - P[1]:  # no need to look further
 
@@ -133,9 +143,8 @@ def fLWP_stable(p, photo='Farquhar', res='low', inf_gb=False):
         fw = fLWP(p, Psi)  # update stress factor
         __, __, __, __, __, __, __, __, Pleaf = gas_exchange(p, fw, photo=photo,
                                                              res=res,
-                                                             dynamic=False,
                                                              inf_gb=inf_gb,
-                                                             iter_max=5)
+                                                             iter_max=iter_max)
 
         if ((down and (Pleaf - Psi > P[1] - P[0])) or
             ((not down) and (Pleaf - Psi < P[0] - P[1]))):  # converges

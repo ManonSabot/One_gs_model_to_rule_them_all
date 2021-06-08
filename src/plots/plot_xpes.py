@@ -246,7 +246,6 @@ def smooth_soil_water(df):
     # retrieve the soil moisture profiles
     sw_wet, __ = soil_water(df, 'wet')
     sw_inter, __ = soil_water(df, 'inter')
-    sw_dry, __ = soil_water(df, 'dry')
 
     # smooth the decay of sm when plotting it
     N  = 3  # filter order
@@ -254,9 +253,8 @@ def smooth_soil_water(df):
     B, A = signal.butter(N, Wn, output='ba')
     sw_wet = signal.filtfilt(B, A, sw_wet)
     sw_inter = signal.filtfilt(B, A, sw_inter)
-    sw_dry = signal.filtfilt(B, A, sw_dry)
 
-    return sw_wet, sw_inter, sw_dry
+    return sw_wet, sw_inter
 
 
 def plot_forcings(df, fname):
@@ -280,10 +278,10 @@ def plot_forcings(df, fname):
                          facecolor='lightgrey', edgecolor='none')
 
     # plot the soil moisture profiles
-    sw_wet, sw_inter, sw_dry = smooth_soil_water(df)
-    axes[3].plot(sw_wet, color='#fdcc8a')
-    axes[3].plot(sw_inter, color='#fc8d59')
-    axes[3].plot(sw_dry, color='#d7301f')
+    sw_wet, sw_inter = smooth_soil_water(df)
+
+    axes[3].plot(sw_wet, color='k')
+    axes[3].plot(sw_inter, color='k', ls='--')
 
     # plot reference soil moisture levels
     axes[3].plot(df['theta_sat'], ':k',
@@ -292,11 +290,11 @@ def plot_forcings(df, fname):
                  ha='right')
     axes[3].plot(df['fc'], ':k',
                  linewidth=plt.rcParams['lines.linewidth'] / 2., zorder=-1)
-    axes[3].text(0.99 * len(df), df['fc'][0] + 1.15e-2, 'field capacity',
+    axes[3].text(0.99 * len(df), df['fc'][0] + 0.008, 'field capacity',
                  ha='right')
     axes[3].plot(df['pwp'], ':k',
                  linewidth=plt.rcParams['lines.linewidth'] / 2., zorder=-1)
-    axes[3].text(0.99 * len(df), df['pwp'][0] + 1.15e-2, 'wilting point',
+    axes[3].text(0.92 * len(df), df['pwp'][0] + 0.008, 'wilting point',
                  ha='right')
 
     for i, ax in enumerate(axes):  # format axes
@@ -709,6 +707,7 @@ for training in ['wet', 'inter']:
     figname = os.path.join(figdir, 'calib_variables_%s.jpg' % (training))
 
     if not os.path.isfile(figname):
+
         plot_diag_target(df2, figname, Ca=df1.loc[0, 'CO2'],
                          P50=-df1.loc[0, 'P50'],
                          P88=-df1.loc[0, 'P88'])

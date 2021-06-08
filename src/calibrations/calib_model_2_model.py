@@ -189,27 +189,6 @@ def subsample(training, target, sample):
                             doys[-1] + 1, size=size - len(sub)))))
 
         ssub = np.asarray(training.loc[training['doy'].isin(sub)].index)
-
-        """
-        # there are small differences in day time hours... same sizes?
-        if sample > 1:  # the first distribution is the reference size
-            ref = np.load(fname.replace('%d.npy' % (sample), '1.npy'))
-            diff = len(ref) - len(ssub)
-
-            while diff > 0:  # random extra data points from any one day
-
-                sub = np.unique(np.append(sub,
-                                np.unique(np.random.randint(doys[0],
-                                doys[-1] + 1, size=1))))
-
-                ssub = np.asarray(training.loc[training['doy'].isin(sub)].index)
-                diff = len(ref) - len(ssub)
-
-            if diff < 0:  # randomly remove the excess
-                rm = np.random.randint(0, len(ssub), size=abs(diff))
-                ssub = np.delete(ssub, rm)
-        """
-
         np.save(fname, ssub)
 
     else:
@@ -267,14 +246,14 @@ def prep_training_N_target(profile, sub=None):
 
 #==============================================================================
 
-to_fit = True
+to_fit = False
 sample = None # None, 1, 2, or 3
 
 swaters = ['wet', 'inter']  # two different soil moisture profiles
 
 # declare empty dataframe which will be used to analyse the calibrations
 odf = pd.DataFrame(columns=['Model', 'training', 'solver', 'BIC', 'Rank', 'p1',
-                            'v1', 'p2', 'v2'])
+                            'v1', 'ci1', 'p2', 'v2', 'ci2'])
 
 # where should the fitting solvers' outputs be stored?
 base_dir = get_main_dir()  # working paths
@@ -301,8 +280,8 @@ if to_fit:
             os.makedirs(opath)
 
         # use a non-linear least square minimiser to train the models
-        for test in ['nelder', 'powell', 'cobyla']:
-            #for test in ['differential_evolution', 'basinhopping', 'dual_annealing', 'ampgo']:
+        for test in ['differential_evolution', 'basinhopping', 'nelder',
+                     'powell', 'cobyla', 'dual_annealing', 'ampgo']:
 
             XX = X.copy()
             nlmfit = NLMFIT(method=test, store=opath)
@@ -360,19 +339,32 @@ else:  # read over the calibration files and analyse these outputs
                         k2 = 'function evals'
                         k3 = 'data points'
                         k4 = 'Bayesian info crit'
-                        k5 = '%) '  # calibrated parameters
+                        k5 = ' ('  # calibrated parameters
                         k6 = '(init'  # calibrated parameters
                         k7 = '+/-'  # calibrated parameters
-                        k8 = '=='  # calibrated parameters
+                        k8 = ':'  # calibrated parameters
+                        k9 = '(fixed'  # calibrated parameters
+                        k10 = '=='  # calibrated parameters
                         info = [e.split('=') if (k1 in e) else
                                 [e.split('=')[1]] if ((k2 in e) or (k3 in e) or
                                 (k4 in e)) else
-                                e.split(k5)[0].split(k7)[0].split(':')
-                                if (k5 in e)
-                                else e.split(k6)[0].split(k7)[0].split(':')
+                                [(e.split(k6)[0].split(k5)[0].split(k7)[0]
+                                   .split(k8)[0]),
+                                 (e.split(k6)[0].split(k5)[0].split(k7)[0]
+                                   .split(k8)[1]),
+                                 e.split(k6)[0].split(k5)[0].split(k7)[1]]
+                                if (k7 in e) else
+                                [e.split(k6)[0].split(':')[0],
+                                 e.split(k6)[0].split(':')[1], 'nan']
                                 if (k6 in e) else
-                                e.split(k8)[0].split(':') if (k8 in e) else
-                                [''] for e in lines]
+                                [e.split(k9)[0].split(':')[0],
+                                 e.split(k9)[0].split(':')[1], 'nan']
+                                if (k9 in e) else
+                                [e.split(k10)[0].split(':')[0],
+                                 e.split(k10)[0].split(':')[1], 'nan']
+                                if (k10 in e) else [''] for e in lines]
+
+                        # remove end lines and formatting issues
                         info = [e.strip('\n') for sub in info for e in sub
                                 if e != '']
                         info = [e.replace(' ', '') if (':' in e) else e.strip()
@@ -394,16 +386,19 @@ else:  # read over the calibration files and analyse these outputs
                                    'Ntotal': float(solver[1]) *
                                              float(solver[2]),
                                    'BIC': float(solver[3]), 'p1': solver[4],
-                                   'v1': float(solver[5])}
+                                   'v1': float(solver[5]),
+                                   'ci1': float(solver[6])}
 
-                            if len(solver) > 6:
+                            if len(solver) > 7:
                                 if model == 'SOX-OPT':  # deal with the 'factor'
-                                    dic['p2'] = solver[8]
-                                    dic['v2'] = float(solver[9])
+                                    dic['p2'] = solver[10]
+                                    dic['v2'] = float(solver[11])
+                                    dic['ci2'] = float(solver[12])
 
                                 else:
-                                    dic['p2'] = solver[6]
-                                    dic['v2'] = float(solver[7])
+                                    dic['p2'] = solver[7]
+                                    dic['v2'] = float(solver[8])
+                                    dic['ci2'] = float(solver[9])
 
                             odf = odf.append(dic, ignore_index=True)
 
@@ -425,7 +420,7 @@ else:  # read over the calibration files and analyse these outputs
 
         # column order
         columns = ['Model', 'training', 'sub-sample', 'solver', 'Rank', 'BIC',
-                   'Ntotal', 'p1', 'v1', 'p2', 'v2']
+                   'Ntotal', 'p1', 'v1', 'ci1', 'p2', 'v2', 'ci2']
 
         # save the overview file
         odf[columns].to_csv(fname, index=False, na_rep='', encoding='utf-8')
@@ -443,9 +438,10 @@ else:  # read over the calibration files and analyse these outputs
 
     # are the three best solvers the same regardless of training?
     if set(subset) == set(subw) == set(subi):
-        print('All top 3 solvers are the same:', subset)
-    # if not, are the three overall best in each training's four best?
-    else:
+        print('Overall top 3 solvers are the same regardless of soil moisture:',
+              subset)
+
+    else:  # are the three overall best in each training's four best?
         subw = (odf[odf['training'] == 'wet'].groupby('solver')['Rank']
                    .mean().nsmallest(n=4).index.tolist())
         subi = (odf[odf['training'] == 'inter'].groupby('solver')['Rank']
@@ -453,11 +449,22 @@ else:  # read over the calibration files and analyse these outputs
 
         if (set(subw).issuperset(set(subset)) and
             set(subi).issuperset(set(subset))):
-            print('Overall top 3 solvers are in each top 4 solvers:', subset)
+            print('Overall top 3 solvers are in each soil moisture top 4:',
+                  subset)
 
-        else:  # the 'best solvers' are too different, rethink the method
-            msg = 'Abort: the best solvers change with the type of training!'
-            raise ValueError(msg)
+        else:  # there are no equivocal three best solvers, test 4?
+            subset = (odf.groupby('solver')['Rank'].mean().nsmallest(n=4)
+                         .index.tolist())
+            subset = [[e, (subset + subw + subi).count(e)]
+                      for e in set(subset + subw + subi)]
+            subset = [e[0] for e in subset if e[1] > 1]
+
+            if len(subset) > 3:
+                print('The overall top 4 solvers are:', subset)
+
+            else:
+                msg = 'Abort: there are no better solvers!'
+                raise ValueError(msg)
 
     fname = os.path.join(os.path.join(os.path.join(os.path.join(base_dir,
                          'output'), 'calibrations'), 'idealised'),
@@ -465,48 +472,9 @@ else:  # read over the calibration files and analyse these outputs
 
     if not os.path.isfile(fname):
 
-        """
-        odf = (odf[np.logical_and(odf['solver'].isin(subset),
-                                  odf['sub-sample'] == 0)]
-                  .drop(['sub-sample'], axis=1))
-
-        # re-rank the solvers
-        odf['Rank'] = (odf.groupby(['Model', 'training'])['BIC'].rank()
-                          .astype(int))
-        """
-
         # check that there are no duplicated ranks within a group
         eq = (odf.groupby(['Model', 'training'])['Rank'].nunique()
                  .le(len(odf['solver'].unique()) - 1))
-
-        """
-        eq_models = eq[eq == True].index.get_level_values(0)
-        eq_trainings = eq[eq == True].index.get_level_values(1)
-
-        for i in range(len(eq_models)):
-
-            where = np.logical_and(odf['Model'] == eq_models[i],
-                                   odf['training'] == eq_trainings[i])
-            sub = odf[where]
-
-            for j in range(len(sub['sub-sample'].unique())):
-
-                subsub = sub[sub['sub-sample'] == float(j)]
-                med = subsub['v1'].median()
-                Rmin = subsub['Rank'].min()
-                dup = subsub['Rank'].duplicated()
-
-            # if rank duplicated, rerank by median param
-            if len(sub[sub['Rank'] == sub['Rank'].min()]) > 1:
-                odf['Rank'][where] = 3  # deal with duplicated Rank = 1
-                idx = sub[sub['v1'] == sub['v1'].median()].index
-
-                if len(idx) > 1:  # if params are still equal, pick fastest
-                    sub = sub.loc[idx]
-                    idx = sub[sub['Ntotal'] == sub['Ntotal'].min()].index
-
-                odf.loc[idx, 'Rank'] = 1
-        """
 
         if not any(eq):  # no duplicates, things working properly
 
@@ -526,7 +494,7 @@ else:  # read over the calibration files and analyse these outputs
 
             # column order
             columns = ['Model', 'training', 'sub-sample', 'solver', 'Rank',
-                       'BIC', 'Ntotal', 'p1', 'v1', 'p2', 'v2']
+                       'BIC', 'Ntotal', 'p1', 'v1', 'ci1', 'p2', 'v2', 'ci2']
 
             # within best 3
             sdf[columns].to_csv(fname, index=False, na_rep='', encoding='utf-8')
@@ -553,6 +521,7 @@ else:  # read over the calibration files and analyse these outputs
         # add params to Tuzet, WUE-LWP, CGain, CMax
         sdf['p3'] = np.nan  # own kmax
         sdf['v3'] = np.nan
+        sdf['ci3'] = np.nan
 
         # specific param names on a per model basis
         sdf['p2'].loc[sdf['Model'] == 'WUE-LWP'] = 'kmaxWUE'
@@ -568,20 +537,26 @@ else:  # read over the calibration files and analyse these outputs
             for m in ['WUE-LWP', 'CGain', 'Tuzet', 'CMax']:
 
                 solver = sub1[sub1['Model'] == m].solver.values[0]
+
+                # own kmax
                 kval = (sub2[np.logical_and(sub2['solver'] == solver,
-                        sub2['Model'] == 'ProfitMax')]).v1  # own kmax
+                        sub2['Model'] == 'ProfitMax')]).v1
+                cival = (sub2[np.logical_and(sub2['solver'] == solver,
+                                             sub2['Model'] == 'ProfitMax')]).ci1
                 idx = sub1[np.logical_and(sub1['Model'] == m,
                                           sub1['solver'] == solver)].index
 
                 if m in ['WUE-LWP', 'CGain']:
                     sdf.loc[idx, 'v2'] = float(kval)
+                    sdf.loc[idx, 'ci2'] = float(cival)
 
                 else:
                     sdf.loc[idx, 'v3'] = float(kval)
+                    sdf.loc[idx, 'ci3'] = float(cival)
 
         # column order
         columns = ['Model', 'training', 'solver', 'BIC', 'Ntotal', 'p1',
-                   'v1', 'p2', 'v2', 'p3', 'v3']
+                   'v1', 'ci1', 'p2', 'v2', 'ci2', 'p3', 'v3', 'ci3']
 
         # best calibrations
         sdf[columns].to_csv(fname, index=False, na_rep='', encoding='utf-8')

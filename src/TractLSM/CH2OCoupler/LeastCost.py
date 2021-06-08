@@ -158,8 +158,11 @@ def least_cost(p, photo='Farquhar', res='low', inf_gb=False, deriv=False):
                                          inf_gb=inf_gb)
         rublim = rubisco_limit(Aj, Ac)
 
-        # leaf temperature?
-        Tleaf, __ = leaf_temperature(p, trans, inf_gb=inf_gb)
+        try:  # is Tleaf one of the input fields?
+            Tleaf = p.Tleaf
+
+        except (IndexError, AttributeError, ValueError):  # calc. Tleaf
+            Tleaf, __ = leaf_temperature(p, trans, inf_gb=inf_gb)
 
         if (np.isclose(trans, cst.zero, rtol=cst.zero, atol=cst.zero) and
             (An > 0.)) or (idx[0] == len(P) - 1) or any(np.isnan([An, Ci, trans,

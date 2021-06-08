@@ -243,9 +243,13 @@ def Ci_sup_dem(p, trans, photo='Farquhar', res='low', Vmax25=None, phi=None,
     if res == 'high':
         NCis = 8000
 
-    # retrieve the appropriate Cis from the supply-demand
-    Cis = np.asarray([np.linspace(0.1, Cs[e], NCis) for e in
-                     range(len(trans))])
+    try:  # retrieve the appropriate Cis from the supply-demand
+        Cis = np.asarray([np.linspace(0.1, Cs[e], NCis) for e in
+                         range(len(trans))])
+
+    except (IndexError, AttributeError, ValueError):
+        Cis = np.asarray([np.linspace(0.1, Cs, NCis) for e in
+                         range(len(trans))])
 
     if (Vmax25 is None) and (phi is not None):  # account for gm
         Tref = p.Tref + conv.C_2_K  # degk, Tref set to 25 degC

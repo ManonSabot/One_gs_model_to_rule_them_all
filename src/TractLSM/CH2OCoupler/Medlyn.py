@@ -106,8 +106,13 @@ def solve_std(p, sw, photo='Farquhar', res='low', iter_max=40,
 
     # initial state
     Cs = p.CO2  # Pa
-    Tleaf = p.Tair  # deg C
     Dleaf = np.maximum(0.05, p.VPD)  # gs model not valid < 0.05
+
+    try:   # is Tleaf one of the input fields?
+        Tleaf = p.Tleaf
+
+    except (IndexError, AttributeError, ValueError):  # calc. Tleaf
+        Tleaf = p.Tair  # deg C
 
     # hydraulics
     P, E = hydraulics(p, res=res)
@@ -137,7 +142,13 @@ def solve_std(p, sw, photo='Farquhar', res='low', iter_max=40,
         # calculate new trans, gw, gb, mol.m-2.s-1
         trans, real_zero, gw, gb, Dleaf = calc_trans(p, Tleaf, gs,
                                                      inf_gb=inf_gb)
-        new_Tleaf, __ = leaf_temperature(p, trans, Tleaf=Tleaf, inf_gb=inf_gb)
+
+        try:  # is Tleaf one of the input fields?
+            new_Tleaf = p.Tleaf
+
+        except (IndexError, AttributeError, ValueError):  # calc. Tleaf
+            new_Tleaf, __ = leaf_temperature(p, trans, Tleaf=Tleaf,
+                                             inf_gb=inf_gb)
 
         # update Cs (Pa)
         boundary_CO2 = p.Patm * conv.FROM_MILI * An / (gb * conv.GbcvGb)

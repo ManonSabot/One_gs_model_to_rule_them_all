@@ -124,8 +124,13 @@ def MES(p, photo='Farquhar', res='low', inf_gb=False, deriv=False):
         gs = gs[idx[0]]
         Pleaf = P[mask][idx[0]]
 
+        try:  # is Tleaf one of the input fields?
+            Tleaf = p.Tleaf
+
+        except (IndexError, AttributeError, ValueError):  # calc. Tleaf
+            Tleaf, __ = leaf_temperature(p, trans, inf_gb=inf_gb)
+
         # Ci?
-        Tleaf, __ = leaf_temperature(p, trans, inf_gb=inf_gb)
         gamstar = arrhen(p.gamstar25, p.Egamstar, p.Tref + conv.C_2_K, Tleaf)
         Ci = (Cc[idx[0]] - gamstar) / phi[mask][idx[0]] + gamstar
 

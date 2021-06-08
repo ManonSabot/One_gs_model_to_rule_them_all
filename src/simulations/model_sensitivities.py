@@ -89,7 +89,7 @@ def chunks(a, N):
 base_dir = get_main_dir()
 
 # path to input data
-Pmin = 1
+Pmin = 1.5
 fname = os.path.join(os.path.join(os.path.join(os.path.join(base_dir, 'input'),
                      'simulations'), 'idealised'), 'sensitivity_mtx_%sMPa.csv'
                      % (str(Pmin)))

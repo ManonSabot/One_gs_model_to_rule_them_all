@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 
 """
@@ -61,17 +62,17 @@ def floop(p, model, photo='Farquhar', inf_gb=True):
         Tleaf = p.Tair  # deg C
         iter_max = 40
 
-    if model != 'Tuzet':  # energy balance requirements
-        Pleaf_pd = p.Ps_pd - p.height * cst.rho * cst.g0 * conv.MEGA
+    if (model == 'Eller') or (model == 'SOX-OPT'):
+        Pleaf_sat = p.Ps_pd - p.height * cst.rho * cst.g0 * conv.MEGA
 
-        if model == 'Medlyn':
-            Dleaf = np.maximum(0.05, Dleaf)  # gs model not valid < 0.05
+    elif model == 'Medlyn':
+        Dleaf = np.maximum(0.05, Dleaf)  # gs model not valid < 0.05
 
-            if p.height > 0 and  sw >= p.fc:
-                fw = 1.  # no moisture stress
+        if iter_max > 0 and sw >= p.fc:
+            fw = 1.  # no moisture stress
 
-            else:
-                fw = fwWP(p, p.Ps)  # moisture stress function
+        else:
+            fw = fwWP(p, p.Ps)  # moisture stress function
 
     else:  # Tuzet model
         fw = fLWP(p, p.LWP_ini)  # stress factor
@@ -106,12 +107,12 @@ def floop(p, model, photo='Farquhar', inf_gb=True):
             dAdCi = dA * conv.GwvGc * p.Patm / dCi
 
             # kcost, unitless
-            cost_pd = kcost(p, Pleaf_pd, Pleaf_pd)
-            cost_mid = kcost(p, -p.P50, Pleaf_pd)
+            cost_pd = kcost(p, Pleaf_sat, Pleaf_sat)
+            cost_mid = kcost(p, -p.P50, Pleaf_sat)
             dkcost = cost_pd - cost_mid
 
             # dP is needed to calculate gs
-            dP = 0.5 * (Pleaf_pd + p.P50)  # MPa,  /!\ sign of P50
+            dP = 0.5 * (Pleaf_sat + p.P50)  # MPa,  /!\ sign of P50
 
             # xi, the loss of xylem cost of stomatal opening, mmol m-2 s-1
             dq = Dleaf / p.Patm  # mol mol-1, equivalent to D / Patm
@@ -145,10 +146,10 @@ def floop(p, model, photo='Farquhar', inf_gb=True):
                      * Dleaf / (p.CO2 - Cis))
 
             # cost, Pleaf
-            mask = np.logical_and(Pleaf_pd - E / p.ksc_prev <= Pleaf_pd,
-                                  Pleaf_pd - E / p.ksc_prev >= P[-1])
-            P = (Pleaf_pd - E / p.ksc_prev)[mask]
-            cost = kcost(p, P, Pleaf_pd)
+            mask = np.logical_and(Pleaf_sat - E / p.ksc_prev <= Pleaf_sat,
+                                  Pleaf_sat - E / p.ksc_prev >= P[-1])
+            P = (Pleaf_sat - E / p.ksc_prev)[mask]
+            cost = kcost(p, P, Pleaf_sat)
 
             try:  # optimal point
                 iopt = np.argmax(cost * A[mask])

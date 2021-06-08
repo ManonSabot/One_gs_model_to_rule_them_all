@@ -92,21 +92,13 @@ def soil_water(df, profile):
 
     if profile == 'inter':
         start = 0.9 * sw[0]
-        rate = -5. / len(df) * (np.log(sw[0]) - np.log(df['fc'][0]))
-        sw_min = (df['fc'][0] + df['pwp'][0]) / 2.
-
-        # alternative
-        #start = sw[0]
-        #rate = -8. / len(df) * (np.log(sw[0]) - np.log(df['fc'][0]))
+        rate = -6. / len(df) * (np.log(sw[0]) - np.log(df['fc'][0]))
+        sw_min = df['pwp'][0]
 
     if profile == 'dry':
         start = 0.8 * sw[0]
         rate = -12. / len(df) * (np.log(sw[0]) - np.log(df['fc'][0]))
         sw_min = df['pwp'][0] / 2.
-
-        # alternative
-        #start = sw[0]
-        #rate = -16. / len(df) * (np.log(sw[0]) - np.log(df['fc'][0]))
 
     for i in range(len(df)):
 
@@ -286,9 +278,16 @@ if not os.path.isfile(fname):
     morn = df[low_light].groupby('xpe')[gs + A + E].mean() * 100.
     arvo = df[~low_light].groupby('xpe')[gs + A + E].mean() * 100.
 
+    # max daily relative fluxes
+    all2 = df.groupby(['xpe', 'doy'])[gs + A + E].mean().groupby(level=0).max() * 100.
+    morn2 = df[low_light].groupby(['xpe', 'doy'])[gs + A + E].mean().groupby(level=0).max() * 100.
+    arvo2 = df[~low_light].groupby(['xpe', 'doy'])[gs + A + E].mean().groupby(level=0).max() * 100.
+
     # save relative change df
     (pd.concat([all, morn, arvo], keys=['day', 'mornNeve', 'arvo'])
        .to_csv(fname, na_rep='', encoding='utf-8'))
+    (pd.concat([all2, morn2, arvo2], keys=['day', 'mornNeve', 'arvo'])
+       .to_csv(fname.replace('relative', 'max_relative'), na_rep='', encoding='utf-8'))
 
 
 # create an impact df

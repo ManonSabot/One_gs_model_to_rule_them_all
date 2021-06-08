@@ -92,7 +92,7 @@ to_fit = False
 
 # declare empty dataframe which will be used to analyse the calibrations
 odf = pd.DataFrame(columns=['Model', 'training', 'solver', 'BIC', 'Rank', 'p1',
-                            'v1', 'p2', 'v2'])
+                            'v1', 'ci1', 'p2', 'v2', 'ci2'])
 
 base_dir = get_main_dir()  # working paths
 
@@ -102,8 +102,8 @@ ipath = os.path.join(os.path.join(os.path.join(base_dir, 'input'),
 opath = os.path.join(os.path.join(os.path.join(base_dir, 'output'),
                      'calibrations'), 'obs_driven')
 
-xfiles = sorted([e for e in os.listdir(ipath) if e.endswith('_x.csv')])[-2:]
-yfiles = sorted([e for e in os.listdir(ipath) if e.endswith('_y.csv')])[-2:]
+xfiles = sorted([e for e in os.listdir(ipath) if e.endswith('_x.csv')])
+yfiles = sorted([e for e in os.listdir(ipath) if e.endswith('_y.csv')])
 
 if to_fit:
 
@@ -119,28 +119,28 @@ if to_fit:
             os.makedirs(out)
 
         # use a non-linear least square minimiser to train the models
-        for test in ['leastsq']:  #['differential_evolution', 'powell', 'dual_annealing']:
+        for test in ['differential_evolution', 'powell', 'dual_annealing']:
 
             XX = X.copy()
             nlmfit = NLMFIT(method=test, store=out, inf_gb=False)
 
-            #__ = nlmfit.run(XX, Y, 'Medlyn')
-            #__ = nlmfit.run(XX, Y, 'Tuzet')
-            #__ = nlmfit.run(XX, Y, 'Eller')
+            __ = nlmfit.run(XX, Y, 'Medlyn')
+            __ = nlmfit.run(XX, Y, 'Tuzet')
+            __ = nlmfit.run(XX, Y, 'Eller')
 
-            #__ = nlmfit.run(XX, Y, 'SOX-OPT')
-            #__ = nlmfit.run(XX, Y, 'CAP')
-            #__ = nlmfit.run(XX, Y, 'MES')
-            #__ = nlmfit.run(XX, Y, 'LeastCost')
-            #__ = nlmfit.run(XX, Y, 'ProfitMax2')
+            __ = nlmfit.run(XX, Y, 'SOX-OPT')
+            __ = nlmfit.run(XX, Y, 'CAP')
+            __ = nlmfit.run(XX, Y, 'MES')
+            __ = nlmfit.run(XX, Y, 'LeastCost')
+            __ = nlmfit.run(XX, Y, 'ProfitMax2')
 
             # use ProfitMax's kmax
             fkmax = nlmfit.run(XX, Y, 'ProfitMax')
-            #XX['kmax'] = fkmax['kmax']
+            XX['kmax'] = fkmax['kmax']
 
-            #__ = nlmfit.run(XX, Y, 'WUE-LWP')
-            #__ = nlmfit.run(XX, Y, 'CMax')
-            #__ = nlmfit.run(XX, Y, 'CGain')
+            __ = nlmfit.run(XX, Y, 'WUE-LWP')
+            __ = nlmfit.run(XX, Y, 'CMax')
+            __ = nlmfit.run(XX, Y, 'CGain')
 
     exit(1)
 
@@ -157,7 +157,7 @@ else:  # read over the calibration files and analyse these outputs
 
             for file in os.listdir(os.path.join(opath, training)):
 
-                if file.endswith('.txt') and not file.endswith('zet2.txt'):
+                if file.endswith('.txt'):
                     f = open(os.path.join(os.path.join(opath, training), file),
                              'r')
                     model = file.split('.txt')[0]
@@ -168,25 +168,36 @@ else:  # read over the calibration files and analyse these outputs
                     k2 = 'function evals'
                     k3 = 'data points'
                     k4 = 'Bayesian info crit'
-                    k5 = '%) '  # calibrated parameters
+                    k5 = ' ('  # calibrated parameters
                     k6 = '(init'  # calibrated parameters
                     k7 = '+/-'  # calibrated parameters
-                    k8 = '(fixed'  # calibrated parameters
-                    k9 = '=='  # calibrated parameters
+                    k8 = ':'
+                    k9 = '(fixed'  # calibrated parameters
+                    k10 = '=='  # calibrated parameters
                     info = [e.split('=') if (k1 in e) else
                             [e.split('=')[1]] if ((k2 in e) or (k3 in e) or
                             (k4 in e)) else
-                            e.split(k5)[0].split(k7)[0].split(':')
-                            if (k5 in e) else
-                            e.split(k6)[0].split(k7)[0].split(':')
-                            if (k6 in e) else
-                            e.split(k8)[0].split(':') if (k8 in e) else
-                            e.split(k9)[0].split(':') if (k9 in e) else
-                            [''] for e in lines]
+                            [(e.split(k6)[0].split(k5)[0].split(k7)[0]
+                               .split(k8)[0]),
+                             (e.split(k6)[0].split(k5)[0].split(k7)[0]
+                               .split(k8)[1]),
+                             e.split(k6)[0].split(k5)[0].split(k7)[1]]
+                            if (k7 in e) else
+                            [e.split(k6)[0].split(':')[0],
+                             e.split(k6)[0].split(':')[1], 'nan'] if (k6 in e)
+                            else
+                            [e.split(k9)[0].split(':')[0],
+                             e.split(k9)[0].split(':')[1], 'nan'] if (k9 in e)
+                            else
+                            [e.split(k10)[0].split(':')[0],
+                             e.split(k10)[0].split(':')[1], 'nan'] if (k10 in e)
+                            else [''] for e in lines]
+
+                    # remove end lines and formatting issues
                     info = [e.strip('\n') for sub in info for e in sub
                             if e != '']
                     info = [e.replace(' ', '') if (':' in e) else e.strip()
-                            for e in info ]
+                            for e in info]
 
                     # split into sublists containing each solver's info
                     by_solver = [list(sub) for e, sub in
@@ -200,16 +211,18 @@ else:  # read over the calibration files and analyse these outputs
                                'solver': solver[0], 'Ntotal': float(solver[1]) *
                                                               float(solver[2]),
                                'BIC': float(solver[3]), 'p1': solver[4],
-                               'v1': float(solver[5])}
+                               'v1': float(solver[5]), 'ci1': float(solver[6])}
 
-                        if len(solver) > 6:
+                        if len(solver) > 7:
                             if model == 'SOX-OPT':  # deal with the 'factor'
-                                dic['p2'] = solver[8]
-                                dic['v2'] = float(solver[9])
+                                dic['p2'] = solver[10]
+                                dic['v2'] = float(solver[11])
+                                dic['ci2'] = float(solver[12])
 
                             else:
-                                dic['p2'] = solver[6]
-                                dic['v2'] = float(solver[7])
+                                dic['p2'] = solver[7]
+                                dic['v2'] = float(solver[8])
+                                dic['ci2'] = float(solver[9])
 
                         odf = odf.append(dic, ignore_index=True)
 
@@ -231,7 +244,7 @@ else:  # read over the calibration files and analyse these outputs
 
         # column order
         columns = ['Model', 'training', 'solver', 'Rank', 'BIC', 'Ntotal', 'p1',
-                   'v1', 'p2', 'v2']
+                   'v1', 'ci1', 'p2', 'v2', 'ci2']
 
         # save the overview file
         odf[columns].to_csv(fname, index=False, na_rep='', encoding='utf-8')
@@ -258,8 +271,8 @@ else:  # read over the calibration files and analyse these outputs
                 sub1 = sub[sub['p1'] == e]
                 sub2 = sub[sub['p2'] == e]
                 min, max = nlmfit.param_space(e, P88=df.loc[0, 'P88'])
-                min += 0.05 * min  # above min is not stuck at bound
-                max -= 0.05 * max  # below max is not stuck at bound
+                min += 0.01 * min  # above min is not stuck at bound
+                max -= 0.01 * max  # below max is not stuck at bound
 
                 if len(sub1) > 0:
                     lims = np.logical_or(sub1['v1'] < min, sub1['v1'] > max)
@@ -272,10 +285,11 @@ else:  # read over the calibration files and analyse these outputs
 
                     if any(lims):
                         stuck += sub2['v2'][lims].index.to_list()
+
         # boundary params
         if len(stuck) > 0:
             sub = odf[odf.index.isin(stuck)]
-            eq = sub.groupby(['Model', 'training']).size().le(2)
+            eq = sub.groupby(['Model', 'training']).size().le(3)
             eq_models = eq[eq == True].index.get_level_values(0)
             eq_trainings = eq[eq == True].index.get_level_values(1)
 
@@ -319,6 +333,7 @@ else:  # read over the calibration files and analyse these outputs
         # add params to Tuzet, WUE-LWP, CGain, CMax
         odf['p3'] = np.nan  # own kmax
         odf['v3'] = np.nan
+        odf['ci3'] = np.nan
 
         # specific param names on a per model basis
         odf['p2'].loc[odf['Model'] == 'WUE-LWP'] = 'kmaxWUE'
@@ -332,26 +347,30 @@ else:  # read over the calibration files and analyse these outputs
             for solver in sub['solver'].unique():
 
                 # own kmax
-                value = (sub[np.logical_and(sub['solver'] == solver,
-                         sub['Model'] == 'ProfitMax')]).v1
+                v1 = (sub[np.logical_and(sub['solver'] == solver,
+                                         sub['Model'] == 'ProfitMax')]).v1
+                ci1 = (sub[np.logical_and(sub['solver'] == solver,
+                                         sub['Model'] == 'ProfitMax')]).ci1
 
                 idx = (sub[np.logical_and(sub['solver'] == solver,
                                          sub['Model'].isin(['WUE-LWP',
                                                             'CGain']))]
                           .index)
-                odf.loc[idx, 'v2'] = float(value)
+                odf.loc[idx, 'v2'] = float(v1)
+                odf.loc[idx, 'ci2'] = float(ci1)
 
                 idx = (sub[np.logical_and(sub['solver'] == solver,
                                          sub['Model'].isin(['CMax']))]
                           .index)
-                odf.loc[idx, 'v3'] = float(value)
+                odf.loc[idx, 'v3'] = float(v1)
+                odf.loc[idx, 'ci3'] = float(ci1)
 
         # Rank = 1 is assumed to be the best param
         odf = odf[odf['Rank'] == 1].drop(['Rank'], axis=1)
 
         # column order
         columns = ['Model', 'training', 'solver', 'BIC', 'Ntotal', 'p1',
-                   'v1', 'p2', 'v2', 'p3', 'v3']
+                   'v1', 'ci1', 'p2', 'v2', 'ci2', 'p3', 'v3', 'ci3']
 
         # best calibrations
         odf[columns].to_csv(fname, index=False, na_rep='', encoding='utf-8')

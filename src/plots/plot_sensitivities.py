@@ -149,8 +149,8 @@ def update_var_names(array):
 
 def which_model(short):
 
-    if short == 'std1':
-        lab = r'Medlyn-$\beta$'
+    if short == 'std':
+        lab = 'Medlyn'
 
     if short == 'tuz':
         lab = 'Tuzet'
@@ -198,7 +198,7 @@ def plot_sensitivities(df, figname):
     drivers, idxs = ['VPD', 'Ps', 'CO2', 'PPFD', 'Tair'], ['ST',] * 5 # dominant_features(df.copy())
 
     # calculate the sensitivities
-    for mod in ['std1', 'tuz', 'sox1', 'wue', 'cmax', 'pmax', 'cgn', 'sox2',
+    for mod in ['std', 'tuz', 'sox1', 'wue', 'cmax', 'pmax', 'cgn', 'sox2',
                 'pmax2', 'lcst', 'cap', 'mes']:
 
         # initialise the axis for the plot
@@ -239,7 +239,9 @@ def plot_sensitivities(df, figname):
 
                 # draw lines angles and labels
                 ax.set_rgrids([0., 0.25, 0.5, 0.75], [])
-                ax.set_ylim(0., 0.95)
+                ax.set_ylim(0., 1.)
+                #ax.set_rgrids([0., 0.25, 0.5], [])
+                #ax.set_ylim(0., 0.75)
                 ax.spines['polar'].set_visible(False)
                 ax.set_thetagrids(np.degrees(angles[:-1]), xlabels)
 
@@ -281,7 +283,7 @@ def plot_sensitivities(df, figname):
                     zorder = 3
 
                 # plot the data
-                if mod == 'std1' and var == r'$\varPsi_{l}$':
+                if mod == 'std' and var == r'$\varPsi_{l}$':
                     next(ax._get_lines.prop_cycler)
 
                 else:
@@ -307,6 +309,8 @@ def plot_sensitivities(df, figname):
     # setup ticks and labels
     ax.set_rgrids([0., 0.25, 0.5, 0.75], ['0', '', '', '0.75'])
     ax.set_rmax(0.75)
+    #ax.set_rgrids([0., 0.25, 0.5], ['0', '', '0.5'])
+    #ax.set_rmax(0.5)
 
     # draw lines angles
     ax.set_thetagrids(np.degrees([0, -45]), [])

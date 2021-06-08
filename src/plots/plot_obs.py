@@ -97,17 +97,14 @@ class plt_setup(object):
 
 def model_order():
 
-    return ['std2', 'tuz', 'sox1', 'wue', 'cmax', 'pmax', 'cgn', 'sox2',
+    return ['std', 'tuz', 'sox1', 'wue', 'cmax', 'pmax', 'cgn', 'sox2',
             'pmax2', 'lcst', 'cap', 'mes']
 
 
 def which_model(short):
 
-    if short == 'std1':
-        lab = r'Medlyn-$\beta$'
-
-    elif short == 'std2':
-        lab = r'Medlyn-$f_{\varPsi_{l,pd}}$'
+    if short == 'std':
+        lab = r'Medlyn'
 
     elif short == 'tuz':
         lab = 'Tuzet'
@@ -297,13 +294,13 @@ def E_A_relationships(df, figname, keep, VPD_info=True):
                 wspace = -0.75
                 hspace = -0.25
 
-            gs = fig.add_gridspec(nrows=6, ncols=6, left=l, right=r, top=t,
-                                  bottom=b, wspace=wspace, hspace=hspace)
-            ax = fig.add_subplot(gs[:-1, 1:])
+            axes = fig.add_gridspec(nrows=6, ncols=6, left=l, right=r, top=t,
+                                    bottom=b, wspace=wspace, hspace=hspace)
+            ax = fig.add_subplot(axes[:-1, 1:])
 
             if Nrows < 3:
-                ax_y = fig.add_subplot(gs[:-1, 0], xticklabels=[], sharey=ax)
-                ax_x = fig.add_subplot(gs[-1, 1:], yticklabels=[], sharex=ax)
+                ax_y = fig.add_subplot(axes[:-1, 0], xticklabels=[], sharey=ax)
+                ax_x = fig.add_subplot(axes[-1, 1:], yticklabels=[], sharex=ax)
 
                 for axis in [ax_y, ax_x]:
 
@@ -576,7 +573,6 @@ def iWUE_relationships(df, figname, keep):
             axes[i].scatter(xobs, yobs, marker='+', s=125. / Nrows, lw=1.25,
                             facecolor='#c0c0c0', edgecolor='none', alpha=0.6,
                             label='Obs.')
-            #obs_popt, obs_pcov = curve_fit(fexponent, xobs, yobs)
 
         left = 1.
         bottom = 1.
@@ -619,13 +615,9 @@ def iWUE_relationships(df, figname, keep):
                     left = np.minimum(left, x[valid].min())
                     bottom = np.minimum(bottom, y[valid].min())
 
-                elif mod != 'std2':  # plot functional relationships
+                elif mod != 'std':  # plot functional relationships
                     if x.min() < 0.95:
-                        try:
-                            #popt, __ = curve_fit(fexponent, x.copy(), y.copy(),
-                            #                     p0=obs_popt, method='dogbox')
-
-                            # plot average obs behaviour above everything else
+                        try:  # plot average obs behaviour
                             gam = (ExpectileGAM(expectile=0.5, n_splines=5,
                                                 spline_order=4,
                                                 constraints='monotonic_dec')
@@ -640,7 +632,7 @@ def iWUE_relationships(df, figname, keep):
                                                         < 0.]
 
                             if (np.isnan(np.nanmean(check)) or
-                                (np.nanmean(check) > -0.1)):
+                                (np.nanmean(check) > -0.3)):
                                 ms = 30.
                                 alpha = 0.9
 
@@ -797,8 +789,8 @@ def Ci_gs_clusters(df, figname, keep):
         __, top = axes[i].get_ylim()
 
         # tighten the subplots
-        axes[i].set_xlim(np.maximum(0.05, left - 0.2), right)
-        axes[i].set_ylim(np.maximum(0.05, bottom - 0.2), top)
+        axes[i].set_xlim(np.maximum(-0.1, left - 0.2), right)
+        axes[i].set_ylim(np.maximum(-0.1, bottom - 0.2), top)
 
         # format axes ticks
         axes[i].xaxis.set_major_locator(mpl.ticker.MaxNLocator(4))
@@ -872,7 +864,7 @@ def LWP_gs_functional(df, figname, keep):
             Ncols += 1
 
     fig, axes = plt.subplots(Nrows, Ncols, figsize=(Ncols + 2.25, Nrows + 2))
-    plt.subplots_adjust(hspace=0.25, wspace=0.25)
+    plt.subplots_adjust(hspace=0.275, wspace=0.275)
     axes = axes.flat
 
     # Ci - gs relationships
@@ -887,11 +879,23 @@ def LWP_gs_functional(df, figname, keep):
         Pcrit = get_P95(ref.loc[0, 'P50'], ref.loc[0, 'P88'], 50, 88)
 
         valid = sub['gs'] < sub['gs'].max()
-        xobs = sub['Pleaf'][valid] / Pcrit
         yobs = sub['gs'][valid] / sub['gs'].max()
-        axes[i].scatter(xobs, yobs, marker='+', s=500. / (Nrows * Ncols),
-                        lw=2.5 / Ncols, facecolor='#c0c0c0', edgecolor='none',
-                        alpha=0.6, label='Obs.')
+
+        if what == 'Corrigin_Eucalyptus_capillosa':  # min average obs
+            axes[i].scatter(np.linspace(0.45, 0.75, 10), [0.01,] * 10,
+                            marker='+', s=500. / (Nrows * Ncols),
+                            lw=2.5 / Ncols, facecolor='#c0c0c0',
+                            edgecolor='none', alpha=0.6, label='Obs.')  # gs
+            axes[i].scatter([-5.2  / Pcrit,] * 20, np.linspace(0., 1., 20),
+                            marker='+', s=500. / (Nrows * Ncols),
+                            lw=2.5 / Ncols, facecolor='#c0c0c0',
+                            edgecolor='none', alpha=0.6)  # Pleaf
+
+        else:
+            xobs = sub['Pleaf'][valid] / Pcrit
+            axes[i].scatter(xobs, yobs, marker='+', s=500. / (Nrows * Ncols),
+                            lw=2.5 / Ncols, facecolor='#c0c0c0',
+                            edgecolor='none', alpha=0.6, label='Obs.')
 
         # add P50 info
         axes[i].vlines(-ref.loc[0, 'P50'] / Pcrit, 0., 1., linestyle=':',
@@ -899,8 +903,6 @@ def LWP_gs_functional(df, figname, keep):
                        label='P$_{50}$', zorder=20)
 
         local_max = 0.
-        obs_popt, obs_pcov = curve_fit(fexponent, sub['Pleaf'] / Pcrit,
-                                       sub['gs'] / sub['gs'].max())
         next(axes[i]._get_lines.prop_cycler)
 
         for mod in model_order()[1:]:
@@ -922,15 +924,9 @@ def LWP_gs_functional(df, figname, keep):
             try:  # plot functional relationships
                 c = next(axes[i]._get_lines.prop_cycler)['color']
                 alpha = 0.5
-                valid = y > 0.
 
-                if x[valid].min() < 0.95:
-                    try:
-                        #popt, __ = curve_fit(fexponent, x[valid].copy(),
-                        #                     y[valid].copy(), p0=obs_popt,
-                        #                     method='dogbox')
-
-                        # plot average obs behaviour above everything else
+                if x.min() < 0.95:
+                    try:  # plot average obs behaviour
                         gam = (ExpectileGAM(expectile=0.5, n_splines=5,
                                             spline_order=4,
                                             constraints='monotonic_dec')
@@ -941,11 +937,11 @@ def LWP_gs_functional(df, figname, keep):
                                          num=500)
                         py = gam.predict(px)
 
-                        check = np.gradient(py, px)[np.gradient(py, px)
-                                                    < 0.]
+                        check = np.gradient(py, px)[~np.isclose(np.gradient(py,
+                                                                px), 0.)]
 
                         if (np.isnan(np.nanmean(check)) or
-                            (np.nanmean(check) > -0.1)):
+                            (np.nanmean(check) >= -0.3)):
                             ms = 6.
                             alpha = 0.9
 
@@ -955,25 +951,11 @@ def LWP_gs_functional(df, figname, keep):
                         ms = 1.
                         alpha = 0.3
 
-                        #if popt[1] < 0.:
-                        #    raise Exception
-
-                        #xx = np.linspace(0.1, 1., 200)
-                        #yy = fexponent(xx, popt[0], popt[1])
-
-                        # sanity check
-                        #xx = xx[yy <= 1.]
-                        #yy = yy[yy <= 1.]
-
-                        #if len(xx) > 0:
-                        #    axes[i].plot(xx, yy, color=c)
-                        #    alpha = 0.
-
                     except Exception:
                         pass
 
                 # plot the scatters
-                axes[i].scatter(x[valid], y[valid], s=ms, c=c, alpha=alpha,
+                axes[i].scatter(x, y, s=ms, c=c, alpha=alpha,
                                 label=which_model(mod))
 
             except Exception:
@@ -1051,42 +1033,46 @@ def VPD_closure(df, figname, keep):
 
     fig = plt.figure(figsize=(6., 3.))
 
-    gs = fig.add_gridspec(nrows=len(model_order()), ncols=12, wspace=-0.15)
+    gs = fig.add_gridspec(nrows=len(model_order()), ncols=12, wspace=0.15)
     ax = fig.add_subplot(gs[:, :5])
 
-    for what in keep:  # behaviours relative to themselves
+    # generic operation for both subplots
+    for what in keep:
 
         where = df[df['site_spp'] == what].index
-        df.loc[where, 'gs'] /= df.loc[where, 'gs'].max()
 
-        for mod in model_order():
-
-            valid = df.loc[where, 'gs(%s)' % (mod)] < 9999.
-            nans = df.loc[where, 'gs(%s)' % (mod)][~valid].index
-            df.loc[nans, 'gs(%s)' % (mod)] = np.nan
-            df.loc[where, 'gs(%s)' % (mod)] /= (df.loc[where, 'gs(%s)' % (mod)]
-                                                  .max())
-
-        # limit the dry soil effect by applying set threshold
+        # limit the dry soil effects
         wherewhere = (df.loc[where][df.loc[where, 'Ps'] <
-                                    df.loc[where, 'Ps'].quantile(0.75)].index)
+                                    df.loc[where, 'Ps'].quantile(0.6)].index)
         df.loc[wherewhere] = np.nan
 
     df = df.dropna(how='all')
-    print(df['VPD'].min(), df['VPD'].max())
 
     all = df.copy()
+
+    for what in keep:  # behaviour relative to the obs
+
+        where = all[all['site_spp'] == what].index
+
+        for mod in model_order():
+
+            valid = all.loc[where, 'gs(%s)' % (mod)] < 9999.
+            nans = all.loc[where, 'gs(%s)' % (mod)][~valid].index
+            all.loc[nans, 'gs(%s)' % (mod)] = np.nan
+            all.loc[where, 'gs(%s)' % (mod)] /= all.loc[where, 'gs'].max()
+
+        all.loc[where, 'gs'] /= all.loc[where, 'gs'].max()
+
     all = all.select_dtypes(exclude=['object'])
     all.replace(9999., np.nan, inplace=True) # deal with the nans
     all.sort_values(by=['VPD'], inplace=True)
     all.reset_index(drop=True, inplace=True)
 
     # bin by VPD
-    all['distri'] = pd.cut(all['VPD'], bins=12)
-    print(all['distri'].unique())
+    all['distri'] = pd.cut(all['VPD'], bins=16)
     all = all.dropna(how='all')
-    all_max = all.groupby(['distri']).quantile(0.95)
-    all_min = all.groupby(['distri']).quantile(0.05)
+    all_max = all.groupby(['distri']).max()
+    all_min = all.groupby(['distri']).min()
     all = all.groupby(['distri']).mean()
 
     # find the min/max values and plot
@@ -1096,47 +1082,30 @@ def VPD_closure(df, figname, keep):
     all_plot['VPD'].iloc[0] = all_min['VPD'].min()
     all_plot['VPD'].iloc[-1] = all_max['VPD'].max()
 
-    # smooth min / max lines only for plotting purposes
-    min_gs = all_min['gs'].copy()
-    max_gs = all_max['gs'].copy()
-    idx1 = np.where(min_gs.diff() > 0)[0]
-    idx2 = np.where(max_gs.diff() > 0)[0]
-
-    for i in idx1:
-
-        if (i - 2 >= 0) and (i + 2) < len(min_gs):
-            min_gs.iloc[i-1:i+2] = np.nan
-            min_gs.interpolate(inplace=True)
-
-    for i in idx2:
-
-        if (i - 2 >= 0) and (i + 2) < len(max_gs):
-            max_gs.iloc[i-1:i+2] = np.nan
-            max_gs.interpolate(inplace=True)
-
-    ax.fill_between(all_plot['VPD'], min_gs, max_gs, color='#c0c0c0', alpha=0.5)
-
-    # behavioural 'transition' point into 'high' VPD, use actual
-    change = np.gradient(max_gs, all_max['VPD'])
-    idx = np.argmin(change)
-    gs_thresh = (all_max['gs'][idx] + all_max['gs'][idx - 1]) / 2.
-
     # draw a box around the area
-    ax.hlines(gs_thresh, 3., all_max['VPD'].max(), linestyle='--',
+    ax.hlines(0.3, 2., all_max['VPD'].max(), linestyle='--', linewidth=2.,
+              zorder=20)
+    ax.vlines(2., 0., 0.3 + 0.0065, linestyle='--', linewidth=2., zorder=20)
+    ax.vlines(all_max['VPD'].max(), 0., 0.3 + 0.0065, linestyle='--',
               linewidth=2., zorder=20)
-    ax.vlines(3., 0., gs_thresh + 0.0065, linestyle='--',
-              linewidth=2., zorder=20)
-    ax.vlines(all_max['VPD'].max(), 0., gs_thresh + 0.0065,
-              linestyle='--', linewidth=2., zorder=20)
-    ax.annotate('high $D_a$\nclosure', ha='center', va='center',
-                xy=(all_max['VPD'][idx] - 1., gs_thresh + 0.01),
-                xytext=(all_max['VPD'][idx], 0.5),
-                arrowprops=dict(lw=1.5, fc='k',
-                               arrowstyle='->, head_length=0.5, head_width=0.3',
-                                connectionstyle='arc3, rad=-0.2'))
+    ax.annotate('High $D_a$\nclosure', ha='center', va='center',
+                xy=(3.5, 0.32), xytext=(4.5, 0.5), arrowprops=dict(lw=1.5,
+                fc='k', arrowstyle='->, head_length=0.5, head_width=0.3',
+                connectionstyle='arc3, rad=-0.2'))
 
     # smooth the lines
     lowess = sm.nonparametric.lowess
+    all_plot = all[['VPD', 'gs']].copy()
+    all_plot['gs'] = lowess(all_plot['gs'], all_plot['VPD'], frac=0.5,
+                            return_sorted=False)
+    all_plot['VPD'].iloc[0] = all_min['VPD'].min()
+    all_plot['VPD'].iloc[-1] = all_max['VPD'].max()
+    ax.fill_between(all_plot['VPD'],
+                    np.maximum(0., all_plot['gs'] - all_plot['gs'].std()),
+                    np.minimum(all_plot['gs'] + all_plot['gs'].std(), 1.),
+                    color='#c0c0c0', alpha=0.5)
+    ax.plot(all_plot['VPD'], all_plot['gs'], lw=10., color='#c0c0c0', alpha=0.6)
+
 
     for mod in model_order():
 
@@ -1152,7 +1121,7 @@ def VPD_closure(df, figname, keep):
 
     # tighten
     ax.set_xlim(all_min['VPD'].min(), all_max['VPD'].max() + 0.1)
-    ax.set_ylim(0., 1.)
+    ax.set_ylim(0., 0.8)
 
     # format axes ticks
     ax.xaxis.set_major_locator(mpl.ticker.MaxNLocator(4))
@@ -1167,7 +1136,7 @@ def VPD_closure(df, figname, keep):
     ax.spines['right'].set_visible(False)
 
     # subplot labelling
-    ax.text(0.025, 0.995, r'\textbf{(%s)}' % (string.ascii_lowercase[0]),
+    ax.text(0.025, 0.98, r'\textbf{(%s)}' % (string.ascii_lowercase[0]),
             transform=ax.transAxes, weight='bold')
 
     # axes labels
@@ -1176,22 +1145,39 @@ def VPD_closure(df, figname, keep):
     ax.xaxis.labelpad = 5
 
     # now add relative rates of closure on the second axis
-    high = df.copy()[df['VPD'] > 3.]  # high VPD effect
+    high = df.copy()
+
+    for what in keep:  # behaviours relative to themselves
+
+        where = high[high['site_spp'] == what].index
+
+        for mod in model_order():
+
+            valid = high.loc[where, 'gs(%s)' % (mod)] < 9999.
+            nans = high.loc[where, 'gs(%s)' % (mod)][~valid].index
+            high.loc[nans, 'gs(%s)' % (mod)] = np.nan
+
+            # scaling the magnitudes to ask about % diffence closure
+            high.loc[where, 'gs(%s)' % (mod)] /= \
+                                         high.loc[where, 'gs(%s)' % (mod)].max()
+            high.loc[where, 'gs(%s)' % (mod)] *= \
+                                         high.loc[where, 'gs'].max()
+
+    high = high[high['VPD'] > 2.]  # VPD effect
     high.set_index('VPD', inplace=True)
     high = high[high.filter(like='gs').columns.to_list()]
-    high = high[high <= gs_thresh]  # boxed area
+    high = high[high <= 0.3]
 
     # relative closure difference
-    high.loc[:, high.columns != 'gs'] = \
-                       high.loc[:, high.columns != 'gs'].sub(high['gs'], axis=0)
+    high.loc[:, high.columns != 'gs'] = (high.loc[:, high.columns != 'gs']
+                                             .sub(high['gs'], axis=0)
+                                             .divide(high['gs'], axis=0))
     high = high.dropna(how='all')
-    min = high.min().min()
-    max = high.max().max()
 
-    models = ['wue', 'cgn', 'cmax', 'sox2', 'pmax', 'std2', 'sox1', 'pmax2',
-              'mes', 'cap', 'lcst', 'tuz']
-    colours = ['#197aff', '#a6d96a', '#9be2fd', '#6b3b07', '#009231', '#1a1a1a',
-               '#af97c5', '#ff8e12', '#ffc2cd', '#f10c80', '#ffe020', '#6023b7']
+    models = ['cmax', 'cgn', 'sox2', 'pmax', 'mes', 'wue', 'std', 'pmax2',
+              'lcst', 'cap', 'tuz', 'sox1']
+    colours = ['#9be2fd', '#a6d96a', '#6b3b07', '#009231', '#ffc2cd', '#197aff',
+               '#1a1a1a', '#ff8e12', '#ffe020', '#f10c80', '#6023b7', '#af97c5']
 
     for i, mod in enumerate(models):
 
@@ -1199,7 +1185,7 @@ def VPD_closure(df, figname, keep):
             ax = fig.add_subplot(gs[i, 5:])
 
             # subplot labelling
-            ax.text(0.025, 0.97,
+            ax.text(0.025, 0.92,
                     r'\textbf{(%s)}' % (string.ascii_lowercase[1]),
                     transform=ax.transAxes, weight='bold')
 
@@ -1227,7 +1213,7 @@ def VPD_closure(df, figname, keep):
 
         # adding a vertical '0' marker
         if i == 0:
-            ax.vlines(0, 0, 0.4, transform=ax.get_xaxis_transform(), lw=0.75,
+            ax.vlines(0, 0, 0.65, transform=ax.get_xaxis_transform(), lw=0.75,
                       color='#5a6576', zorder=20)
 
         else:
@@ -1246,7 +1232,7 @@ def VPD_closure(df, figname, keep):
         else:
             plt.tick_params(top=False, left=False, right=False, labelleft=False)
             no_spines = ['top', 'right', 'left']
-            ax.spines['bottom'].set_bounds(-0.5, 0.5)
+            ax.spines['bottom'].set_bounds(-2., 6.)
 
         for s in no_spines:
 
@@ -1259,17 +1245,16 @@ def VPD_closure(df, figname, keep):
                           alpha=0.8))
 
         # tighten
-        ax.set_xlim(min - 0.2, max + 0.2)
+        ax.set_xlim(-3., 7.)
         __, top = ax.get_ylim()
-        ax.set_ylim(0, top + 0.5)
+        ax.set_ylim(0, top + 0.02)
 
     # axes ticks and labels
-    ax.set_xticks([-0.15, 0, 0.15, 0.3])
     ax.set_xticklabels(ax.get_xticks())  # force LaTex
-    ax.set_xlabel(r'$\Delta$$g_{s,norm}$')
+    ax.set_xlabel(r'$\Delta$ $g_{s,norm,sc.}$')
     ax.xaxis.labelpad = 5
 
-    gs.update(hspace=-0.675)  # further tighten
+    gs.update(hspace=-0.725)  # further tighten
     fig.savefig(figname)
     plt.close()
 
@@ -1329,7 +1314,7 @@ def LWP_box_plots(df, figname):
                                                 len(sub['site_spp'].unique()),
                                          showcaps=False, patch_artist=True)
 
-                    if mod == 'std2':
+                    if mod == 'std':
                         set_box_color(bp, c, lc='#c0c0c0')
 
                     else:
@@ -1350,6 +1335,11 @@ def LWP_box_plots(df, figname):
 
         # axes ticks
         yticks = [-round(range * 2) / 2., -1.5, 0., 1.5, round(range * 2) / 2.]
+
+        if i > 0:
+            min = sub.filter(like='Pleaf').sub(sub['Pleaf'], axis=0).min().min()
+            yticks = [round(min),] + yticks
+
         axes[i].set_yticks(yticks)
         axes[i].yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1f'))
 
@@ -1474,7 +1464,7 @@ site_spp2 = [e for e in site_spp if e not in subsel2]
 figname = os.path.join(ofdir, 'LWP_gs_others.jpg')
 
 if not os.path.isfile(figname):
-    LWP_gs_functional(df, figname, site_spp2)
+    LWP_gs_functional(df, figname, site_spp)
 
 figname = os.path.join(ofdir, 'VPD_closure.jpg')
 

@@ -271,7 +271,7 @@ def behavioural_markers(ax, P, profits, costs):
              -P[2][np.argmax(profits[2])]]
 
     # plot the arrow
-    ax.scatter(Popts, np.amax(profits, axis=1))
+    ax.scatter(Popts, np.amax(profits, axis=1), c='k', marker='x', zorder=20)
 
     ax.text(Popts[-1] - 0.8, np.amax(profits[-1]) + 0.05,
             r'${\rm \Delta}{\rm \Psi}_{\rm leaf,opt}$ = ' +
@@ -300,7 +300,7 @@ def annotate_model(ax, colours):
 
     """
 
-    ax.text(0.35, 0.88, 'Carbon\ngain', color=colours[2], fontsize=12.,
+    ax.text(0.4, 0.88, 'Carbon\ngain', color=colours[2], fontsize=12.,
             va='center', ha='center', transform=ax.transAxes)
     ax.text(0.7, 0.75, 'Hydraulic\ncost', color=colours[0], fontsize=12.,
             va='center', ha='center', transform=ax.transAxes)
@@ -336,15 +336,32 @@ def stream_ticks(p, P, Pcrit=False):
     """
 
     P12 = Px(p, 12)
-    iP12 = np.argmin(P - P12 >= 0.)
 
-    Pticks = [-np.amax(P), -P[iP12], p.P50, p.P88]
-    Ptick_labels = [r'${\rm \Psi}_{\rm sat}$', r'${\rm \Psi}_{\rm 12}$',
-                    r'${\rm \Psi}_{\rm 50}$', r'${\rm \Psi}_{\rm 88}$']
+    if P12 < np.amax(P) - 0.5:
+        iP12 = np.argmin(P - P12 >= 0.)
+        Pticks = [-np.amax(P), -P[iP12], p.P50, p.P88]
+        Ptick_labels = [r'${\rm \Psi}_{\rm s}$', r'${\rm \Psi}_{\rm 12}$',
+                        r'${\rm \Psi}_{\rm 50}$', r'${\rm \Psi}_{\rm 88}$']
 
-    if Pcrit:
-        Pticks += [-P[-1]]
-        Ptick_labels += [r'${\rm \Psi}_{\rm 95}$']
+    elif P12 < np.amax(P):
+        iP12 = np.argmin(P - P12 >= 0.)
+        Pticks = [-P[iP12], p.P50, p.P88]
+        Ptick_labels = [r'${\rm \Psi}_{\rm 12}$', r'${\rm \Psi}_{\rm 50}$',
+                        r'${\rm \Psi}_{\rm 88}$']
+
+    elif -p.P50 < np.amax(P) - 0.5:
+        Pticks = [-np.amax(P), p.P50, p.P88]
+        Ptick_labels = [r'${\rm \Psi}_{\rm s}$', r'${\rm \Psi}_{\rm 50}$',
+                        r'${\rm \Psi}_{\rm 88}$']
+
+    elif -p.P50 < np.amax(P):
+        Pticks = [p.P50, p.P88]
+        Ptick_labels = [r'${\rm \Psi}_{\rm 50}$', r'${\rm \Psi}_{\rm 88}$']
+
+    else:
+        Pticks = [-np.amax(P), p.P50, p.P88]
+        Ptick_labels = [r'${\rm \Psi}_{\rm s}$', r'${\rm \Psi}_{\rm 50}$',
+                        r'${\rm \Psi}_{\rm 88}$']
 
     return Pticks, Ptick_labels
 
@@ -414,21 +431,21 @@ def rcrit_model_behaviour():
 
     # retrieve the three potential "behavioural" kmax values
     p = declared_params()
-    p.Ps = -4.5
+    p.Ps = -1.5
 
     # no legacy, ref.
     P, cost, gain = opt_stream(p, res, photo)
 
     # large legacy
-    p.ratiocrit = 0.12
+    p.ratiocrit = 0.10
     P12, cost12, gain12 = opt_stream(p, res, photo)
 
     # little legacy
-    p.ratiocrit = 0.001
+    p.ratiocrit = 0.0005
     P001, cost001, gain001 = opt_stream(p, res, photo)
 
     lines = ['-', ':', '--']  # line types for the plots
-    labels = ['P95', 'P88', 'P99.9']
+    labels = ['P95', 'P90', 'P99.95']
 
     # plot the three alternative instantaneous optimisation
     plot_model(ax, P, gain, cost, colours, linestyle=lines[0], label=labels[0])

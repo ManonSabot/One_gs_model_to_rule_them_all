@@ -122,11 +122,16 @@ def supply_max(p, photo='Farquhar', case=1, res='low', iter_max=40,
 
     # initial state
     Cs = p.CO2  # Pa
-    Tleaf = p.Tair  # deg C
     Dleaf = p.VPD  # kPa
 
+    try:   # is Tleaf one of the input fields?
+        Tleaf = p.Tleaf
+
+    except (IndexError, AttributeError, ValueError):  # calc. Tleaf
+        Tleaf = p.Tair  # deg C
+
     # hydraulics
-    Pleaf_pd = p.Ps_pd - p.height * cst.rho * cst.g0 * conv.MEGA
+    Pleaf_sat = p.Ps_pd - p.height * cst.rho * cst.g0 * conv.MEGA
     P, E = hydraulics(p, res=res, kmax=p.kmaxS1)
 
     # iter on the solution until it is stable enough
@@ -149,12 +154,12 @@ def supply_max(p, photo='Farquhar', case=1, res='low', iter_max=40,
             dAdCi = dA * conv.GwvGc * p.Patm / dCi
 
             # kcost, unitless
-            cost_pd = kcost(p, Pleaf_pd, Pleaf_pd)
-            cost_mid = kcost(p, -p.P50, Pleaf_pd)
+            cost_pd = kcost(p, Pleaf_sat, Pleaf_sat)
+            cost_mid = kcost(p, -p.P50, Pleaf_sat)
             dkcost = cost_pd - cost_mid
 
             # dkcostdP is needed to calculate gs
-            dP = 0.5 * (Pleaf_pd + p.P50)  # MPa, /!\ sign of P50
+            dP = 0.5 * (Pleaf_sat + p.P50)  # MPa, /!\ sign of P50
 
             # xi, the loss of xylem cost of stomatal opening, mmol m-2 s-1
             dq = Dleaf / p.Patm  # unitless, equivalent to D / Patm
@@ -170,6 +175,11 @@ def supply_max(p, photo='Farquhar', case=1, res='low', iter_max=40,
             else:
                 gs = 0.5 * dAdCi * conv.FROM_MILI * (((1. + 4. * Xi / dAdCi)
                                                       ** 0.5) - 1.)
+
+            # calculate An, Ci
+            An, Aj, Ac = calc_photosynthesis(p, 0., Cs, photo, Tleaf=Tleaf,
+                                             gsc=conv.U * conv.GcvGw * gs)
+            Ci = Cs - p.Patm * conv.FROM_MILI * An / (gs * conv.GcvGw)  # Pa
 
         else:  # retrieve the Ci stream of possible Ci values
             Cis = Ci_stream(p, Cs, Tleaf, res)
@@ -188,10 +198,10 @@ def supply_max(p, photo='Farquhar', case=1, res='low', iter_max=40,
                      * Dleaf / (p.CO2 - Cis))
 
             # kcost, Pleaf
-            mask = np.logical_and(Pleaf_pd - E / p.ksc_prev <= Pleaf_pd,
-                                  Pleaf_pd - E / p.ksc_prev >= P[-1])
-            P = (Pleaf_pd - E / p.ksc_prev)[mask]
-            cost = kcost(p, P, Pleaf_pd)
+            mask = np.logical_and(Pleaf_sat - E / p.ksc_prev <= Pleaf_sat,
+                                  Pleaf_sat - E / p.ksc_prev >= P[-1])
+            P = (Pleaf_sat - E / p.ksc_prev)[mask]
+            cost = kcost(p, P, Pleaf_sat)
 
             # optimal point
             iopt = np.argmax(cost * A[mask])
@@ -217,12 +227,13 @@ def supply_max(p, photo='Farquhar', case=1, res='low', iter_max=40,
         # calculate new trans, gw, gb, mol.m-2.s-1
         trans, real_zero, gw, gb, Dleaf = calc_trans(p, Tleaf, gs,
                                                      inf_gb=inf_gb)
-        new_Tleaf, __ = leaf_temperature(p, trans, Tleaf=Tleaf, inf_gb=inf_gb)
 
-        if case == 1:  # calculate An, Ci
-            An, Aj, Ac = calc_photosynthesis(p, 0., Cs, photo, Tleaf=p.Tair,
-                                             gsc=conv.U * conv.GcvGw * gs)
-            Ci = Cs - p.Patm * conv.FROM_MILI * An / (gs * conv.GcvGw)  # Pa
+        try:  # is Tleaf one of the input fields?
+            new_Tleaf = p.Tleaf
+
+        except (IndexError, AttributeError, ValueError):  # calc. Tleaf
+            new_Tleaf, __ = leaf_temperature(p, trans, Tleaf=Tleaf,
+                                             inf_gb=inf_gb)
 
         # update Cs (Pa)
         boundary_CO2 = p.Patm * conv.FROM_MILI * An / (gb * conv.GbcvGb)

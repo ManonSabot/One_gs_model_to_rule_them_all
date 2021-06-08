@@ -273,46 +273,4 @@ class NLMFIT(object):
         txt.write('\n')
         txt.close()  # close text file
 
-        """
-        # two-step test: recalibration of both Pref and sref
-        if success and (model == 'Tuzet') and not ('Tleaf' in X.columns):
-
-            # retrieve the first (now solved for) parameter name and value
-            p1name = str(out.params.valuesdict().popitem(last=False)[0])
-            p1val = out.params.valuesdict().popitem(last=False)[1]
-
-            # reset the input parameter dic accordingly
-            params[p1name].set(value=p1val, vary=False)
-
-            # add sref to vary alongside Pref
-            min, max = self.param_space('srefT')
-            params.add('srefT', p0.srefT, min=min, max=max)
-
-            # re-run the minimizer
-            if self.method == 'emcee':
-                out = lmfit.minimize(fres, params, args=(model, X, Y,
-                                                         self.inf_gb),
-                                     method=self.method, steps=self.steps,
-                                     nwalkers=self.nchains, burn=self.burn,
-                                     thin=self.thin, is_weighted=False,
-                                     progress=False)
-
-            else:
-                out = lmfit.minimize(fres, params, args=(model, X, Y,
-                                                         self.inf_gb),
-                                     method=self.method)
-
-            if not os.path.isfile(os.path.join(self.opath,
-                                               '%s2.txt' % (model))):
-                txt = open(os.path.join(self.opath, '%s2.txt' % (model)), 'w+')
-
-            else:  # append to existing file
-                txt = open(os.path.join(self.opath, '%s2.txt' % (model)), 'a+')
-
-            txt.write('\n')
-            txt.write(lmfit.fit_report(out))
-            txt.write('\n')
-            txt.close()  # close text file
-        """
-
         return out.params.valuesdict()
