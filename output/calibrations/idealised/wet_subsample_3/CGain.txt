@@ -28,36 +28,36 @@
     # function evals   = 31
     # data points      = 178
     # variables        = 1
-    chi-square         = 8664.94156
-    reduced chi-square = 48.9544721
-    Akaike info crit   = 693.575730
-    Bayesian info crit = 696.757513
+    chi-square         = 8666.65905
+    reduced chi-square = 48.9641754
+    Akaike info crit   = 693.611008
+    Bayesian info crit = 696.792791
 [[Variables]]
-    Kappa:  7.67718587 +/- 0.09557830 (1.24%) (init = 5)
+    Kappa:  7.67718587 +/- 0.15805489 (2.06%) (init = 5)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 55
+    # function evals   = 88
     # data points      = 178
     # variables        = 1
-    chi-square         = 9072.61557
-    reduced chi-square = 51.2577151
-    Akaike info crit   = 701.759354
-    Bayesian info crit = 704.941138
+    chi-square         = 9725.17024
+    reduced chi-square = 54.9444646
+    Akaike info crit   = 714.122664
+    Bayesian info crit = 717.304448
 [[Variables]]
-    Kappa:  6.29546889 +/- 0.13312579 (2.11%) (init = 5)
+    Kappa:  6.31432013 +/- 0.15474615 (2.45%) (init = 5)
 
 [[Fit Statistics]]
     # fitting method   = COBYLA
-    # function evals   = 15
+    # function evals   = 18
     # data points      = 178
     # variables        = 1
-    chi-square         = 10724.7858
-    reduced chi-square = 60.5920103
-    Akaike info crit   = 731.538202
-    Bayesian info crit = 734.719985
+    chi-square         = 8951.70572
+    reduced chi-square = 50.5746086
+    Akaike info crit   = 699.371217
+    Bayesian info crit = 702.553001
 [[Variables]]
-    Kappa:  5.88534851 +/- 0.18742996 (3.18%) (init = 5)
+    Kappa:  5.83826457 +/- 0.15292414 (2.62%) (init = 5)
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing

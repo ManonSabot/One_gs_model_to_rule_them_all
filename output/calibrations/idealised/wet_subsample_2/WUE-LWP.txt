@@ -25,39 +25,40 @@
     
 [[Fit Statistics]]
     # fitting method   = Nelder-Mead
-    # function evals   = 36
+    # function evals   = 2
     # data points      = 176
     # variables        = 1
-    chi-square         = 7024.06622
-    reduced chi-square = 40.1375212
-    Akaike info crit   = 650.843988
-    Bayesian info crit = 654.014472
+    chi-square         = 325650.511
+    reduced chi-square = 1860.86006
+    Akaike info crit   = 1326.06490
+    Bayesian info crit = 1329.23539
+##  Warning: uncertainties could not be estimated:
 [[Variables]]
-    Lambda:  1.37214578 +/- 0.01785538 (1.30%) (init = 5)
+    Lambda:  4.97227241 +/-        nan (nan%) (init = 5)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 48
+    # function evals   = 87
     # data points      = 176
     # variables        = 1
-    chi-square         = 7680.25279
-    reduced chi-square = 43.8871588
-    Akaike info crit   = 666.562579
-    Bayesian info crit = 669.733063
+    chi-square         = 6481.63966
+    reduced chi-square = 37.0379409
+    Akaike info crit   = 636.699084
+    Bayesian info crit = 639.869568
 [[Variables]]
-    Lambda:  1.44638719 +/- 0.01861491 (1.29%) (init = 5)
+    Lambda:  1.37233156 +/- 0.01556880 (1.13%) (init = 5)
 
 [[Fit Statistics]]
     # fitting method   = COBYLA
     # function evals   = 18
     # data points      = 176
     # variables        = 1
-    chi-square         = 6956.09924
-    reduced chi-square = 39.7491385
-    Akaike info crit   = 649.132666
-    Bayesian info crit = 652.303150
+    chi-square         = 6758.10828
+    reduced chi-square = 38.6177616
+    Akaike info crit   = 644.050516
+    Bayesian info crit = 647.221000
 [[Variables]]
-    Lambda:  1.27962516 +/- 0.01587265 (1.24%) (init = 5)
+    Lambda:  1.35615832 +/- 0.01732684 (1.28%) (init = 5)
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing

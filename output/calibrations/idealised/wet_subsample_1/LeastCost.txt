@@ -31,46 +31,46 @@
     
 [[Fit Statistics]]
     # fitting method   = Nelder-Mead
-    # function evals   = 128
+    # function evals   = 129
     # data points      = 179
     # variables        = 2
-    chi-square         = 9446.86584
-    reduced chi-square = 53.3721234
-    Akaike info crit   = 713.923398
-    Bayesian info crit = 720.298170
+    chi-square         = 9420.64559
+    reduced chi-square = 53.2239864
+    Akaike info crit   = 713.425884
+    Bayesian info crit = 719.800655
 [[Variables]]
-    kmaxLC:  0.45047427 +/- 0.00587668 (1.30%) (init = 1)
-    Eta:     3.64500310 +/- 0.12457131 (3.42%) (init = 5)
+    kmaxLC:  0.45046247 +/- 0.00582926 (1.29%) (init = 1)
+    Eta:     3.66299779 +/- 0.12453758 (3.40%) (init = 5)
 [[Correlations]] (unreported correlations are < 0.100)
-    C(kmaxLC, Eta) =  0.335
+    C(kmaxLC, Eta) =  0.323
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 147
+    # function evals   = 317
     # data points      = 179
     # variables        = 2
-    chi-square         = 33715.1741
-    reduced chi-square = 190.481210
-    Akaike info crit   = 941.658829
-    Bayesian info crit = 948.033600
+    chi-square         = 31536.6522
+    reduced chi-square = 178.173176
+    Akaike info crit   = 929.702063
+    Bayesian info crit = 936.076835
 [[Variables]]
-    kmaxLC:  8.13432397 +/- 0.44924568 (5.52%) (init = 1)
-    Eta:     6.39341446 +/- 0.18557746 (2.90%) (init = 5)
+    kmaxLC:  8.91535487 +/- 0.51746560 (5.80%) (init = 1)
+    Eta:     6.76792254 +/- 0.18818324 (2.78%) (init = 5)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(kmaxLC, Eta) = -0.383
 
 [[Fit Statistics]]
     # fitting method   = COBYLA
-    # function evals   = 31
+    # function evals   = 32
     # data points      = 179
     # variables        = 2
-    chi-square         = 36303.0552
-    reduced chi-square = 205.102007
-    Akaike info crit   = 954.896576
-    Bayesian info crit = 961.271348
+    chi-square         = 37405.0553
+    reduced chi-square = 211.327996
+    Akaike info crit   = 960.249385
+    Bayesian info crit = 966.624157
 [[Variables]]
-    kmaxLC:  9.00758098 +/- 0.29812622 (3.31%) (init = 1)
-    Eta:     6.93765875 +/- 0.22993913 (3.31%) (init = 5)
-[[Correlations]] (unreported correlations are < 0.100)
-    C(kmaxLC, Eta) = -0.166
+    kmaxLC:  9.09056216 +/- 0.40006297 (4.40%) (init = 1)
+    Eta:     6.94753994 +/- 0.23777561 (3.42%) (init = 5)
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing

@@ -31,48 +31,42 @@
 
 [[Fit Statistics]]
     # fitting method   = Nelder-Mead
-    # function evals   = 201
+    # function evals   = 238
     # data points      = 179
     # variables        = 2
-    chi-square         = 10031.4452
-    reduced chi-square = 56.6748318
-    Akaike info crit   = 724.670854
-    Bayesian info crit = 731.045625
+    chi-square         = 1930.92149
+    reduced chi-square = 10.9091610
+    Akaike info crit   = 429.727660
+    Bayesian info crit = 436.102432
 [[Variables]]
-    g1T:    3.08099601 +/- 0.01827999 (0.59%) (init = 3.5)
-    PrefT: -2.60198226 +/- 0.04512820 (1.73%) (init = -3.13)
-[[Correlations]] (unreported correlations are < 0.100)
-    C(g1T, PrefT) =  0.230
+    g1T:    3.39592593 +/- 0.00856705 (0.25%) (init = 3.5)
+    PrefT: -2.49147738 +/- 0.00985039 (0.40%) (init = -3.13)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 194
+    # function evals   = 262
     # data points      = 179
     # variables        = 2
-    chi-square         = 10085.0642
-    reduced chi-square = 56.9777639
-    Akaike info crit   = 725.625077
-    Bayesian info crit = 731.999849
+    chi-square         = 1901.43470
+    reduced chi-square = 10.7425689
+    Akaike info crit   = 426.973094
+    Bayesian info crit = 433.347866
 [[Variables]]
-    g1T:    3.06972670 +/- 0.01894415 (0.62%) (init = 3.5)
-    PrefT: -2.65548982 +/- 0.07407913 (2.79%) (init = -3.13)
-[[Correlations]] (unreported correlations are < 0.100)
-    C(g1T, PrefT) =  0.384 
+    g1T:    3.41250554 +/- 0.00824211 (0.24%) (init = 3.5)
+    PrefT: -2.47764743 +/- 0.01443215 (0.58%) (init = -3.13)
 
 [[Fit Statistics]]
     # fitting method   = COBYLA
-    # function evals   = 42
+    # function evals   = 36
     # data points      = 179
     # variables        = 2
-    chi-square         = 11379.4146
-    reduced chi-square = 64.2904779
-    Akaike info crit   = 747.239407
-    Bayesian info crit = 753.614179
+    chi-square         = 1870.71082
+    reduced chi-square = 10.5689877
+    Akaike info crit   = 424.057143
+    Bayesian info crit = 430.431915
 [[Variables]]
-    g1T:    3.02351023 +/- 0.04755250 (1.57%) (init = 3.5)
-    PrefT: -3.06639079 +/- 0.43407878 (14.16%) (init = -3.13)
-[[Correlations]] (unreported correlations are < 0.100)
-    C(g1T, PrefT) =  0.911
+    g1T:    3.44826071 +/- 0.00831778 (0.24%) (init = 3.5)
+    PrefT: -2.45834878 +/- 0.01598623 (0.65%) (init = -3.13)
     
 [[Fit Statistics]]
     # fitting method   = dual_annealing

@@ -25,39 +25,39 @@
     
 [[Fit Statistics]]
     # fitting method   = Nelder-Mead
-    # function evals   = 81
+    # function evals   = 75
     # data points      = 706
     # variables        = 1
-    chi-square         = 82848.4774
-    reduced chi-square = 117.515571
-    Akaike info crit   = 3366.19831
-    Bayesian info crit = 3370.75792
+    chi-square         = 82745.1354
+    reduced chi-square = 117.368986
+    Akaike info crit   = 3365.31712
+    Bayesian info crit = 3369.87673
 [[Variables]]
-    kmax:  0.88676579 +/- 0.00689758 (0.78%) (init = 1)
+    kmax:  0.88675422 +/- 0.00675771 (0.76%) (init = 1)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 98
+    # function evals   = 90
     # data points      = 706
     # variables        = 1
-    chi-square         = 83797.7361
-    reduced chi-square = 118.862037
-    Akaike info crit   = 3374.24150
-    Bayesian info crit = 3378.80111
+    chi-square         = 85987.7690
+    reduced chi-square = 121.968467
+    Akaike info crit   = 3392.45565
+    Bayesian info crit = 3397.01526
 [[Variables]]
-    kmax:  0.88690981 +/- 0.00727045 (0.82%) (init = 1)
+    kmax:  0.84836770 +/- 0.00685222 (0.81%) (init = 1)
 
 [[Fit Statistics]]
     # fitting method   = COBYLA
     # function evals   = 20
     # data points      = 706
     # variables        = 1
-    chi-square         = 91027.8530
-    reduced chi-square = 129.117522
-    Akaike info crit   = 3432.66974
-    Bayesian info crit = 3437.22935
+    chi-square         = 90410.5181
+    reduced chi-square = 128.241870
+    Akaike info crit   = 3427.86546
+    Bayesian info crit = 3432.42508
 [[Variables]]
-    kmax:  0.87535613 +/- 0.00679426 (0.78%) (init = 1)
+    kmax:  0.87893589 +/- 0.00716806 (0.82%) (init = 1)
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing

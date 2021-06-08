@@ -31,47 +31,47 @@
 
 [[Fit Statistics]]
     # fitting method   = Nelder-Mead
-    # function evals   = 342
+    # function evals   = 221
     # data points      = 176
     # variables        = 2
-    chi-square         = 15171.0514
-    reduced chi-square = 87.1899505
-    Akaike info crit   = 788.372227
-    Bayesian info crit = 794.713195
+    chi-square         = 15178.6237
+    reduced chi-square = 87.2334698
+    Akaike info crit   = 788.460053
+    Bayesian info crit = 794.801021
 ##  Warning: uncertainties could not be estimated:
 [[Variables]]
-    krlC:    1.89322361 +/-        nan (nan%) (init = 1)
-    PcritC: -3.18986523 +/-        nan (nan%) (init = -3.13)
+    krlC:    1.89342320 +/-        nan (nan%) (init = 1)
+    PcritC: -3.19026809 +/-        nan (nan%) (init = -3.13)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 151
+    # function evals   = 118
     # data points      = 176
     # variables        = 2
-    chi-square         = 15088.8567
-    reduced chi-square = 86.7175673
-    Akaike info crit   = 787.416091
-    Bayesian info crit = 793.757059
+    chi-square         = 15376.6365
+    reduced chi-square = 88.3714739
+    Akaike info crit   = 790.741213
+    Bayesian info crit = 797.082181
 [[Variables]]
-    krlC:    1.91321891 +/- 0.07531339 (3.94%) (init = 1)
-    PcritC: -3.11987347 +/- 0.11837350 (3.79%) (init = -3.13)
+    krlC:    1.94108006 +/- 0.12005907 (6.19%) (init = 1)
+    PcritC: -3.15348113 +/- 0.18336321 (5.81%) (init = -3.13)
 [[Correlations]] (unreported correlations are < 0.100)
-    C(krlC, PcritC) =  0.887
+    C(krlC, PcritC) =  0.955
 
 [[Fit Statistics]]
     # fitting method   = COBYLA
-    # function evals   = 33
+    # function evals   = 30
     # data points      = 176
     # variables        = 2
-    chi-square         = 15852.2209
-    reduced chi-square = 91.1047177
-    Akaike info crit   = 796.102237
-    Bayesian info crit = 802.443205
+    chi-square         = 16488.3016
+    reduced chi-square = 94.7603542
+    Akaike info crit   = 803.026346
+    Bayesian info crit = 809.367314
 [[Variables]]
-    krlC:    1.30727965 +/- 0.07368962 (5.64%) (init = 1)
-    PcritC: -4.59441203 +/- 0.27404585 (5.96%) (init = -3.13)
+    krlC:    1.54524677 +/- 0.05539251 (3.58%) (init = 1)
+    PcritC: -3.88594169 +/- 0.14427076 (3.71%) (init = -3.13)
 [[Correlations]] (unreported correlations are < 0.100)
-    C(krlC, PcritC) =  0.942
+    C(krlC, PcritC) =  0.839
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing

@@ -1,84 +1,84 @@
 
 [[Fit Statistics]]
     # fitting method   = differential_evolution
-    # function evals   = 182
+    # function evals   = 122
     # data points      = 176
     # variables        = 1
-    chi-square         = 35003.3225
-    reduced chi-square = 200.018986
-    Akaike info crit   = 933.517711
-    Bayesian info crit = 936.688195
+    chi-square         = 18514.5922
+    reduced chi-square = 105.797670
+    Akaike info crit   = 821.426163
+    Bayesian info crit = 824.596647
 [[Variables]]
-    Kappa:  7.53554607 +/- 0.50378805 (6.69%) (init = 5)
+    Kappa:  6.73689263 +/- 0.22632449 (3.36%) (init = 5)
 
 [[Fit Statistics]]
     # fitting method   = basinhopping
     # function evals   = 303
     # data points      = 176
     # variables        = 1
-    chi-square         = 35221.5044
-    reduced chi-square = 201.265740
-    Akaike info crit   = 934.611346
-    Bayesian info crit = 937.781830
+    chi-square         = 17867.6354
+    reduced chi-square = 102.100774
+    Akaike info crit   = 815.166162
+    Bayesian info crit = 818.336646
 [[Variables]]
-    Kappa:  7.60857779 +/- 0.46437220 (6.10%) (init = 5)
+    Kappa:  7.28027143 +/- 0.25873396 (3.55%) (init = 5)
 
 [[Fit Statistics]]
     # fitting method   = Nelder-Mead
-    # function evals   = 31
+    # function evals   = 30
     # data points      = 176
     # variables        = 1
-    chi-square         = 35947.4342
-    reduced chi-square = 205.413909
-    Akaike info crit   = 938.201903
-    Bayesian info crit = 941.372387
+    chi-square         = 18985.5379
+    reduced chi-square = 108.488788
+    Akaike info crit   = 825.846990
+    Bayesian info crit = 829.017474
 [[Variables]]
-    Kappa:  6.28531889 +/- 0.37455489 (5.96%) (init = 5)
+    Kappa:  8.03306274 +/- 0.36522868 (4.55%) (init = 5)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 77
+    # function evals   = 51
     # data points      = 176
     # variables        = 1
-    chi-square         = 35889.0474
-    reduced chi-square = 205.080271
-    Akaike info crit   = 937.915806
-    Bayesian info crit = 941.086290
+    chi-square         = 18742.3216
+    reduced chi-square = 107.098981
+    Akaike info crit   = 823.577757
+    Bayesian info crit = 826.748241
 [[Variables]]
-    Kappa:  7.50151570 +/- 0.39560177 (5.27%) (init = 5)
+    Kappa:  6.89956644 +/- 0.21500076 (3.12%) (init = 5)
 
 [[Fit Statistics]]
     # fitting method   = COBYLA
-    # function evals   = 18
+    # function evals   = 17
     # data points      = 176
     # variables        = 1
-    chi-square         = 36153.7736
-    reduced chi-square = 206.592992
-    Akaike info crit   = 939.209260
-    Bayesian info crit = 942.379744
+    chi-square         = 19147.1228
+    reduced chi-square = 109.412131
+    Akaike info crit   = 827.338579
+    Bayesian info crit = 830.509063
 [[Variables]]
-    Kappa:  7.79232023 +/- 0.42916243 (5.51%) (init = 5)
+    Kappa:  6.97888371 +/- 0.28898868 (4.14%) (init = 5)
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing
     # function evals   = 2013
     # data points      = 176
     # variables        = 1
-    chi-square         = 34746.0774
-    reduced chi-square = 198.549014
-    Akaike info crit   = 932.219482
-    Bayesian info crit = 935.389966
+    chi-square         = 18778.1592
+    reduced chi-square = 107.303767
+    Akaike info crit   = 823.913969
+    Bayesian info crit = 827.084453
 [[Variables]]
-    Kappa:  7.98965915 +/- 0.29306673 (3.67%) (init = 5)
+    Kappa:  7.64865653 +/- 0.26246690 (3.43%) (init = 5)
 
 [[Fit Statistics]]
     # fitting method   = ampgo, with L-BFGS-B as local solver
-    # function evals   = 8688
+    # function evals   = 8426
     # data points      = 176
     # variables        = 1
-    chi-square         = 35063.7243
-    reduced chi-square = 200.364139
-    Akaike info crit   = 933.821155
-    Bayesian info crit = 936.991639
+    chi-square         = 20613.2290
+    reduced chi-square = 117.789880
+    Akaike info crit   = 840.323963
+    Bayesian info crit = 843.494447
 [[Variables]]
-    Kappa:  5.91929202 +/- 0.89389118 (15.10%) (init = 5)
+    Kappa:  5.15123602 +/- 0.64247283 (12.47%) (init = 5)

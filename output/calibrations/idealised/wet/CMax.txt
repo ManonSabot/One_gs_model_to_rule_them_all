@@ -32,42 +32,41 @@
     # function evals   = 70
     # data points      = 706
     # variables        = 2
-    chi-square         = 129085.754
-    reduced chi-square = 183.360445
-    Akaike info crit   = 3681.28359
-    Bayesian info crit = 3690.40282
-##  Warning: uncertainties could not be estimated:
+    chi-square         = 128857.109
+    reduced chi-square = 183.035666
+    Akaike info crit   = 3680.03197
+    Bayesian info crit = 3689.15120
 [[Variables]]
-    Alpha:  2.22638955 (init = 5)
-    Beta:   1.12153018 (init = 1)
+    Alpha:  2.22638955 +/- 0.06940064 (3.12%) (init = 5)
+    Beta:   1.12153018 +/- 4.43606726 (395.54%) (init = 1)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 92
+    # function evals   = 104
     # data points      = 706
     # variables        = 2
-    chi-square         = 131573.563
-    reduced chi-square = 186.894266
-    Akaike info crit   = 3694.76054
-    Bayesian info crit = 3703.87977
+    chi-square         = 131834.721
+    reduced chi-square = 187.265229
+    Akaike info crit   = 3696.16048
+    Bayesian info crit = 3705.27971
 ##  Warning: uncertainties could not be estimated:
 [[Variables]]
-    Alpha:  2.22478791 (init = 5)
-    Beta:   0.45630365 (init = 1)
+    Alpha:  1.98042790 (init = 5)
+    Beta:   4.04092772 (init = 1)
 
 [[Fit Statistics]]
     # fitting method   = COBYLA
-    # function evals   = 34
+    # function evals   = 36
     # data points      = 706
     # variables        = 2
-    chi-square         = 139629.020
-    reduced chi-square = 198.336677
-    Akaike info crit   = 3736.71314
-    Bayesian info crit = 3745.83237
+    chi-square         = 139137.335
+    reduced chi-square = 197.638260
+    Akaike info crit   = 3734.22267
+    Bayesian info crit = 3743.34190
 ##  Warning: uncertainties could not be estimated:
 [[Variables]]
-    Alpha:  2.13964963 (init = 5)
-    Beta:   0.99513748 (init = 1)
+    Alpha:  2.17102220 (init = 5)
+    Beta:   0.98611388 (init = 1)
     
 [[Fit Statistics]]
     # fitting method   = dual_annealing
@@ -80,7 +79,7 @@
     Bayesian info crit = 3665.48917
 ##  Warning: uncertainties could not be estimated:
 [[Variables]]
-    Alpha:  2.46275721 (init = 5)
+    Alpha:  2.26275721 (init = 5)
     Beta:   2.69352952 (init = 1)
 
 [[Fit Statistics]]

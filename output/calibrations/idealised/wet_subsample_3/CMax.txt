@@ -29,44 +29,44 @@
     
 [[Fit Statistics]]
     # fitting method   = Nelder-Mead
-    # function evals   = 64
+    # function evals   = 56
     # data points      = 178
     # variables        = 2
-    chi-square         = 34758.0842
-    reduced chi-square = 197.489115
-    Akaike info crit   = 942.840336
-    Bayesian info crit = 949.203903
+    chi-square         = 34668.0203
+    reduced chi-square = 196.977388
+    Akaike info crit   = 942.378511
+    Bayesian info crit = 948.742078
 ##  Warning: uncertainties could not be estimated:
 [[Variables]]
-    Alpha:  2.38526938 (init = 5)
-    Beta:   1.10718576 (init = 1)
+    Alpha:  2.45807212 (init = 5)
+    Beta:   1.12999493 (init = 1)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 65
+    # function evals   = 69
     # data points      = 178
     # variables        = 2
-    chi-square         = 33543.5460
-    reduced chi-square = 190.588329
-    Akaike info crit   = 936.509284
-    Bayesian info crit = 942.872851
+    chi-square         = 28883.1757
+    reduced chi-square = 164.108953
+    Akaike info crit   = 909.883117
+    Bayesian info crit = 916.246685
 ##  Warning: uncertainties could not be estimated:
 [[Variables]]
-    Alpha:  2.24134670 (init = 5)
+    Alpha:  2.00584651 (init = 5)
     Beta:   0.45630365 (init = 1)
 
 [[Fit Statistics]]
     # fitting method   = COBYLA
-    # function evals   = 29
+    # function evals   = 28
     # data points      = 178
     # variables        = 2
-    chi-square         = 33654.8024
-    reduced chi-square = 191.220468
-    Akaike info crit   = 937.098693
-    Bayesian info crit = 943.462260
+    chi-square         = 35833.8215
+    reduced chi-square = 203.601259
+    Akaike info crit   = 948.265776
+    Bayesian info crit = 954.629343
 ##  Warning: uncertainties could not be estimated:
 [[Variables]]
-    Alpha:  1.85330547 (init = 5)
+    Alpha:  1.69731478 (init = 5)
     Beta:   0.98611388 (init = 1)
 
 [[Fit Statistics]]
