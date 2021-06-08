@@ -468,7 +468,7 @@ else:  # read over the calibration files and analyse these outputs
 
     fname = os.path.join(os.path.join(os.path.join(os.path.join(base_dir,
                          'output'), 'calibrations'), 'idealised'),
-                         'top_3_fits.csv')
+                         'top_fits.csv')
 
     if not os.path.isfile(fname):
 
