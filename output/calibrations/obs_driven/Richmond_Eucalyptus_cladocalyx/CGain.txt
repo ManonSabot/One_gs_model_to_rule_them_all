@@ -1,36 +1,48 @@
 
 [[Fit Statistics]]
     # fitting method   = differential_evolution
-    # function evals   = 167
+    # function evals   = 107
     # data points      = 90
     # variables        = 1
-    chi-square         = 439297.458
-    reduced chi-square = 4935.92649
-    Akaike info crit   = 766.381014
-    Bayesian info crit = 768.880823
+    chi-square         = 446946.973
+    reduced chi-square = 5021.87610
+    Akaike info crit   = 767.934701
+    Bayesian info crit = 770.434511
 [[Variables]]
-    Kappa:  23.7425192 +/- 1.74388353 (7.34%) (init = 5)
+    Kappa:  22.3774143 +/- 1.48191781 (6.62%) (init = 5)
+
+[[Fit Statistics]]
+    # fitting method   = basinhopping
+    # function evals   = 303
+    # data points      = 90
+    # variables        = 1
+    chi-square         = 448418.660
+    reduced chi-square = 5038.41191
+    Akaike info crit   = 768.230562
+    Bayesian info crit = 770.730372
+[[Variables]]
+    Kappa:  18.7564323 +/- 0.97241890 (5.18%) (init = 5)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 103
+    # function evals   = 43
     # data points      = 90
     # variables        = 1
-    chi-square         = 491030.912
-    reduced chi-square = 5517.20126
-    Akaike info crit   = 776.400742
-    Bayesian info crit = 778.900552
+    chi-square         = 411458.359
+    reduced chi-square = 4623.12762
+    Akaike info crit   = 760.488809
+    Bayesian info crit = 762.988618
 [[Variables]]
-    Kappa:  25.9117047 +/- 1.49670929 (5.78%) (init = 5)
+    Kappa:  21.4527809 +/- 0.89144213 (4.16%) (init = 5)
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing
-    # function evals   = 2013
+    # function evals   = 2017
     # data points      = 90
     # variables        = 1
-    chi-square         = 389405.546
-    reduced chi-square = 4375.34321
-    Akaike info crit   = 755.531025
-    Bayesian info crit = 758.030835
+    chi-square         = 355040.730
+    reduced chi-square = 3989.22168
+    Akaike info crit   = 747.216031
+    Bayesian info crit = 749.715841
 [[Variables]]
-    Kappa:  25.6839754 +/- 0.78113178 (3.04%) (init = 5)
+    Kappa:  18.5559981 +/- 0.29525480 (1.59%) (init = 5)

@@ -1,37 +1,48 @@
 
 [[Fit Statistics]]
     # fitting method   = differential_evolution
-    # function evals   = 137
+    # function evals   = 167
     # data points      = 45
     # variables        = 1
-    chi-square         = 46651.4750
-    reduced chi-square = 1060.26080
-    Akaike info crit   = 314.470880
-    Bayesian info crit = 316.277543
+    chi-square         = 46245.9277
+    reduced chi-square = 1051.04381
+    Akaike info crit   = 314.077979
+    Bayesian info crit = 315.884641
 [[Variables]]
-    Kappa:  14.6113503 +/- 2.74386065 (18.78%) (init = 5)
+    Kappa:  13.0094816 +/- 2.33786892 (17.97%) (init = 5)
+
+[[Fit Statistics]]
+    # fitting method   = basinhopping
+    # function evals   = 303
+    # data points      = 45
+    # variables        = 1
+    chi-square         = 46050.7657
+    reduced chi-square = 1046.60831
+    Akaike info crit   = 313.887673
+    Bayesian info crit = 315.694336
+[[Variables]]
+    Kappa:  11.6163058 +/- 1.95035158 (16.79%) (init = 5)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 102
+    # function evals   = 82
     # data points      = 45
     # variables        = 1
-    chi-square         = 47106.7828
-    reduced chi-square = 1070.60870
-    Akaike info crit   = 314.907941
-    Bayesian info crit = 316.714603
+    chi-square         = 47198.2321
+    reduced chi-square = 1072.68709
+    Akaike info crit   = 314.995215
+    Bayesian info crit = 316.801878
 [[Variables]]
-    Kappa:  18.0176957 +/- 3.66166458 (20.32%) (init = 5)
+    Kappa:  12.1519096 +/- 2.20473826 (18.14%) (init = 5)
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing
-    # function evals   = 2017
+    # function evals   = 2021
     # data points      = 45
     # variables        = 1
-    chi-square         = 47176.9062
-    reduced chi-square = 1072.20241
-    Akaike info crit   = 314.974878
-    Bayesian info crit = 316.781540
-##  Warning: uncertainties could not be estimated:
+    chi-square         = 46242.7776
+    reduced chi-square = 1050.97222
+    Akaike info crit   = 314.074914
+    Bayesian info crit = 315.881576
 [[Variables]]
-    Kappa:  20.9801341 +/-        nan (nan%) (init = 5)
+    Kappa:  13.3814022 +/- 1.04680096 (7.82%) (init = 5)

@@ -1,42 +1,56 @@
 
 [[Fit Statistics]]
     # fitting method   = differential_evolution
-    # function evals   = 363
+    # function evals   = 453
     # data points      = 32
     # variables        = 2
-    chi-square         = 60914.8229
-    reduced chi-square = 2030.49410
-    Akaike info crit   = 245.647869
-    Bayesian info crit = 248.579341
+    chi-square         = 39388.9559
+    reduced chi-square = 1312.96520
+    Akaike info crit   = 231.696155
+    Bayesian info crit = 234.627627
 ##  Warning: uncertainties could not be estimated:
 [[Variables]]
-    Alpha:  0.50344631 (init = 5)
-    Beta:   0.82529032 (init = 1)
+    Alpha:  0.50009632 (init = 5)
+    Beta:   5.53785284 (init = 1)
+
+[[Fit Statistics]]
+    # fitting method   = basinhopping
+    # function evals   = 404
+    # data points      = 32
+    # variables        = 2
+    chi-square         = 42326.0653
+    reduced chi-square = 1410.86884
+    Akaike info crit   = 233.997519
+    Bayesian info crit = 236.928991
+##  Warning: uncertainties could not be estimated:
+[[Variables]]
+    Alpha:  0.52610292 (init = 5)
+    Beta:   0.10020195 (init = 1)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 25
+    # function evals   = 58
     # data points      = 32
     # variables        = 2
-    chi-square         = 211766.198
-    reduced chi-square = 7058.87328
-    Akaike info crit   = 285.520071
-    Bayesian info crit = 288.451542
+    chi-square         = 35954.3429
+    reduced chi-square = 1198.47810
+    Akaike info crit   = 228.776616
+    Bayesian info crit = 231.708088
 ##  Warning: uncertainties could not be estimated:
 [[Variables]]
-    Alpha:  79.8934786 (init = 5)
-    Beta:   7.96699598 (init = 1)
+    Alpha:  0.60171512 (init = 5)
+    Beta:   0.45630365 (init = 1)
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing
-    # function evals   = 4019
+    # function evals   = 4028
     # data points      = 32
     # variables        = 2
-    chi-square         = 57858.1471
-    reduced chi-square = 1928.60490
-    Akaike info crit   = 244.000437
-    Bayesian info crit = 246.931909
+    chi-square         = 43341.0279
+    reduced chi-square = 1444.70093
+    Akaike info crit   = 234.755811
+    Bayesian info crit = 237.687283
 ##  Warning: uncertainties could not be estimated:
 [[Variables]]
-    Alpha:  0.55122847 (init = 5)
-    Beta:   0.54427003 (init = 1)
+    Alpha:  0.67770405 (init = 5)
+    Beta:   5.27109200 (init = 1)

@@ -1,37 +1,49 @@
 
 [[Fit Statistics]]
     # fitting method   = differential_evolution
-    # function evals   = 387
+    # function evals   = 338
     # data points      = 92
     # variables        = 1
-    chi-square         = 2424311.93
-    reduced chi-square = 26640.7905
-    Akaike info crit   = 938.492815
-    Bayesian info crit = 941.014603
+    chi-square         = 1869482.00
+    reduced chi-square = 20543.7582
+    Akaike info crit   = 914.583270
+    Bayesian info crit = 917.105058
 [[Variables]]
-    kmax:  13.8698550 +/- 0.59202634 (4.27%) (init = 1)
+    kmax:  9.24906779 +/- 0.69146553 (7.48%) (init = 1)
+
+[[Fit Statistics]]
+    # fitting method   = basinhopping
+    # function evals   = 25726
+    # data points      = 92
+    # variables        = 1
+    chi-square         = 1838096.15
+    reduced chi-square = 20198.8588
+    Akaike info crit   = 913.025613
+    Bayesian info crit = 915.547402
+[[Variables]]
+    kmax:  8.28939133 +/- 0.50036275 (6.04%) (init = 1)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 56
+    # function evals   = 93
     # data points      = 92
     # variables        = 1
-    chi-square         = 2387670.99
-    reduced chi-square = 26238.1427
-    Akaike info crit   = 937.091716
-    Bayesian info crit = 939.613504
+    chi-square         = 1860887.22
+    reduced chi-square = 20449.3101
+    Akaike info crit   = 914.159333
+    Bayesian info crit = 916.681121
 [[Variables]]
-    kmax:  13.9204641 +/- 0.55580075 (3.99%) (init = 1)
+    kmax:  9.24264498 +/- 0.57975175 (6.27%) (init = 1)
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing
-    # function evals   = 2293
+    # function evals   = 2631
     # data points      = 92
     # variables        = 1
-    chi-square         = 2344467.89
-    reduced chi-square = 25763.3834
-    Akaike info crit   = 935.411801
-    Bayesian info crit = 937.933589
+    chi-square         = 1813181.92
+    reduced chi-square = 19925.0761
+    Akaike info crit   = 911.770083
+    Bayesian info crit = 914.291872
 ##  Warning: uncertainties could not be estimated:
 [[Variables]]
-    kmax:  15.3351674 +/-        nan (nan%) (init = 1)
+    kmax:  8.33241124 +/-        nan (nan%) (init = 1)

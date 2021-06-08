@@ -1,36 +1,48 @@
 
 [[Fit Statistics]]
     # fitting method   = differential_evolution
-    # function evals   = 145
-    # data points      = 53
+    # function evals   = 161
+    # data points      = 139
     # variables        = 1
-    chi-square         = 7168.23229
-    reduced chi-square = 137.850621
-    Akaike info crit   = 262.077490
-    Bayesian info crit = 264.047782
+    chi-square         = 13114.3488
+    reduced chi-square = 95.0315128
+    Akaike info crit   = 634.031374
+    Bayesian info crit = 636.965848
 [[Variables]]
-    kmaxS1:  0.04985946 +/- 0.00524592 (10.52%) (init = 0.4)
+    kmaxS1:  0.05414146 +/- 0.00367894 (6.80%) (init = 0.4)
+
+[[Fit Statistics]]
+    # fitting method   = basinhopping
+    # function evals   = 9454
+    # data points      = 139
+    # variables        = 1
+    chi-square         = 13114.3488
+    reduced chi-square = 95.0315128
+    Akaike info crit   = 634.031374
+    Bayesian info crit = 636.965848
+[[Variables]]
+    kmaxS1:  0.05414147 +/- 0.00367894 (6.80%) (init = 0.4)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 38
-    # data points      = 53
+    # function evals   = 36
+    # data points      = 139
     # variables        = 1
-    chi-square         = 7168.23229
-    reduced chi-square = 137.850621
-    Akaike info crit   = 262.077490
-    Bayesian info crit = 264.047782
+    chi-square         = 13114.3488
+    reduced chi-square = 95.0315128
+    Akaike info crit   = 634.031374
+    Bayesian info crit = 636.965848
 [[Variables]]
-    kmaxS1:  0.04985947 +/- 0.00524592 (10.52%) (init = 0.4)
+    kmaxS1:  0.05414147 +/- 0.00367894 (6.80%) (init = 0.4)
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing
-    # function evals   = 2037
-    # data points      = 53
+    # function evals   = 2039
+    # data points      = 139
     # variables        = 1
-    chi-square         = 7168.23229
-    reduced chi-square = 137.850621
-    Akaike info crit   = 262.077490
-    Bayesian info crit = 264.047782
+    chi-square         = 13114.3488
+    reduced chi-square = 95.0315128
+    Akaike info crit   = 634.031374
+    Bayesian info crit = 636.965848
 [[Variables]]
-    kmaxS1:  0.04971313 +/- 0.00524592 (10.55%) (init = 0.4)
+    kmaxS1:  0.05423939 +/- 0.00367894 (6.78%) (init = 0.4)

@@ -1,36 +1,48 @@
 
 [[Fit Statistics]]
     # fitting method   = differential_evolution
-    # function evals   = 372
+    # function evals   = 387
     # data points      = 36
     # variables        = 1
-    chi-square         = 44980.0261
-    reduced chi-square = 1285.14360
-    Akaike info crit   = 258.696375
-    Bayesian info crit = 260.279894
+    chi-square         = 43262.5429
+    reduced chi-square = 1236.07266
+    Akaike info crit   = 257.294848
+    Bayesian info crit = 258.878366
 [[Variables]]
-    kmax:  3.15582832 +/- 0.43975223 (13.93%) (init = 1)
+    kmax:  3.26359469 +/- 0.43818466 (13.43%) (init = 1)
+
+[[Fit Statistics]]
+    # fitting method   = basinhopping
+    # function evals   = 24127
+    # data points      = 36
+    # variables        = 1
+    chi-square         = 43183.2679
+    reduced chi-square = 1233.80765
+    Akaike info crit   = 257.228820
+    Bayesian info crit = 258.812339
+[[Variables]]
+    kmax:  3.65192916 +/- 0.46056786 (12.61%) (init = 1)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 70
+    # function evals   = 71
     # data points      = 36
     # variables        = 1
-    chi-square         = 45708.9159
-    reduced chi-square = 1305.96903
-    Akaike info crit   = 259.275070
-    Bayesian info crit = 260.858589
+    chi-square         = 43275.0483
+    reduced chi-square = 1236.42995
+    Akaike info crit   = 257.305252
+    Bayesian info crit = 258.888771
 [[Variables]]
-    kmax:  3.08319771 +/- 0.43641161 (14.15%) (init = 1)
+    kmax:  3.39260947 +/- 0.45774885 (13.49%) (init = 1)
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing
-    # function evals   = 2469
+    # function evals   = 2605
     # data points      = 36
     # variables        = 1
-    chi-square         = 44101.1784
-    reduced chi-square = 1260.03367
-    Akaike info crit   = 257.986022
-    Bayesian info crit = 259.569541
+    chi-square         = 43262.3892
+    reduced chi-square = 1236.06826
+    Akaike info crit   = 257.294720
+    Bayesian info crit = 258.878239
 [[Variables]]
-    kmax:  3.05728256 +/- 0.57010082 (18.65%) (init = 1)
+    kmax:  3.29661169 +/- 0.47374999 (14.37%) (init = 1)

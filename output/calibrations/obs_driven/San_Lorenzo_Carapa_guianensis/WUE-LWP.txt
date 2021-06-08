@@ -4,33 +4,45 @@
     # function evals   = 122
     # data points      = 36
     # variables        = 1
-    chi-square         = 57587.2587
-    reduced chi-square = 1645.35025
-    Akaike info crit   = 267.591357
-    Bayesian info crit = 269.174875
+    chi-square         = 53854.5420
+    reduced chi-square = 1538.70120
+    Akaike info crit   = 265.178831
+    Bayesian info crit = 266.762350
 [[Variables]]
-    Lambda:  5.78294551 +/- 0.79775471 (13.79%) (init = 5)
+    Lambda:  4.90353511 +/- 0.62360525 (12.72%) (init = 5)
+
+[[Fit Statistics]]
+    # fitting method   = basinhopping
+    # function evals   = 303
+    # data points      = 36
+    # variables        = 1
+    chi-square         = 55445.4322
+    reduced chi-square = 1584.15521
+    Akaike info crit   = 266.226884
+    Bayesian info crit = 267.810403
+[[Variables]]
+    Lambda:  5.22838798 +/- 0.54001749 (10.33%) (init = 5)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 71
+    # function evals   = 73
     # data points      = 36
     # variables        = 1
-    chi-square         = 58160.1616
-    reduced chi-square = 1661.71890
-    Akaike info crit   = 267.947730
-    Bayesian info crit = 269.531249
+    chi-square         = 54384.7550
+    reduced chi-square = 1553.85014
+    Akaike info crit   = 265.531528
+    Bayesian info crit = 267.115047
 [[Variables]]
-    Lambda:  6.28548792 +/- 0.78732061 (12.53%) (init = 5)
+    Lambda:  4.78132127 +/- 0.80701537 (16.88%) (init = 5)
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing
-    # function evals   = 2017
+    # function evals   = 2009
     # data points      = 36
     # variables        = 1
-    chi-square         = 56121.9202
-    reduced chi-square = 1603.48343
-    Akaike info crit   = 266.663461
-    Bayesian info crit = 268.246980
+    chi-square         = 55124.0382
+    reduced chi-square = 1574.97252
+    Akaike info crit   = 266.017600
+    Bayesian info crit = 267.601119
 [[Variables]]
-    Lambda:  6.01901852 +/- 0.47289029 (7.86%) (init = 5)
+    Lambda:  4.97948680 +/- 0.61207210 (12.29%) (init = 5)

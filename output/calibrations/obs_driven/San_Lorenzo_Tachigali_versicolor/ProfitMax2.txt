@@ -1,36 +1,48 @@
 
 [[Fit Statistics]]
     # fitting method   = differential_evolution
-    # function evals   = 402
+    # function evals   = 552
     # data points      = 30
     # variables        = 1
-    chi-square         = 69617.1595
-    reduced chi-square = 2400.59171
-    Akaike info crit   = 234.487069
-    Bayesian info crit = 235.888267
+    chi-square         = 79583.2475
+    reduced chi-square = 2744.24992
+    Akaike info crit   = 238.500845
+    Bayesian info crit = 239.902043
 [[Variables]]
-    kmax:  6.81345101 +/- 0.54464983 (7.99%) (init = 1)
+    kmax:  7.10881469 +/- 0.69516891 (9.78%) (init = 1)
+
+[[Fit Statistics]]
+    # fitting method   = basinhopping
+    # function evals   = 23001
+    # data points      = 30
+    # variables        = 1
+    chi-square         = 79583.5551
+    reduced chi-square = 2744.26052
+    Akaike info crit   = 238.500961
+    Bayesian info crit = 239.902159
+[[Variables]]
+    kmax:  7.10933978 +/- 0.69538774 (9.78%) (init = 1)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 177
+    # function evals   = 108
     # data points      = 30
     # variables        = 1
-    chi-square         = 76011.1687
-    reduced chi-square = 2621.07478
-    Akaike info crit   = 237.123146
-    Bayesian info crit = 238.524343
+    chi-square         = 78135.8580
+    reduced chi-square = 2694.33993
+    Akaike info crit   = 237.950209
+    Bayesian info crit = 239.351407
 [[Variables]]
-    kmax:  6.69671010 +/- 0.62512254 (9.33%) (init = 1)
+    kmax:  7.15131924 +/- 0.59842170 (8.37%) (init = 1)
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing
-    # function evals   = 2729
+    # function evals   = 2545
     # data points      = 30
     # variables        = 1
-    chi-square         = 69010.8612
-    reduced chi-square = 2379.68487
-    Akaike info crit   = 234.224654
-    Bayesian info crit = 235.625851
+    chi-square         = 78135.8574
+    reduced chi-square = 2694.33991
+    Akaike info crit   = 237.950209
+    Bayesian info crit = 239.351407
 [[Variables]]
-    kmax:  7.55993481 +/- 0.47591484 (6.30%) (init = 1)
+    kmax:  7.19287186 +/- 0.43812247 (6.09%) (init = 1)

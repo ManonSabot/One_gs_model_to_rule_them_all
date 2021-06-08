@@ -1,36 +1,48 @@
 
 [[Fit Statistics]]
     # fitting method   = differential_evolution
-    # function evals   = 327
+    # function evals   = 348
     # data points      = 92
     # variables        = 1
-    chi-square         = 2033027.48
-    reduced chi-square = 22340.9613
-    Akaike info crit   = 922.298819
-    Bayesian info crit = 924.820607
+    chi-square         = 1654577.86
+    reduced chi-square = 18182.1743
+    Akaike info crit   = 903.348646
+    Bayesian info crit = 905.870434
 [[Variables]]
-    kmax:  4.86062937 +/- 0.17865253 (3.68%) (init = 1)
+    kmax:  3.84027867 +/- 0.14694261 (3.83%) (init = 1)
+
+[[Fit Statistics]]
+    # fitting method   = basinhopping
+    # function evals   = 23787
+    # data points      = 92
+    # variables        = 1
+    chi-square         = 1626102.54
+    reduced chi-square = 17869.2587
+    Akaike info crit   = 901.751541
+    Bayesian info crit = 904.273329
+[[Variables]]
+    kmax:  4.07385328 +/- 0.20210166 (4.96%) (init = 1)
 
 [[Fit Statistics]]
     # fitting method   = Powell
-    # function evals   = 79
+    # function evals   = 61
     # data points      = 92
     # variables        = 1
-    chi-square         = 2165114.96
-    reduced chi-square = 23792.4720
-    Akaike info crit   = 928.089980
-    Bayesian info crit = 930.611769
+    chi-square         = 1883012.58
+    reduced chi-square = 20692.4459
+    Akaike info crit   = 915.246732
+    Bayesian info crit = 917.768520
 [[Variables]]
-    kmax:  5.08124209 +/- 0.34881821 (6.86%) (init = 1)
+    kmax:  3.44423280 +/- 0.18811376 (5.46%) (init = 1)
 
 [[Fit Statistics]]
     # fitting method   = dual_annealing
-    # function evals   = 2665
+    # function evals   = 2379
     # data points      = 92
     # variables        = 1
-    chi-square         = 2033007.14
-    reduced chi-square = 22340.7378
-    Akaike info crit   = 922.297898
-    Bayesian info crit = 924.819687
+    chi-square         = 1626081.77
+    reduced chi-square = 17869.0304
+    Akaike info crit   = 901.750366
+    Bayesian info crit = 904.272154
 [[Variables]]
-    kmax:  4.86847881 +/- 0.08734294 (1.79%) (init = 1)
+    kmax:  4.10975598 +/- 0.13320339 (3.24%) (init = 1)

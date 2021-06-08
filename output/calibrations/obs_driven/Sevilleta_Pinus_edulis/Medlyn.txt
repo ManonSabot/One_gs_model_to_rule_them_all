@@ -1,0 +1,60 @@
+
+[[Fit Statistics]]
+    # fitting method   = differential_evolution
+    # function evals   = 393
+    # data points      = 139
+    # variables        = 2
+    chi-square         = 16877.3776
+    reduced chi-square = 123.192537
+    Akaike info crit   = 671.096510
+    Bayesian info crit = 676.965458
+[[Variables]]
+    g1:    7.76797618 +/- 1.06120597 (13.66%) (init = 2.4942)
+    sref:  1.00146844 +/- 0.11803317 (11.79%) (init = 2)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(g1, sref) =  0.957
+
+[[Fit Statistics]]
+    # fitting method   = basinhopping
+    # function evals   = 23592
+    # data points      = 139
+    # variables        = 2
+    chi-square         = 16877.3776
+    reduced chi-square = 123.192537
+    Akaike info crit   = 671.096510
+    Bayesian info crit = 676.965458
+[[Variables]]
+    g1:    7.76796357 +/- 1.04798192 (13.49%) (init = 2.4942)
+    sref:  1.07037819 +/- 0.11653374 (10.89%) (init = 2)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(g1, sref) =  0.956
+
+[[Fit Statistics]]
+    # fitting method   = Powell
+    # function evals   = 211
+    # data points      = 139
+    # variables        = 2
+    chi-square         = 16877.3776
+    reduced chi-square = 123.192537
+    Akaike info crit   = 671.096510
+    Bayesian info crit = 676.965458
+[[Variables]]
+    g1:    7.76799435 +/- 1.06122899 (13.66%) (init = 2.4942)
+    sref:  1.00146890 +/- 0.11803537 (11.79%) (init = 2)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(g1, sref) =  0.957
+
+[[Fit Statistics]]
+    # fitting method   = dual_annealing
+    # function evals   = 4037
+    # data points      = 139
+    # variables        = 2
+    chi-square         = 16877.3776
+    reduced chi-square = 123.192537
+    Akaike info crit   = 671.096510
+    Bayesian info crit = 676.965458
+[[Variables]]
+    g1:    7.76796014 +/- 1.03899375 (13.38%) (init = 2.4942)
+    sref:  1.01255796 +/- 0.11533399 (11.39%) (init = 2)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(g1, sref) =  0.956
