@@ -11,6 +11,8 @@ Repository containing all the code to reproduce the results in Sabot et al.
 carbon and water exchange in global models. Journal of Advances in Modeling
 Earth Systems, Accepted.
 
+[![DOI](https://zenodo.org/badge/224778196.svg)](https://zenodo.org/badge/latestdoi/224778196)
+
 ## General instructions
 
 To make sure the model and support files are properly set up, simply type:
