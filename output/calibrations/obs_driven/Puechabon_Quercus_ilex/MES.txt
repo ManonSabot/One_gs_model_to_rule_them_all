@@ -1,0 +1,60 @@
+
+[[Fit Statistics]]
+    # fitting method   = differential_evolution
+    # function evals   = 1203
+    # data points      = 32
+    # variables        = 2
+    chi-square         = 25639.9333
+    reduced chi-square = 854.664445
+    Akaike info crit   = 217.957453
+    Bayesian info crit = 220.888925
+[[Variables]]
+    krlM:    0.87437083 +/- 0.08423036 (9.63%) (init = 1)
+    PcritM: -5.37630064 +/- 0.10434305 (1.94%) (init = -6.88)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(krlM, PcritM) =  0.217
+
+[[Fit Statistics]]
+    # fitting method   = basinhopping
+    # function evals   = 29943
+    # data points      = 32
+    # variables        = 2
+    chi-square         = 25525.5829
+    reduced chi-square = 850.852762
+    Akaike info crit   = 217.814418
+    Bayesian info crit = 220.745890
+[[Variables]]
+    krlM:    1.10967563 +/- 0.11091830 (10.00%) (init = 1)
+    PcritM: -4.56204568 +/- 0.07793278 (1.71%) (init = -6.88)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(krlM, PcritM) =  0.138
+
+[[Fit Statistics]]
+    # fitting method   = Powell
+    # function evals   = 159
+    # data points      = 32
+    # variables        = 2
+    chi-square         = 26702.2911
+    reduced chi-square = 890.076371
+    Akaike info crit   = 219.256600
+    Bayesian info crit = 222.188072
+[[Variables]]
+    krlM:    0.61700490 +/- 0.06740060 (10.92%) (init = 1)
+    PcritM: -7.00439993 +/- 0.31287008 (4.47%) (init = -6.88)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(krlM, PcritM) =  0.397
+
+[[Fit Statistics]]
+    # fitting method   = dual_annealing
+    # function evals   = 5489
+    # data points      = 32
+    # variables        = 2
+    chi-square         = 24659.5734
+    reduced chi-square = 821.985781
+    Akaike info crit   = 216.709906
+    Bayesian info crit = 219.641378
+[[Variables]]
+    krlM:    1.23948737 +/- 0.10064696 (8.12%) (init = 1)
+    PcritM: -4.23563285 +/- 0.04429869 (1.05%) (init = -6.88)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(krlM, PcritM) =  0.131

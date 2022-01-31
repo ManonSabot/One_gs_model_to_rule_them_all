@@ -1,0 +1,60 @@
+
+[[Fit Statistics]]
+    # fitting method   = differential_evolution
+    # function evals   = 540
+    # data points      = 78
+    # variables        = 2
+    chi-square         = 775961.218
+    reduced chi-square = 10210.0160
+    Akaike info crit   = 722.001622
+    Bayesian info crit = 726.715039
+[[Variables]]
+    g1T:    5.74111055 +/- 0.23141738 (4.03%) (init = 3.5)
+    kmaxT:  9.19917281 +/- 0.60470945 (6.57%) (init = 1)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(g1T, kmaxT) = -0.288
+
+[[Fit Statistics]]
+    # fitting method   = basinhopping
+    # function evals   = 27812
+    # data points      = 78
+    # variables        = 2
+    chi-square         = 785875.767
+    reduced chi-square = 10340.4706
+    Akaike info crit   = 722.991924
+    Bayesian info crit = 727.705341
+[[Variables]]
+    g1T:    5.66974108 +/- 0.48712218 (8.59%) (init = 3.5)
+    kmaxT:  9.10842484 +/- 3.39712103 (37.30%) (init = 1)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(g1T, kmaxT) = -0.889
+
+[[Fit Statistics]]
+    # fitting method   = Powell
+    # function evals   = 206
+    # data points      = 78
+    # variables        = 2
+    chi-square         = 911861.182
+    reduced chi-square = 11998.1734
+    Akaike info crit   = 734.589669
+    Bayesian info crit = 739.303087
+[[Variables]]
+    g1T:    5.14600749 +/- 0.20817919 (4.05%) (init = 3.5)
+    kmaxT:  17.8729669 +/- 1.50783798 (8.44%) (init = 1)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(g1T, kmaxT) = -0.287
+
+[[Fit Statistics]]
+    # fitting method   = dual_annealing
+    # function evals   = 5201
+    # data points      = 78
+    # variables        = 2
+    chi-square         = 786918.507
+    reduced chi-square = 10354.1909
+    Akaike info crit   = 723.095349
+    Bayesian info crit = 727.808767
+[[Variables]]
+    g1T:    6.32295528 +/- 0.34314379 (5.43%) (init = 3.5)
+    kmaxT:  5.70812229 +/- 0.42297282 (7.41%) (init = 1)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(g1T, kmaxT) = -0.612

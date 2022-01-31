@@ -1,0 +1,59 @@
+
+[[Fit Statistics]]
+    # fitting method   = differential_evolution
+    # function evals   = 1113
+    # data points      = 92
+    # variables        = 2
+    chi-square         = 1429926.07
+    reduced chi-square = 15888.0674
+    Akaike info crit   = 891.923714
+    Bayesian info crit = 896.967292
+[[Variables]]
+    krlM:    17.0686773 +/- 0.76954337 (4.51%) (init = 1)
+    PcritM: -1.83100574 +/- 0.04226720 (2.31%) (init = -4.93)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(krlM, PcritM) =  0.409
+
+[[Fit Statistics]]
+    # fitting method   = basinhopping
+    # function evals   = 23209
+    # data points      = 92
+    # variables        = 2
+    chi-square         = 1547811.42
+    reduced chi-square = 17197.9047
+    Akaike info crit   = 899.211882
+    Bayesian info crit = 904.255459
+[[Variables]]
+    krlM:    14.6288694 +/- 0.75716727 (5.18%) (init = 1)
+    PcritM: -2.15640243 +/- 0.04645662 (2.15%) (init = -4.93)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(krlM, PcritM) =  0.413
+
+[[Fit Statistics]]
+    # fitting method   = Powell
+    # function evals   = 421
+    # data points      = 92
+    # variables        = 2
+    chi-square         = 1798054.46
+    reduced chi-square = 19978.3829
+    Akaike info crit   = 912.999303
+    Bayesian info crit = 918.042880
+[[Variables]]
+    krlM:    5.46538740 +/- 0.31138370 (5.70%) (init = 1)
+    PcritM: -4.82792581 +/- 0.11391626 (2.36%) (init = -4.93)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(krlM, PcritM) =  0.312
+
+[[Fit Statistics]]
+    # fitting method   = dual_annealing
+    # function evals   = 6599
+    # data points      = 92
+    # variables        = 2
+    chi-square         = 1430263.56
+    reduced chi-square = 15891.8173
+    Akaike info crit   = 891.945426
+    Bayesian info crit = 896.989003
+##  Warning: uncertainties could not be estimated:
+[[Variables]]
+    krlM:    17.0637113 +/-        nan (nan%) (init = 1)
+    PcritM: -1.81397094 +/- 0.02122201 (1.17%) (init = -4.93)

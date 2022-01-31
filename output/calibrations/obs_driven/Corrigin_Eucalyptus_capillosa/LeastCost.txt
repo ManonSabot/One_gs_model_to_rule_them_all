@@ -1,0 +1,59 @@
+
+[[Fit Statistics]]
+    # fitting method   = differential_evolution
+    # function evals   = 558
+    # data points      = 132
+    # variables        = 2
+    chi-square         = 107461.451
+    reduced chi-square = 826.626548
+    Akaike info crit   = 888.675292
+    Bayesian info crit = 894.440896
+[[Variables]]
+    kmaxLC:  3.48561367 +/- 0.15932630 (4.57%) (init = 1)
+    Eta:     6.66153971 +/- 2.35975079 (35.42%) (init = 5)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(kmaxLC, Eta) =  0.641
+
+[[Fit Statistics]]
+    # fitting method   = basinhopping
+    # function evals   = 34059
+    # data points      = 132
+    # variables        = 2
+    chi-square         = 106117.711
+    reduced chi-square = 816.290088
+    Akaike info crit   = 887.014306
+    Bayesian info crit = 892.779910
+[[Variables]]
+    kmaxLC:  3.47223440 +/- 0.12510676 (3.60%) (init = 1)
+    Eta:     4.43584112 +/- 4.03219667 (90.90%) (init = 5)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(kmaxLC, Eta) =  0.580
+
+[[Fit Statistics]]
+    # fitting method   = Powell
+    # function evals   = 112
+    # data points      = 132
+    # variables        = 2
+    chi-square         = 107230.510
+    reduced chi-square = 824.850079
+    Akaike info crit   = 888.391311
+    Bayesian info crit = 894.156915
+[[Variables]]
+    kmaxLC:  3.56047927 +/- 0.12405241 (3.48%) (init = 1)
+    Eta:     4.88064993 +/- 1.51714655 (31.08%) (init = 5)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(kmaxLC, Eta) =  0.577
+
+[[Fit Statistics]]
+    # fitting method   = dual_annealing
+    # function evals   = 5672
+    # data points      = 132
+    # variables        = 2
+    chi-square         = 105697.365
+    reduced chi-square = 813.056657
+    Akaike info crit   = 886.490399
+    Bayesian info crit = 892.256003
+##  Warning: uncertainties could not be estimated:
+[[Variables]]
+    kmaxLC:  3.87053056 +/- 0.14658294 (3.79%) (init = 1)
+    Eta:     11.8242433 +/-        nan (nan%) (init = 5)

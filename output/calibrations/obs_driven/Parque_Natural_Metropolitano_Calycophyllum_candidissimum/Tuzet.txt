@@ -1,0 +1,59 @@
+
+[[Fit Statistics]]
+    # fitting method   = differential_evolution
+    # function evals   = 561
+    # data points      = 32
+    # variables        = 2
+    chi-square         = 131731.893
+    reduced chi-square = 4391.06309
+    Akaike info crit   = 270.329220
+    Bayesian info crit = 273.260692
+[[Variables]]
+    g1T:    7.56111033 +/- 1.74911191 (23.13%) (init = 3.5)
+    kmaxT:  0.56187485 +/- 0.66966501 (119.18%) (init = 1)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(g1T, kmaxT) = -0.879
+
+[[Fit Statistics]]
+    # fitting method   = basinhopping
+    # function evals   = 21294
+    # data points      = 32
+    # variables        = 2
+    chi-square         = 131803.520
+    reduced chi-square = 4393.45066
+    Akaike info crit   = 270.346615
+    Bayesian info crit = 273.278086
+[[Variables]]
+    g1T:    7.77879450 +/- 1.13274292 (14.56%) (init = 3.5)
+    kmaxT:  0.58703977 +/- 0.41179913 (70.15%) (init = 1)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(g1T, kmaxT) = -0.717
+
+[[Fit Statistics]]
+    # fitting method   = Powell
+    # function evals   = 150
+    # data points      = 32
+    # variables        = 2
+    chi-square         = 132011.324
+    reduced chi-square = 4400.37748
+    Akaike info crit   = 270.397027
+    Bayesian info crit = 273.328499
+##  Warning: uncertainties could not be estimated:
+[[Variables]]
+    g1T:    7.41409072 +/-        nan (nan%) (init = 3.5)
+    kmaxT:  0.54458646 +/-        nan (nan%) (init = 1)
+
+[[Fit Statistics]]
+    # fitting method   = dual_annealing
+    # function evals   = 7079
+    # data points      = 32
+    # variables        = 2
+    chi-square         = 131644.670
+    reduced chi-square = 4388.15567
+    Akaike info crit   = 270.308025
+    Bayesian info crit = 273.239497
+[[Variables]]
+    g1T:    7.60980916 +/- 0.96674848 (12.70%) (init = 3.5)
+    kmaxT:  0.58130475 +/- 0.26010211 (44.74%) (init = 1)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(g1T, kmaxT) =  0.605

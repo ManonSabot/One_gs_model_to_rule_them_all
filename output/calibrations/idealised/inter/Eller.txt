@@ -1,0 +1,84 @@
+
+[[Fit Statistics]]
+    # fitting method   = differential_evolution
+    # function evals   = 130
+    # data points      = 706
+    # variables        = 1
+    chi-square         = 125042.662
+    reduced chi-square = 177.365478
+    Akaike info crit   = 3656.81728
+    Bayesian info crit = 3661.37690
+[[Variables]]
+    kmaxS1:  0.25923292 +/- 0.00391793 (1.51%) (init = 1)
+
+[[Fit Statistics]]
+    # fitting method   = basinhopping
+    # function evals   = 19808
+    # data points      = 706
+    # variables        = 1
+    chi-square         = 125042.662
+    reduced chi-square = 177.365478
+    Akaike info crit   = 3656.81728
+    Bayesian info crit = 3661.37690
+[[Variables]]
+    kmaxS1:  0.28510191 +/- 0.00391793 (1.37%) (init = 1)
+
+[[Fit Statistics]]
+    # fitting method   = Nelder-Mead
+    # function evals   = 32
+    # data points      = 706
+    # variables        = 1
+    chi-square         = 125042.662
+    reduced chi-square = 177.365479
+    Akaike info crit   = 3656.81728
+    Bayesian info crit = 3661.37690
+[[Variables]]
+    kmaxS1:  0.25923490 +/- 0.00391795 (1.51%) (init = 1)
+
+[[Fit Statistics]]
+    # fitting method   = Powell
+    # function evals   = 30
+    # data points      = 706
+    # variables        = 1
+    chi-square         = 125042.662
+    reduced chi-square = 177.365478
+    Akaike info crit   = 3656.81728
+    Bayesian info crit = 3661.37690
+[[Variables]]
+    kmaxS1:  0.25923294 +/- 0.00391793 (1.51%) (init = 1)
+
+[[Fit Statistics]]
+    # fitting method   = COBYLA
+    # function evals   = 21
+    # data points      = 706
+    # variables        = 1
+    chi-square         = 125043.514
+    reduced chi-square = 177.366687
+    Akaike info crit   = 3656.82209
+    Bayesian info crit = 3661.38171
+[[Variables]]
+    kmaxS1:  0.28482330 +/- 0.00391603 (1.37%) (init = 1)
+
+[[Fit Statistics]]
+    # fitting method   = dual_annealing
+    # function evals   = 2027
+    # data points      = 706
+    # variables        = 1
+    chi-square         = 125042.662
+    reduced chi-square = 177.365478
+    Akaike info crit   = 3656.81728
+    Bayesian info crit = 3661.37690
+[[Variables]]
+    kmaxS1:  0.26626779 +/- 0.00391793 (1.47%) (init = 1)
+
+[[Fit Statistics]]
+    # fitting method   = ampgo, with L-BFGS-B as local solver
+    # function evals   = 4406
+    # data points      = 706
+    # variables        = 1
+    chi-square         = 125042.662
+    reduced chi-square = 177.365478
+    Akaike info crit   = 3656.81728
+    Bayesian info crit = 3661.37690
+[[Variables]]
+    kmaxS1:  0.28510193 +/- 0.00391793 (1.37%) (init = 1)

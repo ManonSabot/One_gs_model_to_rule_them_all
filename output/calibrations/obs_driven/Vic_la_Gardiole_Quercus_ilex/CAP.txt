@@ -1,0 +1,59 @@
+
+[[Fit Statistics]]
+    # fitting method   = differential_evolution
+    # function evals   = 2070
+    # data points      = 45
+    # variables        = 2
+    chi-square         = 34056.3947
+    reduced chi-square = 792.009178
+    Akaike info crit   = 302.309977
+    Bayesian info crit = 305.923302
+[[Variables]]
+    krlC:    1.56992053 +/- 0.12795929 (8.15%) (init = 1)
+    PcritC: -4.04225607 +/- 0.07603282 (1.88%) (init = -6.88)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(krlC, PcritC) =  0.297
+
+[[Fit Statistics]]
+    # fitting method   = basinhopping
+    # function evals   = 22156
+    # data points      = 45
+    # variables        = 2
+    chi-square         = 35647.2742
+    reduced chi-square = 829.006376
+    Akaike info crit   = 304.364446
+    Bayesian info crit = 307.977771
+[[Variables]]
+    krlC:    1.32398547 +/- 0.11444186 (8.64%) (init = 1)
+    PcritC: -4.41394786 +/- 0.09953368 (2.25%) (init = -6.88)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(krlC, PcritC) =  0.315
+
+[[Fit Statistics]]
+    # fitting method   = Powell
+    # function evals   = 209
+    # data points      = 45
+    # variables        = 2
+    chi-square         = 39466.6743
+    reduced chi-square = 917.829635
+    Akaike info crit   = 308.944724
+    Bayesian info crit = 312.558049
+[[Variables]]
+    krlC:    0.73534256 +/- 0.07160356 (9.74%) (init = 1)
+    PcritC: -6.91561582 +/- 0.29641526 (4.29%) (init = -6.88)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(krlC, PcritC) =  0.488
+
+[[Fit Statistics]]
+    # fitting method   = dual_annealing
+    # function evals   = 6116
+    # data points      = 45
+    # variables        = 2
+    chi-square         = 34340.3437
+    reduced chi-square = 798.612644
+    Akaike info crit   = 302.683614
+    Bayesian info crit = 306.296939
+##  Warning: uncertainties could not be estimated:
+[[Variables]]
+    krlC:    1.37377024 +/- 0.10455939 (7.61%) (init = 1)
+    PcritC: -4.37437552 +/-        nan (nan%) (init = -6.88)

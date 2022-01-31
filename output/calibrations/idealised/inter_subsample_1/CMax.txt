@@ -1,0 +1,98 @@
+
+[[Fit Statistics]]
+    # fitting method   = differential_evolution
+    # function evals   = 423
+    # data points      = 179
+    # variables        = 2
+    chi-square         = 29224.2044
+    reduced chi-square = 165.108499
+    Akaike info crit   = 916.070649
+    Bayesian info crit = 922.445421
+##  Warning: uncertainties could not be estimated:
+[[Variables]]
+    Alpha:  2.07851271 (init = 5)
+    Beta:   7.36090228 (init = 1)
+
+[[Fit Statistics]]
+    # fitting method   = basinhopping
+    # function evals   = 404
+    # data points      = 179
+    # variables        = 2
+    chi-square         = 27797.5818
+    reduced chi-square = 157.048485
+    Akaike info crit   = 907.112012
+    Bayesian info crit = 913.486784
+##  Warning: uncertainties could not be estimated:
+[[Variables]]
+    Alpha:  2.60230421 (init = 5)
+    Beta:   0.21536110 (init = 1)
+
+[[Fit Statistics]]
+    # fitting method   = Nelder-Mead
+    # function evals   = 63
+    # data points      = 179
+    # variables        = 2
+    chi-square         = 34247.5360
+    reduced chi-square = 193.488904
+    Akaike info crit   = 944.463153
+    Bayesian info crit = 950.837925
+##  Warning: uncertainties could not be estimated:
+[[Variables]]
+    Alpha:  2.14589652 (init = 5)
+    Beta:   1.14378457 (init = 1)
+
+[[Fit Statistics]]
+    # fitting method   = Powell
+    # function evals   = 97
+    # data points      = 179
+    # variables        = 2
+    chi-square         = 29224.0971
+    reduced chi-square = 165.107893
+    Akaike info crit   = 916.069992
+    Bayesian info crit = 922.444764
+##  Warning: uncertainties could not be estimated:
+[[Variables]]
+    Alpha:  2.07965807 (init = 5)
+    Beta:   6.23750790 (init = 1)
+
+[[Fit Statistics]]
+    # fitting method   = COBYLA
+    # function evals   = 30
+    # data points      = 179
+    # variables        = 2
+    chi-square         = 39478.2175
+    reduced chi-square = 223.040777
+    Akaike info crit   = 969.905218
+    Bayesian info crit = 976.279990
+##  Warning: uncertainties could not be estimated:
+[[Variables]]
+    Alpha:  2.06147134 (init = 5)
+    Beta:   0.98611388 (init = 1)
+
+[[Fit Statistics]]
+    # fitting method   = dual_annealing
+    # function evals   = 4031
+    # data points      = 179
+    # variables        = 2
+    chi-square         = 26390.0063
+    reduced chi-square = 149.096081
+    Akaike info crit   = 897.810520
+    Bayesian info crit = 904.185292
+##  Warning: uncertainties could not be estimated:
+[[Variables]]
+    Alpha:  2.49904229 (init = 5)
+    Beta:   2.75367343 (init = 1)
+
+[[Fit Statistics]]
+    # fitting method   = ampgo, with L-BFGS-B as local solver
+    # function evals   = 4068
+    # data points      = 179
+    # variables        = 2
+    chi-square         = 35986.9394
+    reduced chi-square = 203.316042
+    Akaike info crit   = 953.331074
+    Bayesian info crit = 959.705845
+##  Warning: uncertainties could not be estimated:
+[[Variables]]
+    Alpha:  2.60620693 (init = 5)
+    Beta:   4.45940527 (init = 1)

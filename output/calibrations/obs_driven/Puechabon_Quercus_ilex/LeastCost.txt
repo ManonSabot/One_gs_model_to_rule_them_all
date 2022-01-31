@@ -1,0 +1,59 @@
+
+[[Fit Statistics]]
+    # fitting method   = differential_evolution
+    # function evals   = 603
+    # data points      = 32
+    # variables        = 2
+    chi-square         = 27247.6782
+    reduced chi-square = 908.255940
+    Akaike info crit   = 219.903606
+    Bayesian info crit = 222.835078
+[[Variables]]
+    kmaxLC:  0.24500478 +/- 0.02421333 (9.88%) (init = 1)
+    Eta:     9.80358225 +/- 2.76787878 (28.23%) (init = 5)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(kmaxLC, Eta) =  0.311
+
+[[Fit Statistics]]
+    # fitting method   = basinhopping
+    # function evals   = 35747
+    # data points      = 32
+    # variables        = 2
+    chi-square         = 27069.9044
+    reduced chi-square = 902.330147
+    Akaike info crit   = 219.694142
+    Bayesian info crit = 222.625614
+##  Warning: uncertainties could not be estimated:
+[[Variables]]
+    kmaxLC:  0.24306547 +/-        nan (nan%) (init = 1)
+    Eta:     9.57407471 +/-        nan (nan%) (init = 5)
+
+[[Fit Statistics]]
+    # fitting method   = Powell
+    # function evals   = 206
+    # data points      = 32
+    # variables        = 2
+    chi-square         = 34032.6942
+    reduced chi-square = 1134.42314
+    Akaike info crit   = 227.018913
+    Bayesian info crit = 229.950385
+[[Variables]]
+    kmaxLC:  10.6774947 +/- 21.2103248 (198.65%) (init = 1)
+    Eta:     31.0992724 +/- 5.49546619 (17.67%) (init = 5)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(kmaxLC, Eta) =  0.884
+
+[[Fit Statistics]]
+    # fitting method   = dual_annealing
+    # function evals   = 6920
+    # data points      = 32
+    # variables        = 2
+    chi-square         = 26851.8051
+    reduced chi-square = 895.060171
+    Akaike info crit   = 219.435278
+    Bayesian info crit = 222.366749
+[[Variables]]
+    kmaxLC:  0.24330589 +/- 0.02240891 (9.21%) (init = 1)
+    Eta:     9.98065928 +/- 1.82185122 (18.25%) (init = 5)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(kmaxLC, Eta) =  0.374

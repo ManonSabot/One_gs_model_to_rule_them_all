@@ -1,0 +1,60 @@
+
+[[Fit Statistics]]
+    # fitting method   = differential_evolution
+    # function evals   = 1080
+    # data points      = 92
+    # variables        = 2
+    chi-square         = 1662779.73
+    reduced chi-square = 18475.3304
+    Akaike info crit   = 905.803570
+    Bayesian info crit = 910.847147
+[[Variables]]
+    krlC:    16.7776667 +/- 0.89527044 (5.34%) (init = 1)
+    PcritC: -2.74531937 +/- 0.05215526 (1.90%) (init = -4.93)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(krlC, PcritC) =  0.311
+
+[[Fit Statistics]]
+    # fitting method   = basinhopping
+    # function evals   = 24337
+    # data points      = 92
+    # variables        = 2
+    chi-square         = 1680493.03
+    reduced chi-square = 18672.1447
+    Akaike info crit   = 906.778446
+    Bayesian info crit = 911.822024
+[[Variables]]
+    krlC:    16.7951904 +/- 1.32993737 (7.92%) (init = 1)
+    PcritC: -2.73273314 +/- 0.19218402 (7.03%) (init = -4.93)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(krlC, PcritC) =  0.768
+
+[[Fit Statistics]]
+    # fitting method   = Powell
+    # function evals   = 140
+    # data points      = 92
+    # variables        = 2
+    chi-square         = 1918454.24
+    reduced chi-square = 21316.1582
+    Akaike info crit   = 918.962242
+    Bayesian info crit = 924.005819
+[[Variables]]
+    krlC:    8.48414648 +/- 0.72410999 (8.53%) (init = 1)
+    PcritC: -4.80203997 +/- 0.29281750 (6.10%) (init = -4.93)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(krlC, PcritC) =  0.693
+
+[[Fit Statistics]]
+    # fitting method   = dual_annealing
+    # function evals   = 5558
+    # data points      = 92
+    # variables        = 2
+    chi-square         = 1666091.71
+    reduced chi-square = 18512.1301
+    Akaike info crit   = 905.986636
+    Bayesian info crit = 911.030214
+[[Variables]]
+    krlC:    17.0899862 +/- 0.47955107 (2.81%) (init = 1)
+    PcritC: -2.66276911 +/- 0.04683191 (1.76%) (init = -4.93)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(krlC, PcritC) =  0.186

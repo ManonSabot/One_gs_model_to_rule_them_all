@@ -1,0 +1,48 @@
+
+[[Fit Statistics]]
+    # fitting method   = differential_evolution
+    # function evals   = 137
+    # data points      = 32
+    # variables        = 1
+    chi-square         = 29214.4250
+    reduced chi-square = 942.400806
+    Akaike info crit   = 220.133823
+    Bayesian info crit = 221.599559
+[[Variables]]
+    Kappa:  9.44829433 +/- 2.45977185 (26.03%) (init = 5)
+
+[[Fit Statistics]]
+    # fitting method   = basinhopping
+    # function evals   = 303
+    # data points      = 32
+    # variables        = 1
+    chi-square         = 28945.1862
+    reduced chi-square = 933.715685
+    Akaike info crit   = 219.837545
+    Bayesian info crit = 221.303281
+[[Variables]]
+    Kappa:  9.67674423 +/- 2.24354771 (23.18%) (init = 5)
+
+[[Fit Statistics]]
+    # fitting method   = Powell
+    # function evals   = 47
+    # data points      = 32
+    # variables        = 1
+    chi-square         = 29242.7503
+    reduced chi-square = 943.314526
+    Akaike info crit   = 220.164834
+    Bayesian info crit = 221.630570
+[[Variables]]
+    Kappa:  17.2888240 +/- 4.01317940 (23.21%) (init = 5)
+
+[[Fit Statistics]]
+    # fitting method   = dual_annealing
+    # function evals   = 2013
+    # data points      = 32
+    # variables        = 1
+    chi-square         = 28639.1111
+    reduced chi-square = 923.842294
+    Akaike info crit   = 219.497366
+    Bayesian info crit = 220.963102
+[[Variables]]
+    Kappa:  9.64108879 +/- 4.65359571 (48.27%) (init = 5)

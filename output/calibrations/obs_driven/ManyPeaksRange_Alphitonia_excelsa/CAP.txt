@@ -1,0 +1,56 @@
+
+[[Fit Statistics]]
+    # fitting method   = differential_evolution
+    # function evals   = 678
+    # data points      = 160
+    # variables        = 2
+    chi-square         = 4878968.24
+    reduced chi-square = 30879.5458
+    Akaike info crit   = 1656.04328
+    Bayesian info crit = 1662.19363
+[[Variables]]
+    krlC:    14.2914974 +/- 0.52298627 (3.66%) (init = 1)
+    PcritC: -2.54714963 +/- 0.06522964 (2.56%) (init = -5.56)
+
+[[Fit Statistics]]
+    # fitting method   = basinhopping
+    # function evals   = 19126
+    # data points      = 160
+    # variables        = 2
+    chi-square         = 4879162.61
+    reduced chi-square = 30880.7760
+    Akaike info crit   = 1656.04966
+    Bayesian info crit = 1662.20000
+[[Variables]]
+    krlC:    11.7817450 +/- 2.18380498 (18.54%) (init = 1)
+    PcritC: -2.87360133 +/- 0.38279632 (13.32%) (init = -5.56)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(krlC, PcritC) =  0.574
+
+[[Fit Statistics]]
+    # fitting method   = Powell
+    # function evals   = 346
+    # data points      = 160
+    # variables        = 2
+    chi-square         = 5033921.57
+    reduced chi-square = 31860.2631
+    Akaike info crit   = 1661.04577
+    Bayesian info crit = 1667.19612
+[[Variables]]
+    krlC:    4.19528478 +/- 1.01905359 (24.29%) (init = 1)
+    PcritC: -5.40464328 +/- 0.83128395 (15.38%) (init = -5.56)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(krlC, PcritC) =  0.713
+
+[[Fit Statistics]]
+    # fitting method   = dual_annealing
+    # function evals   = 5231
+    # data points      = 160
+    # variables        = 2
+    chi-square         = 4868581.11
+    reduced chi-square = 30813.8045
+    Akaike info crit   = 1655.70229
+    Bayesian info crit = 1661.85263
+[[Variables]]
+    krlC:    13.9825105 +/- 0.14412037 (1.03%) (init = 1)
+    PcritC: -2.58777432 +/- 0.02679960 (1.04%) (init = -5.56)

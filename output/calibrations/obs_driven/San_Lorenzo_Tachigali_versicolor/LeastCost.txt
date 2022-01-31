@@ -1,0 +1,59 @@
+
+[[Fit Statistics]]
+    # fitting method   = differential_evolution
+    # function evals   = 2073
+    # data points      = 30
+    # variables        = 2
+    chi-square         = 98497.9731
+    reduced chi-square = 3517.78475
+    Akaike info crit   = 246.897816
+    Bayesian info crit = 249.700211
+[[Variables]]
+    kmaxLC:  16.3701132 +/- 0.74053568 (4.52%) (init = 1)
+    Eta:     16.1972004 +/- 1.38744173 (8.57%) (init = 5)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(kmaxLC, Eta) =  0.616
+
+[[Fit Statistics]]
+    # fitting method   = basinhopping
+    # function evals   = 32731
+    # data points      = 30
+    # variables        = 2
+    chi-square         = 85693.8301
+    reduced chi-square = 3060.49393
+    Akaike info crit   = 242.720162
+    Bayesian info crit = 245.522557
+[[Variables]]
+    kmaxLC:  1.35502216 +/- 0.11716477 (8.65%) (init = 1)
+    Eta:     6.65083429 +/- 0.51386986 (7.73%) (init = 5)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(kmaxLC, Eta) =  0.164
+
+[[Fit Statistics]]
+    # fitting method   = Powell
+    # function evals   = 211
+    # data points      = 30
+    # variables        = 2
+    chi-square         = 85006.5594
+    reduced chi-square = 3035.94855
+    Akaike info crit   = 242.478590
+    Bayesian info crit = 245.280984
+[[Variables]]
+    kmaxLC:  1.35508200 +/- 0.10983816 (8.11%) (init = 1)
+    Eta:     6.92527564 +/- 0.82284676 (11.88%) (init = 5)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(kmaxLC, Eta) =  0.113
+
+[[Fit Statistics]]
+    # fitting method   = dual_annealing
+    # function evals   = 5681
+    # data points      = 30
+    # variables        = 2
+    chi-square         = 98498.0262
+    reduced chi-square = 3517.78665
+    Akaike info crit   = 246.897832
+    Bayesian info crit = 249.700227
+##  Warning: uncertainties could not be estimated:
+[[Variables]]
+    kmaxLC:  16.3700988 +/-        nan (nan%) (init = 1)
+    Eta:     16.2524150 +/-        nan (nan%) (init = 5)

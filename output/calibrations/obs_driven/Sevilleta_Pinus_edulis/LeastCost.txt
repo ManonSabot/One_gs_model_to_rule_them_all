@@ -1,0 +1,60 @@
+
+[[Fit Statistics]]
+    # fitting method   = differential_evolution
+    # function evals   = 678
+    # data points      = 139
+    # variables        = 2
+    chi-square         = 16350.8365
+    reduced chi-square = 119.349172
+    Akaike info crit   = 666.690896
+    Bayesian info crit = 672.559844
+[[Variables]]
+    kmaxLC:  0.21156326 +/- 0.01245270 (5.89%) (init = 1)
+    Eta:     10.2438840 +/- 1.29364377 (12.63%) (init = 5)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(kmaxLC, Eta) =  0.366
+
+[[Fit Statistics]]
+    # fitting method   = basinhopping
+    # function evals   = 34768
+    # data points      = 139
+    # variables        = 2
+    chi-square         = 16349.2773
+    reduced chi-square = 119.337790
+    Akaike info crit   = 666.677640
+    Bayesian info crit = 672.546588
+[[Variables]]
+    kmaxLC:  0.20884294 +/- 0.01130638 (5.41%) (init = 1)
+    Eta:     9.78077178 +/- 1.10062235 (11.25%) (init = 5)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(kmaxLC, Eta) =  0.327
+
+[[Fit Statistics]]
+    # fitting method   = Powell
+    # function evals   = 153
+    # data points      = 139
+    # variables        = 2
+    chi-square         = 16372.2282
+    reduced chi-square = 119.505316
+    Akaike info crit   = 666.872630
+    Bayesian info crit = 672.741578
+[[Variables]]
+    kmaxLC:  0.20004977 +/- 0.01077379 (5.39%) (init = 1)
+    Eta:     10.4954167 +/- 1.32773906 (12.65%) (init = 5)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(kmaxLC, Eta) =  0.298
+
+[[Fit Statistics]]
+    # fitting method   = dual_annealing
+    # function evals   = 5480
+    # data points      = 139
+    # variables        = 2
+    chi-square         = 16197.3187
+    reduced chi-square = 118.228604
+    Akaike info crit   = 665.379661
+    Bayesian info crit = 671.248609
+[[Variables]]
+    kmaxLC:  0.20739464 +/- 0.01085369 (5.23%) (init = 1)
+    Eta:     9.14750802 +/- 0.53252376 (5.82%) (init = 5)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(kmaxLC, Eta) =  0.152
